@@ -1,0 +1,46 @@
+.schedule {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-header h2 {
+  font-weight: bold;
+}
+
+.schedule-days {
+  display: flex;
+  gap: 10px;
+  text-align: center;
+}
+
+.schedule-day {
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.schedule-day.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.schedule-event {
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.surgery {
+  background-color: #e7f3fe;
+}
+
+.treatment {
+  background-color: #fff3e0;
+}
+
+.consultation {
+  background-color: #f8d7da;
+}

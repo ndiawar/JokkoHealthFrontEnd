@@ -1,0 +1,33 @@
+// Imports de fichiers SCSS internes en mode module
+@use "bootstrap-scss/bootstrap" as *;
+@use "color" as *;
+@use "vendors/chartist/chartist" as *;
+@use "vendors/themify" as *;
+@use "vendors/whether-icon" as *;
+@use "vendors/icofont" as *;
+@use "vendors/flag-icon" as *;
+@use "vendors/icoicon/icons" as *;
+@use "vendors/fontawesome" as *;
+@use "vendors/animate/animate" as *;
+@use "vendors/sticky/sticky" as *;
+@use "vendors/todo/todo" as *;
+
+// Pour les fichiers CSS externes, soit conserver @import, soit les importer dans JS
+@import "~react-clock/dist/Clock.css";
+@import "~react-datepicker/dist/react-datepicker.css";
+@import "~react-image-crop/dist/ReactCrop.css";
+@import "~react-bootstrap-typeahead/css/Typeahead.css";
+@import "~react-dropzone-uploader/dist/styles.css";
+@import "~react-dragula/dist/dragula.css";
+// @import "~@asseinfo/react-kanban/dist/styles.css"; // éventuellement décommenter si besoin
+@import "~react-toastify/dist/ReactToastify.css";
+@import "react-day-picker/dist/style.css";
+@import "~react-big-calendar/lib/css/react-big-calendar.css";
+// @import '~@fullcalendar/daygrid/main.css';
+// @import '~@fullcalendar/timegrid/main.css';
+@import "~react-vertical-timeline-component/style.min.css";
+@import "~easymde/dist/easymde.min.css";
+// @import "~emoji-mart/css/emoji-mart.css"; // décommenter si nécessaire
+@import "~leaflet/dist/leaflet.css";
+@import "~react-18-image-lightbox/style.css";
+@import "~react-perfect-scrollbar/dist/css/styles.css";
