@@ -1,0 +1,47 @@
+.schedule {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-day {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.schedule-day.active {
+  background-color: #409D9B;
+  color: white;
+}
+
+.schedule-day.active .day-number {
+  color: white !important;
+}
+
+.schedule-event {
+  border-radius: 8px;
+  position: relative;
+  padding-left: 40px;
+}
+
+.schedule-event::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 70%;
+  border-radius: 4px;
+}
+
+.surgery::before { background-color: #409D9B; }
+.treatment::before { background-color: #ffc107; }
+.consultation::before { background-color: #dc3545; }
+
+.surgery { background-color: #e7f3fe; }
+.treatment { background-color: #fff3e0; }
+.consultation { background-color: #f8d7da; }

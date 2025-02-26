@@ -25,7 +25,7 @@ export const MENUITEMS = [
         icon: "home",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/dashboard/patient`
+        path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient`
         // badgetxt: "5",
       },
     ],
@@ -79,7 +79,7 @@ export const MENUITEMS = [
         icon: "calendar",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/schedule/schedule-list`,
+        path: `${process.env.PUBLIC_URL}/pages/medcin/rendezvous`,
       },
     ],
   },

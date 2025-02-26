@@ -1,0 +1,39 @@
+/* DataPatient.css */
+.search-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.search-input {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: width 0.3s ease, border-color 0.3s ease;
+}
+
+.search-input:focus {
+    width: 400px;
+    border-color: #007bff;
+}
+
+/* Style sombre pour les badges d'alerte urgente, stable, etc. */
+.badge-dark-danger {
+    background-color: #dc3545; /* Rouge foncé */
+    color: white;
+}
+
+.badge-dark-warning {
+    background-color: #ffc107; /* Jaune foncé */
+    color: white;
+}
+
+.badge-dark-info {
+    background-color: #17a2b8; /* Bleu foncé */
+    color: white;
+}
+
+.badge-dark-success {
+    background-color: #28a745; /* Vert foncé */
+    color: white;
+}

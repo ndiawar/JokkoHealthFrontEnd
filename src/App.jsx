@@ -12,6 +12,8 @@ import WishListProvider from './_helper/Ecommerce/Wishlist/WishlistProvider';
 import JobSearchProvider from './_helper/JobSearch/JobSearchProvider';
 import CustomizerProvider from './_helper/Customizer/CustomizerProvider';
 import AnimationThemeProvider from './_helper/AnimationTheme/AnimationThemeProvider';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const App = () => (
   <div className='App'>

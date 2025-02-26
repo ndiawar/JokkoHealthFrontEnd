@@ -1,9 +1,14 @@
 /**=====================
      32. pagination CSS Start
 ==========================**/
+:root {
+  --theme-default1: rgba(62, 126, 140, 1);
+  --theme-secondary1: rgba(29, 99, 114, 1);  
+}
+
 /*test Nav bar color */
 $page-name: theme, primary, secondary, success, danger, info, dark, warning;
-$page-color: var(--theme-default), var(--theme-default), $secondary-color, $success-color, $danger-color, $info-color, $dark-color, $warning-color;
+$page-color: var(--theme-secondary1), var(--theme-default1), $secondary-color, $success-color, $danger-color, $info-color, $dark-color, $warning-color;
 @each $var in $page-name {
   $i: index($page-name, $var);
   .pagination-#{$var} {

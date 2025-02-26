@@ -3,7 +3,8 @@ import { Container, Row } from "reactstrap";
 import { Breadcrumbs } from "../../../AbstractElements";
 import GreetingCard from "./GreetingCard";
 import ActivityCard from "./ActivityCard";
-import Schedule from "../../../Pages/ScheduleMedcin/Schedule";
+import Schedule from "../../../Pages/Medcin/ScheduleMedcin/Schedule";
+import ChartRendezVous from "../../../Pages/Medcin/ChartRendezVous/ChartRendezVous";
 
 
 const Dashboard = () => {
@@ -13,8 +14,9 @@ const Dashboard = () => {
       <Container fluid={true}>
         <Row className="widget-grid">
           <GreetingCard />
-          <ActivityCard />
           <Schedule />
+          <ActivityCard />
+          <ChartRendezVous />
         </Row>
       </Container>
     </Fragment>
