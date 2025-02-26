@@ -1,5 +1,19 @@
 # Dependency directories
 node_modules/
+.history
+package-lock.json
+yarn.lock
+./vscode/node_modules
+./vscode/package-lock.json
+./vscode/yarn.lock
+./vscode/.history
+./vscode/.vscode
+./vscode/.vscode-test
+./vscode/.vscode-test/node_modules
+./vscode/.vscode-test/package-lock.json
+./vscode/.vscode-test/yarn.lock
+./vscode
+.vscode
 
 # Build output
 /build/
