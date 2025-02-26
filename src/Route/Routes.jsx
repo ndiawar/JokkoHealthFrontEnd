@@ -154,12 +154,20 @@ import FormClipboardContain from "../Components/Forms/FormWidget/FormClipboard";
 
 // Mes importations from JokkoHealth
 import Schedule from "../Pages/ScheduleMedcin/Schedule";
-
+import Prescription from "../Pages/Prescription/Prescription";
+import GreetingPatient from "../Components/Dashboard/Patient/GreetingPatient";
+import Patient from "../Components/Dashboard/Patient";
+import Medical from "../Pages/DossierMedical";
+import Record from "../Pages/RendezVous";
 export const routes = [
 
   // Mes routes composantes JokkoHealth
-  { path: `${process.env.PUBLIC_URL}/pages/schedulemedcin/schedule/:layout`, component: <Schedule /> },
-
+  { path: `${process.env.PUBLIC_URL}/pages/schedulemedcin/schedule/:layout`, Component: <Schedule /> },
+  { path: `${process.env.PUBLIC_URL}/pages/prescription/prescription/:layout`, Component: <Prescription /> },
+  { path: `${process.env.PUBLIC_URL}/dashboard/greetingpatient/:layout`, Component: <GreetingPatient /> },
+  { path: `${process.env.PUBLIC_URL}/dashboard/patient/:layout`, Component: <Patient /> },
+  { path: `${process.env.PUBLIC_URL}/pages/dossiermedical/:layout`, Component: <Medical /> },
+  { path: `${process.env.PUBLIC_URL}/pages/rendezvous/:layout`, Component: <Record /> },
   // Mes routes composantes JokkoHealth
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-dashboard/:layout`, component: <MedcinDashboard /> },
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-patient/:layout`, component: <MedcinPatient /> },

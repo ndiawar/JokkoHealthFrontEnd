@@ -53,7 +53,7 @@ export const MENUITEMS = [
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/dossiermedical`
       },
     ],
   },
@@ -79,7 +79,7 @@ export const MENUITEMS = [
         icon: "calendar",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/schedule/schedule-list`,
+        path: `${process.env.PUBLIC_URL}/pages/rendezvous`,
       },
     ],
   },
