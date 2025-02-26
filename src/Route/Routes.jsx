@@ -156,6 +156,11 @@ import FormClipboardContain from "../Components/Forms/FormWidget/FormClipboard";
 import Schedule from "../Pages/Medcin/ScheduleMedcin/Schedule";
 import RendezVous from "../Pages/Medcin/RendezVous";
 import ListePatient from "../Pages/Medcin/ListePatient/ListePatient";
+import Prescription from "../Pages/Prescription/Prescription";
+import GreetingPatient from "../Components/Dashboard/Patient/GreetingPatient";
+import Patient from "../Components/Dashboard/Patient";
+import Medical from "../Pages/DossierMedical";
+import Record from "../Pages/RendezVous";
 
 export const routes = [
 
@@ -164,6 +169,14 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/pages/medcin/rendezvous/:layout`, Component: <RendezVous /> },
   { path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient/:layout`, Component: <ListePatient /> },
 
+
+  // Mes routes composantes JokkoHealth
+  { path: `${process.env.PUBLIC_URL}/pages/schedulemedcin/schedule/:layout`, Component: <Schedule /> },
+  { path: `${process.env.PUBLIC_URL}/pages/prescription/prescription/:layout`, Component: <Prescription /> },
+  { path: `${process.env.PUBLIC_URL}/dashboard/greetingpatient/:layout`, Component: <GreetingPatient /> },
+  { path: `${process.env.PUBLIC_URL}/dashboard/patient/:layout`, Component: <Patient /> },
+  { path: `${process.env.PUBLIC_URL}/pages/dossiermedical/:layout`, Component: <Medical /> },
+  { path: `${process.env.PUBLIC_URL}/pages/rendezvous/:layout`, Component: <Record /> },
   // Mes routes composantes JokkoHealth
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-dashboard/:layout`, component: <MedcinDashboard /> },
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-patient/:layout`, component: <MedcinPatient /> },

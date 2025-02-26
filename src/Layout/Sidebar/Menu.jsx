@@ -10,14 +10,13 @@ export const MENUITEMS = [
         badge: "badge badge-light-primary",
         // badgetxt: "5",
         active: false,
-        path: `${process.env.PUBLIC_URL}/dashboard/default`
       },
       {
         title: "Dashboard Medcin",
         icon: "home",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/dashboard/medcin`
+        path: `${process.env.PUBLIC_URL}/dashboard/default`
         // badgetxt: "5",
       },
       {
@@ -25,7 +24,7 @@ export const MENUITEMS = [
         icon: "home",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient`
+        path: `${process.env.PUBLIC_URL}/dashboard/patient`
         // badgetxt: "5",
       },
     ],
@@ -46,14 +45,14 @@ export const MENUITEMS = [
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient`
       },
       {
         title: "Dossier Médicale",
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/dossiermedical`
       },
     ],
   },
@@ -80,6 +79,13 @@ export const MENUITEMS = [
         type: "link",
         active: false,
         path: `${process.env.PUBLIC_URL}/pages/medcin/rendezvous`,
+      },
+      {
+        title: "Mes Rendez-Vous",
+        icon: "calendar",
+        type: "link",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/pages/rendezvous`,
       },
     ],
   },

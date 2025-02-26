@@ -7,6 +7,7 @@ import Schedule from "../../../Pages/Medcin/ScheduleMedcin/Schedule";
 import ChartRendezVous from "../../../Pages/Medcin/ChartRendezVous/ChartRendezVous";
 
 
+
 const Dashboard = () => {
   return (
     <Fragment>
