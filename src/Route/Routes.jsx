@@ -164,6 +164,9 @@ import Record from "../Pages/RendezVous";
 import DashboardAdmin from "../Pages/Admin/Dashboard";
 import DataUsers from "../Pages/Admin/Utilisateurs/DataUsers";
 
+import Historique from "../Pages/Admin/Historique";
+import Inscrire from "../Pages/Admin/Inscription";
+
 export const routes = [
 
   // Mes routes composantes JokkoHealth
@@ -181,6 +184,9 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/dashboard/patient/:layout`, Component: <Patient /> },
   { path: `${process.env.PUBLIC_URL}/pages/dossiermedical/:layout`, Component: <Medical /> },
   { path: `${process.env.PUBLIC_URL}/pages/rendezvous/:layout`, Component: <Record /> },
+  { path: `${process.env.PUBLIC_URL}/pages/historique/:layout`, Component: <Historique /> },
+  { path: `${process.env.PUBLIC_URL}/pages/inscription/:layout`, Component: <Inscrire /> },
+
   // Mes routes composantes JokkoHealth
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-dashboard/:layout`, component: <MedcinDashboard /> },
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-patient/:layout`, component: <MedcinPatient /> },
