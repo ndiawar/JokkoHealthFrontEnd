@@ -1,53 +1,62 @@
 import React from 'react';
-import { Card, CardBody, Col, Media } from 'reactstrap';
-import { H4, P, Btn, Image } from '../../../AbstractElements';
-import { WelcomeMessage, WelcomeToCuba, WhatsNew } from '../../../Constant';
-
-import CarToon from '../../../assets/images/dashboard/cartoon.svg';
+import { Card, CardBody, Col, Row } from 'reactstrap';
+import { H4, P, H5, H6 } from '../../../AbstractElements';
+import ProfilImage from '../../../assets/images/jokko/profil.png'; // Assurez-vous que ce chemin est correct
 
 const GreetingCard = () => {
   return (
-    <Col className='col-xxl-4 col-sm-6 box-col-6'>
-      <Card className=' profile-box'>
-        <CardBody>
-          <Media>
-            <Media body>
-              <div className='greeting-user'>
-                <H4 attrH4={{ className: 'f-w-600' }}>{WelcomeToCuba}</H4>
-                <P>{WelcomeMessage}</P>
-                <div className='whatsnew-btn'>
-                  <Btn attrBtn={{ color: 'transparent', outline: true, className: 'btn btn-outline-white' }}>{WhatsNew}</Btn>
+    <Col className='col-xxl-6 col-sm-6 box-col-6'>
+      <div className='greeting-header mb-3'>
+        <H4 attrH4={{ className: 'f-w-600' }}>Bonjour Dr. Diop!</H4>
+      </div>
+      <Card className='profile-box' style={{ position: 'relative', overflow: 'visible' }}>
+        <CardBody style={{ padding: '20px 30px', position: 'relative' }}>
+          <Row>
+            <Col xs="8">
+              <div className='visit-info'>
+                <H5 className='mb-1'>Visites pour aujourd'hui</H5>
+                <H4 className='mb-3'>2</H4>
+                <div className='patient-cards d-flex'>
+                  <Card className='patient-card me-1' style={{ backgroundColor: 'rgba(173, 216, 230, 0.5)', border: 'none' }}>
+                    <CardBody className='p-2 d-flex justify-content-between align-items-center'>
+                      <div>
+                        <H6 className='mb-1 text-dark me-2'>Nouveaux Patients</H6>
+                        <P className='mb-0'>15</P>
+                      </div>
+                      <div style={{ backgroundColor: 'rgba(0, 128, 0, 0.3)', padding: '5px 10px', borderRadius: '5px' }}>
+                        <P className='mb-0 text-success ms-4'>5% ↑</P>
+                      </div>
+                    </CardBody>
+                  </Card>
+                  <Card className='patient-card ms-1' style={{ backgroundColor: 'rgba(173, 216, 230, 0.5)', border: 'none' }}>
+                    <CardBody className='p-4 d-flex justify-content-between align-items-center'>
+                      <div>
+                        <H6 className='mb-1 text-dark me-2'>Anciens Patients</H6>
+                        <P className='mb-0'>20</P>
+                      </div>
+                      <div style={{ backgroundColor: 'rgba(255, 0, 0, 0.3)', padding: '5px 10px', borderRadius: '5px' }}>
+                        <P className='mb-0 text-danger ms-4'>20% ↓</P>
+                      </div>
+                    </CardBody>
+                  </Card>
                 </div>
               </div>
-            </Media>
-            <div>
-              <div className='clockbox'>
-                <svg id='clock' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>
-                  <g id='face'>
-                    <circle className='circle' cx={300} cy={300} r='253.9' />
-                    <path className='hour-marks' d='M300.5 94V61M506 300.5h32M300.5 506v33M94 300.5H60M411.3 107.8l7.9-13.8M493 190.2l13-7.4M492.1 411.4l16.5 9.5M411 492.3l8.9 15.3M189 492.3l-9.2 15.9M107.7 411L93 419.5M107.5 189.3l-17.1-9.9M188.1 108.2l-9-15.6' />
-                    <circle className='mid-circle' cx={300} cy={300} r='16.2' />
-                  </g>
-                  <g id='hour'>
-                    <path className='hour-hand' d='M300.5 298V142' />
-                    <circle className='sizing-box' cx={300} cy={300} r='253.9' />
-                  </g>
-                  <g id='minute'>
-                    <path className='minute-hand' d='M300.5 298V67' />
-                    <circle className='sizing-box' cx={300} cy={300} r='253.9' />
-                  </g>
-                  <g id='second'>
-                    <path className='second-hand' d='M300.5 350V55' />
-                    <circle className='sizing-box' cx={300} cy={300} r='253.9'></circle>
-                  </g>
-                </svg>
-              </div>
-              <div className='badge f-10 p-0' id='txt' />
-            </div>
-          </Media>
-          <div className='cartoon'>
-            <Image attrImage={{ src: CarToon, alt: 'vector women with leptop' }} />
-          </div>
+            </Col>
+            <Col xs="4" className='d-flex justify-content-end align-items-end' style={{ position: 'relative' }}>
+              <img
+                src={ProfilImage}
+                alt='Dr. Diop'
+                style={{
+                  width: '130%',
+                  height: 'auto',
+                  position: 'absolute',
+                  bottom: '-20px',
+                  right: '-20px',
+                  borderRadius: '15px',
+                }}
+              />
+            </Col>
+          </Row>
         </CardBody>
       </Card>
     </Col>

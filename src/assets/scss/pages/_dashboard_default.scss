@@ -3,6 +3,11 @@
 ==========================**/
 //index dashboard css start
 
+:root {
+  --theme-default1: rgba(62, 126, 140, 1);
+  --theme-secondary1: rgba(29, 99, 114, 1);  
+}
+
 .form-control-plaintext {
   width: auto !important;
 }
@@ -280,10 +285,10 @@
       }
     }
     &.primary {
-      border-color: var(--theme-default);
+      border-color: var(--theme-default1);
     }
     &.secondary {
-      border-color: var(--theme-secondary);
+      border-color: var(--theme-secondary1);
     }
     &.success {
       border-color: $success-color;
@@ -422,7 +427,7 @@
       }
       &.badge-light-primary {
         &:hover {
-          background-color: var(--theme-default);
+          background-color: var(--theme-default1);
         }
       }
     }
@@ -508,7 +513,7 @@
     select {
       background-color: rgba($primary-color, 0.08) !important;
       border: none;
-      color: var(--theme-default) !important;
+      color: var(--theme-default1) !important;
       width: auto !important;
       height: 32px !important;
       border-radius: 10px;
@@ -520,7 +525,7 @@
 
       &:hover {
         background-color: rgba($primary-color, 0.08) !important;
-        color: var(--theme-default) !important;
+        color: var(--theme-default1) !important;
       }
     }
   }
@@ -821,7 +826,7 @@
       &:hover {
         .img-content-box {
           a {
-            color: var(--theme-default);
+            color: var(--theme-default1);
             transition: 0.5s;
           }
         }
@@ -862,11 +867,11 @@
   justify-content: center;
 
   i {
-    color: var(--theme-default);
+    color: var(--theme-default1);
     font-size: 22px;
   }
   svg {
-    stroke: var(--theme-default);
+    stroke: var(--theme-default1);
   }
 }
 .balance-card {
@@ -902,7 +907,7 @@
 }
 
 .btn-light-secondary {
-  background-color: rgba(var(--theme-secondary), 0.1);
+  background-color: rgba(var(--theme-secondary1), 0.1);
   font-size: 12px;
   padding: 6px 12px;
   font-weight: 600;
@@ -1047,7 +1052,7 @@
   }
 
   &.radial-bar-70 {
-    background-image: linear-gradient(342deg, var(--theme-default) 50%, transparent 50%, transparent), linear-gradient(270deg, var(--theme-default) 50%, $light-color 50%, $light-color);
+    background-image: linear-gradient(342deg, var(--theme-default1) 50%, transparent 50%, transparent), linear-gradient(270deg, var(--theme-default1) 50%, $light-color 50%, $light-color);
   }
 }
 
@@ -1287,8 +1292,8 @@
     transition: all 0.3s 0.3s ease-out;
 
     &:hover {
-      fill: var(--theme-secondary);
-      stroke: var(--theme-secondary);
+      fill: var(--theme-secondary1);
+      stroke: var(--theme-secondary1);
       transition: all 0.3s ease-out;
     }
   }
@@ -1648,7 +1653,7 @@ span.twitter-typeahead {
     &.active,
     &:active {
       color: $white;
-      background-color: var(--theme-default);
+      background-color: var(--theme-default1);
     }
   }
 }
@@ -1714,18 +1719,18 @@ span.twitter-typeahead {
     }
   }
   .apexcharts-xaxistooltip {
-    color: var(--theme-default);
+    color: var(--theme-default1);
     background: rgba($primary-color, 0.1);
-    border: 1px solid var(--theme-default);
+    border: 1px solid var(--theme-default1);
   }
 
   .apexcharts-xaxistooltip-bottom:before {
-    border-bottom-color: var(--theme-default);
+    border-bottom-color: var(--theme-default1);
   }
 
   .apexcharts-tooltip.light .apexcharts-tooltip-title {
     background: rgba($primary-color, 0.1);
-    color: var(--theme-default);
+    color: var(--theme-default1);
   }
   &.order-container {
     @media (max-width: 575px) {

@@ -1,17 +1,17 @@
 import React from 'react';
 import { Card, CardBody, CardHeader, Col } from 'reactstrap';
 import { H5, H6, UL, LI, P } from '../../../AbstractElements';
-import { Activity, DailyDropdown } from '../../../Constant';
+import {  DailyDropdown } from '../../../Constant';
 import { ActivityData } from '../../../Data/DefaultDashboard';
 import DropdownCommon from '../../Common/Dropdown';
 
 const ActivityCard = () => {
   return (
-    <Col xxl='4' xl='5' md='6' sm='7' className='notification box-col-6'>
+    <Col xxl='6' xl='6' md='6' sm='7' className='notification box-col-6'>
       <Card className='height-equal'>
         <CardHeader className='card-no-border'>
           <div className='header-top'>
-            <H5 attrH5={{ className: 'm-0' }}>{Activity}</H5>
+            <H5 attrH5={{ className: 'm-0' }}>Patients</H5>
             <div className='card-header-right-icon'>
               <DropdownCommon icon={false} options={DailyDropdown} btn={{ caret: true }} />
             </div>

@@ -1,6 +1,11 @@
 /**=====================
       67. Dashboard 2 CSS Start
 ==========================**/
+:root {
+  --theme-default1: rgba(62, 126, 140, 1);
+  --theme-secondary1: rgba(29, 99, 114, 1);  
+}
+
 .widget-decor {
   position: absolute;
   height: 60px;
@@ -151,7 +156,7 @@
       h6 {
         a {
           transition: 0.5s;
-          color: var(--theme-default);
+          color: var(--theme-default1);
         }
       }
     }
@@ -256,7 +261,7 @@
     svg {
       width: 18px;
       height: 18px;
-      fill: var(--theme-default);
+      fill: var(--theme-default1);
     }
   }
 }
@@ -288,7 +293,7 @@
     padding: 0;
     transition: 0.5s;
     &.active {
-      border: 1px solid var(--theme-default);
+      border: 1px solid var(--theme-default1);
     }
     &:hover {
       transform: translateY(-5px);
@@ -360,7 +365,7 @@
         .product-content {
           h6 {
             a {
-              color: var(--theme-default);
+              color: var(--theme-default1);
               transition: 0.5s;
             }
           }

@@ -1,0 +1,57 @@
+/* Alignement de la barre de recherche à droite */
+.top-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    padding: 8px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: width 0.3s ease, border-color 0.3s ease;
+}
+
+.search-input:focus {
+    width: 250px;
+    border-color: #007bff;
+}
+
+/* Style de la barre d'alerte */
+.alert-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/* Alignement horizontal des icônes */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Couleurs des icônes d'action */
+.icon-red {
+    color: red;
+    cursor: pointer;
+}
+
+.icon-orange {
+    color: orange;
+    cursor: pointer;
+}
+
+.icon-blue {
+    color: blue;
+    cursor: pointer;
+}

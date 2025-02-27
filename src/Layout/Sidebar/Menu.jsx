@@ -10,14 +10,14 @@ export const MENUITEMS = [
         badge: "badge badge-light-primary",
         // badgetxt: "5",
         active: false,
-        path: `${process.env.PUBLIC_URL}/dashboard/default`
+        path: `${process.env.PUBLIC_URL}/pages/admin/dashboard`
       },
       {
         title: "Dashboard Medcin",
         icon: "home",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/dashboard/medcin`
+        path: `${process.env.PUBLIC_URL}/dashboard/default`
         // badgetxt: "5",
       },
       {
@@ -39,21 +39,21 @@ export const MENUITEMS = [
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/admin/utilisateurs/datausers`
       },
       {
         title: "Patients",
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient`
       },
       {
         title: "Dossier Médicale",
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/dossiermedical`
       },
     ],
   },
@@ -79,7 +79,14 @@ export const MENUITEMS = [
         icon: "calendar",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/schedule/schedule-list`,
+        path: `${process.env.PUBLIC_URL}/pages/medcin/rendezvous`,
+      },
+      {
+        title: "Mes Rendez-Vous",
+        icon: "calendar",
+        type: "link",
+        active: false,
+        path: `${process.env.PUBLIC_URL}/pages/rendezvous`,
       },
     ],
   },
@@ -92,7 +99,7 @@ export const MENUITEMS = [
         icon: "editors",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/consultation/consultation-list`,
+        path: `${process.env.PUBLIC_URL}/pages/inscription`,
         },
       ],
   },
@@ -105,7 +112,7 @@ export const MENUITEMS = [
         icon: "task",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/history/history-list`,
+        path: `${process.env.PUBLIC_URL}/pages/historique`,
       },
       ],
   },

@@ -10,7 +10,7 @@ export class ConfigDB {
     },
     color: {
       primary_color: '#3E7E8C', // Valeur fixe (tu as retiré la logique de localStorage)
-      secondary_color: '#C1D4D9', // Idem
+      secondary_color: '#1D6372', // Idem
       mix_background_layout: 'light-only', // Pas de changement ici
     },
     router_animation: 'fadeIn', // Pas de changement

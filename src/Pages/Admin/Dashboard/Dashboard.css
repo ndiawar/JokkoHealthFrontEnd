@@ -1,0 +1,141 @@
+/* CalendrierRv.css */
+.custom-icon-color {
+  color: #12687B !important;
+}
+
+/* CalendrierRv.css */
+.calendar-container {
+background: white;
+border-radius: 10px;
+padding: 15px;
+}
+
+.custom-calendar {
+height: 300px;
+border: none;
+}
+
+/* Ajustements spécifiques pour la hauteur des rangées */
+.rbc-month-row {
+min-height: 60px !important; /* Réduit la hauteur des rangées */
+}
+
+.rbc-day-bg {
+height: 40px !important; /* Hauteur fixe pour les cellules */
+padding: 2px !important;
+}
+
+.rbc-date-cell {
+padding: 2px 4px !important;
+margin: 0 !important;
+font-size: 0.8rem !important;
+}
+
+.date-cell {
+min-height: 30px !important; /* Réduction supplémentaire */
+line-height: 1.2;
+}
+
+/* En-têtes plus compacts */
+.rbc-header {
+padding: 5px 3px !important;
+font-size: 0.75rem !important;
+height: 30px !important;
+}
+
+/* Ajustement des événements */
+.calendar-event {
+font-size: 0.6em !important;
+padding: 0 2px !important;
+}
+
+/* Today cell plus petit */
+.today-cell {
+min-width: 24px;
+min-height: 24px !important;
+display: flex !important;
+align-items: center;
+justify-content: center;
+}
+
+/* Liste des rendez-vous plus compacte */
+.appointment-item {
+padding: 0.3rem !important;
+}
+
+.time-slot span {
+font-size: 0.75rem !important;
+}
+
+.appointment-info {
+font-size: 0.75rem !important;
+margin-left: 1rem !important;
+}
+
+/* Voir tout et voir moins - Container et boutons */
+.voir-tout-container {
+text-align: center;
+margin: 1rem 0; /* Espacement en haut et en bas */
+}
+
+.voir-tout-btn {
+background: none;
+border: none;
+color: #12687B;
+cursor: pointer;
+font-size: 1rem;
+font-weight: 500;
+padding: 8px 16px;
+transition: all 0.3s ease;
+margin-bottom: 1rem; /* Espacement entre les boutons et le tableau */
+}
+
+.voir-tout-btn:hover {
+color: #0d4d5c;
+text-decoration: underline;
+}
+
+/* Styles existants pour les badges */
+.status-wrapper .badge {
+padding: 6px 12px;
+border-radius: 20px;
+font-size: 0.85em;
+}
+
+.badge-dark-danger { background-color: #fee2e2; color: #dc2626; }
+.badge-dark-warning { background-color: #fef3c7; color: #d97706; }
+.badge-dark-info { background-color: #dbeafe; color: #2563eb; }
+.badge-dark-success { background-color: #dcfce7; color: #16a34a; }
+
+/* Stylisation de la pagination */
+.react-pagination-wrapper {
+text-align: center;
+margin-top: 1rem;
+}
+
+.react-pagination-button {
+background-color: #12687B;
+color: white;
+border: none;
+padding: 6px 12px;
+font-size: 0.9rem;
+cursor: pointer;
+}
+
+.react-pagination-button:hover {
+background-color: #0d4d5c;
+}
+
+/* Optionnel : Ajuster la pagination sur le tableau */
+.react-pagination-button {
+background-color: #12687B;
+color: white;
+border: none;
+padding: 6px 12px;
+font-size: 0.9rem;
+cursor: pointer;
+}
+
+.react-pagination-button:hover {
+background-color: #0d4d5c;
+}

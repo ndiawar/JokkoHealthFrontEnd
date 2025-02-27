@@ -4,10 +4,14 @@ $theme-body-font-color: #2f2f3b;
 $theme-body-sub-title-color: #52526c;
 $body-color: #f8f8f8;
 $main-body-color: #f7f8f9;
+:root {
+    --theme-default1: rgba(62, 126, 140, 1);
+  }
+  
 
 // Theme colors variables
-$primary-color: #7366ff;
-$secondary-color: #ff3364;
+$primary-color: #3E7E8C;
+$secondary-color: #1D6372;
 $success-color: #54ba4a;
 $info-color: #16c7f9;
 $warning-color: #ffaa05;
@@ -43,8 +47,8 @@ $theme-medium-color: #eae8ff;
 $dropdown-border-color: #918e99;
 
 // gradient colors
-$gradient-primary: linear-gradient(26deg, var(--theme-default) 0%, #a26cf8 100%);
-$gradient-bg-primary: linear-gradient(103.75deg, #33b1ee -13.9%, var(--theme-default) 79.68%);
+$gradient-primary: linear-gradient(26deg, var(--theme-default1) 0%, #1D6372 100%);
+$gradient-bg-primary: linear-gradient(103.75deg, #1D6372 -13.9%, var(--theme-default1) 79.68%);
 
 //social colors
 $fb: #50598e;
@@ -92,15 +96,15 @@ $dark-even-hover-sorting: #191e27;
 $body-font-size: 14px;
 $body-font-color: $theme-body-font-color;
 $ul-padding-left: 0px;
-$ancher-color: var(--theme-default);
+$ancher-color: var(--theme-default1);
 $btn-focus-box-shadow: none;
-$all-focus-outline-color: var(--theme-default);
+$all-focus-outline-color: var(--theme-default1);
 
 $paragraph-font-size: 14px;
 $paragraph-line-height: 1.7;
 $paragraph-letter-spacing: 0.7px;
 
-$code-tag-color: var(--theme-default);
+$code-tag-color: var(--theme-default1);
 $code-tag-bg-color: rgba($primary-color, 0.03);
 $code-tag-padding: 3px;
 $code-tag-margin: 0 3px;
@@ -115,8 +119,8 @@ $small-tag-color: $dark-color;
 $pre-tag-bg-color: rgba($primary-color, 0.03);
 $pre-tag-padding: 20px 0;
 
-$list-group-active-bg-color: var(--theme-default);
-$list-group-active-border-color: var(--theme-default);
+$list-group-active-bg-color: var(--theme-default1);
+$list-group-active-border-color: var(--theme-default1);
 $list-group-img-size: 40px;
 $list-group-margin: 10px;
 
@@ -212,7 +216,7 @@ $form-input-border-color: $light-semi-gray;
 $form-input-bg-color: $white;
 
 //Tour settings
-$tour-color: var(--theme-default);
+$tour-color: var(--theme-default1);
 
 //sidabr main settings
 $sidebar-width: 255px;
@@ -226,7 +230,7 @@ $sidebar-fill-icon-color: #757589;
 
 //sidebar profile settings
 $sidebar-profile-edit-icon-size: 14px;
-$sidebar-profile-name-txt-color: var(--theme-default);
+$sidebar-profile-name-txt-color: var(--theme-default1);
 $sidebar-profile-name-txt-transfer: uppercase;
 $sidebar-profile-name-txt-weight: 600;
 $sidebar-profile-name-letter-specing: 1.5px;
@@ -252,7 +256,7 @@ $sidebar-padding-bottom: 12px;
 $sidebar-sub-header-padding: 15px;
 $sidebar-sub-header-margin: 0;
 $sidebar-heading-hover-padding: 5px;
-$sidebar-hover-txt-color: var(--theme-default);
+$sidebar-hover-txt-color: var(--theme-default1);
 $sidebar-arrow-margin-top: 2px;
 $sidebar-arrow-size: 15px;
 $sidebar-arrow-color: $theme-body-font-color;
