@@ -161,6 +161,8 @@ import GreetingPatient from "../Components/Dashboard/Patient/GreetingPatient";
 import Patient from "../Components/Dashboard/Patient";
 import Medical from "../Pages/DossierMedical";
 import Record from "../Pages/RendezVous";
+import DashboardAdmin from "../Pages/Admin/Dashboard";
+import DataUsers from "../Pages/Admin/Utilisateurs/DataUsers";
 
 export const routes = [
 
@@ -168,6 +170,8 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/pages/medcin/schedulemedcin/schedule/:layout`, Component: <Schedule /> },
   { path: `${process.env.PUBLIC_URL}/pages/medcin/rendezvous/:layout`, Component: <RendezVous /> },
   { path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient/:layout`, Component: <ListePatient /> },
+  { path: `${process.env.PUBLIC_URL}/pages/admin/dashboard/:layout`, Component: <DashboardAdmin /> },
+  { path: `${process.env.PUBLIC_URL}/pages/admin/utilisateurs/datausers/:layout`, Component: <DataUsers /> },
 
 
   // Mes routes composantes JokkoHealth

@@ -10,6 +10,7 @@ export const MENUITEMS = [
         badge: "badge badge-light-primary",
         // badgetxt: "5",
         active: false,
+        path: `${process.env.PUBLIC_URL}/pages/admin/dashboard`
       },
       {
         title: "Dashboard Medcin",
@@ -38,7 +39,7 @@ export const MENUITEMS = [
         icon: "user",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/users/user-list`
+        path: `${process.env.PUBLIC_URL}/pages/admin/utilisateurs/datausers`
       },
       {
         title: "Patients",
