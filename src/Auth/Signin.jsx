@@ -10,9 +10,8 @@ const Signin = ({ selected }) => {
   const history = useNavigate();
   const { layoutURL } = useContext(CustomizerContext);
   
-  // État local pour les champs de saisie et les erreurs
   const [email, setEmail] = useState("test@gmail.com");
-  const [password, setPassword] = useState("test123");
+  const [password, setPassword] = useState("test1234");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
@@ -51,8 +50,7 @@ const Signin = ({ selected }) => {
       return;
     }
 
-    // Vérification de l'email unique
-    if (email === "test@gmail.com" && password === "test123") {
+    if (email === "test@gmail.com" && password === "test1234") {
       localStorage.setItem("login", JSON.stringify(true));
       history(`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`);
       toast.success("Successfully logged in!..");
@@ -88,12 +86,14 @@ const Signin = ({ selected }) => {
     padding: '40px',
     borderRadius: '15px',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-    width: '600px',
-    height: '600px',
+    width: '100%',
+    maxWidth: '600px',
+    height: 'auto',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+    minWidth: '500px',
   };
 
   const inputGroupStyle = {
@@ -112,26 +112,26 @@ const Signin = ({ selected }) => {
 
   const iconStyle = {
     position: 'absolute',
-    left: '10px',  // Ajuste l'icône pour mieux s'intégrer
+    left: '10px',
     top: '50%',
     transform: 'translateY(-50%)',
     color: '#409D9B',
     pointerEvents: 'none',
-    zIndex: 1,  // Icône derrière le texte
+    zIndex: 1,
   };
-  
+
   const inputStyle = {
     width: '100%',
-    padding: '10px 40px 10px 30px',  // S'assurer qu'il y a assez de place pour l'icône
+    padding: '10px 40px 10px 30px',
     border: '1px solid #ccc',
     borderRadius: '5px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: 'border-color 0.3s',
     borderColor: emailError || passwordError ? 'red' : '#ccc',
-    zIndex: 2,  // S'assurer que le champ de texte reste au-dessus de l'icône
+    zIndex: 2,
   };
-  
+
   return (
     <Fragment>
       <div style={divStyle}>
@@ -139,7 +139,7 @@ const Signin = ({ selected }) => {
           <img src={logo} alt="Logo" style={{ maxHeight: '50px' }} />
         </div>
         <div style={formContainerStyle}>
-          <h2 style={{ textAlign: 'left', color: 'black', marginBottom: '80px', width: '100%', marginTop: '0', marginLeft: '0' }}>Connexion</h2>
+          <h2 style={{ textAlign: 'left', color: 'black', marginBottom: '30px', width: '100%' }}>Connexion</h2>
           <form onSubmit={loginAuth} style={{ width: '100%' }}>
             <div style={inputGroupStyle}>
               <label htmlFor="email" style={labelStyle}>Email</label>
