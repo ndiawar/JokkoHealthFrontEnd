@@ -144,7 +144,7 @@ function Formulaire() {
 
   const buttonStyle = {
     width: '100%',
-    backgroundColor: isFormValid ? '#007bff' : '#B0B0B0', // Bleu si activé, gris alu si désactivé
+    backgroundColor: isFormValid ? '#007bff' : '#6c757d', // Bleu si activé, gris si désactivé
     color: 'white', // Texte blanc
     border: 'none',
     padding: '10px',
@@ -161,7 +161,7 @@ function Formulaire() {
     padding: '0.375rem 2.25rem 0.375rem 40px',
     backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><polyline points='6 9 12 15 18 9' /></svg>")`,
     backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 0.5rem center',
+    backgroundPosition: `right 0.5rem center`,
     backgroundSize: '1.5em',
     cursor: 'pointer',
   };
@@ -257,6 +257,7 @@ function Formulaire() {
               style={{ paddingLeft: '30px', borderColor: errors.email ? 'red' : '' }}
             />
             {errors.email && <div style={{ color: 'red' }}>{errors.email}</div>}
+         
           </div>
         </div>
         <div className="mb-3">
