@@ -127,3 +127,12 @@ export const deleteUser = async (id) => {
     throw error;
   }
 };
+
+// 🚀 Connexion d'un utilisateur (Login)
+export const loginUser = async ({ email, motDePasse }) => {
+  const { data } = await axios.post("users/login", {
+    email,
+    motDePasse
+  });
+  return data;
+};
