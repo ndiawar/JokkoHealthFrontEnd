@@ -24,7 +24,7 @@
 // export const FileApi = `${api}/files.json`;
 // export const UserCardApi = `${api}/usercard.json`;
 // export const UserEditTableAPI = `${api}/user-edit-table.json`;
-// export const StickyApi = `${api}/sticky.json`;
+// // export const StickyApi = `${api}/sticky.json`;
 // export const TypeaheadDataApi = `${api}/typeaheadData.json`;
 // export const FeatherDataApi = `${api}/featherData.json`;
 // export const FlagIconDataApi = `${api}/flagIconData.json`;
