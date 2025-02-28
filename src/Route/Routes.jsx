@@ -175,6 +175,7 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/pages/medcin/listepatient/:layout`, Component: <ListePatient /> },
   { path: `${process.env.PUBLIC_URL}/pages/admin/dashboard/:layout`, Component: <DashboardAdmin /> },
   { path: `${process.env.PUBLIC_URL}/pages/admin/utilisateurs/datausers/:layout`, Component: <DataUsers /> },
+  { path: `${process.env.PUBLIC_URL}/dashboard/default/:layout`, Component: <Default /> },
 
 
   // Mes routes composantes JokkoHealth
@@ -194,7 +195,6 @@ export const routes = [
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-patient-details/:layout`, component: <MedcinPatientDetails /> },
   // { path: `${process.env.PUBLIC_URL}/dashboard/medcin-patient-history/:layout`, component: <MedcinPatientHistory /> },
 
-  { path: `${process.env.PUBLIC_URL}/dashboard/default/:layout`, Component: <Default /> },
   { path: `${process.env.PUBLIC_URL}/dashboard/e-commerce/:layout`, Component: <Ecommerce /> },
   { path: `${process.env.PUBLIC_URL}/dashboard/online-course/:layout`, Component: <OnlineCourse /> },
   { path: `${process.env.PUBLIC_URL}/dashboard/crypto/:layout`, Component: <Crypto /> },

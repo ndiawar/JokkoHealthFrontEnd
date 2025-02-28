@@ -4,10 +4,12 @@ import { Link } from "react-router-dom";
 import SvgIcon from "../../Components/Common/Component/SvgIcon";
 import CustomizerContext from "../../_helper/Customizer";
 import { MENUITEMS } from "./Menu";
+import UserContext from "../../_helper/UserContext"; // Importez le contexte utilisateur
 
 const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive, activeClass }) => {
   const { layout } = useContext(CustomizerContext);
   const layout1 = localStorage.getItem("sidebar_layout") || layout;
+  const { user } = useContext(UserContext); // Utilisez le contexte utilisateur
 
   const id = window.location.pathname.split("/").pop();
   const layoutId = id;
@@ -59,102 +61,109 @@ const SidebarMenuItems = ({ setMainMenu, sidebartoogle, setNavActive, activeClas
             </div>
           </li>
           {Item.Items.map((menuItem, i) => (
-            <li className="sidebar-list" key={i}>
-              {menuItem.type === "sub" ? (
-                <a
-                  href="javascript"
-                  className={`sidebar-link sidebar-title ${CurrentPath.includes(menuItem.title.toLowerCase()) ? "active" : ""} ${menuItem.active && "active"}`}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setNavActive(menuItem);
-                    activeClass(menuItem.active);
-                  }}>
-                  <SvgIcon className="stroke-icon" iconId={`stroke-${menuItem.icon}`} />
-                  <SvgIcon className="fill-icon" iconId={`fill-${menuItem.icon}`} />
-                  <span>{t(menuItem.title)}</span>
-                  {menuItem.badge ? <label className={menuItem.badge}>{menuItem.badgetxt}</label> : ""}
-                  <div className="according-menu">{menuItem.active ? <i className="fa fa-angle-down"></i> : <i className="fa fa-angle-right"></i>}</div>
-                </a>
-              ) : (
-                ""
-              )}
+            // Rendre conditionnellement les éléments de menu en fonction du rôle de l'utilisateur
+            user && menuItem.roles.includes(user.role) && (
+              <li className="sidebar-list" key={i}>
+                {menuItem.type === "sub" ? (
+                  <a
+                    href="javascript"
+                    className={`sidebar-link sidebar-title ${CurrentPath.includes(menuItem.title.toLowerCase()) ? "active" : ""} ${menuItem.active && "active"}`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setNavActive(menuItem);
+                      activeClass(menuItem.active);
+                    }}>
+                    <SvgIcon className="stroke-icon" iconId={`stroke-${menuItem.icon}`} />
+                    <SvgIcon className="fill-icon" iconId={`fill-${menuItem.icon}`} />
+                    <span>{t(menuItem.title)}</span>
+                    {menuItem.badge ? <label className={menuItem.badge}>{menuItem.badgetxt}</label> : ""}
+                    <div className="according-menu">{menuItem.active ? <i className="fa fa-angle-down"></i> : <i className="fa fa-angle-right"></i>}</div>
+                  </a>
+                ) : (
+                  ""
+                )}
 
-              {menuItem.type === "link" ? (
-                <Link to={menuItem.path + "/" + layoutId} className={`sidebar-link sidebar-title link-nav  ${CurrentPath.includes(menuItem.title.toLowerCase()) ? "active" : ""}`} onClick={() => toggletNavActive(menuItem)}>
-                  <SvgIcon className="stroke-icon" iconId={`stroke-${menuItem.icon}`} />
-                  <SvgIcon className="fill-icon" iconId={`fill-${menuItem.icon}`} />
-                  <span>{t(menuItem.title)}</span>
-                  {menuItem.badge ? <label className={menuItem.badge}>{menuItem.badgetxt}</label> : ""}
-                </Link>
-              ) : (
-                ""
-              )}
+                {menuItem.type === "link" ? (
+                  <Link to={menuItem.path + "/" + layoutId} className={`sidebar-link sidebar-title link-nav  ${CurrentPath.includes(menuItem.title.toLowerCase()) ? "active" : ""}`} onClick={() => toggletNavActive(menuItem)}>
+                    <SvgIcon className="stroke-icon" iconId={`stroke-${menuItem.icon}`} />
+                    <SvgIcon className="fill-icon" iconId={`fill-${menuItem.icon}`} />
+                    <span>{t(menuItem.title)}</span>
+                    {menuItem.badge ? <label className={menuItem.badge}>{menuItem.badgetxt}</label> : ""}
+                  </Link>
+                ) : (
+                  ""
+                )}
 
-              {menuItem.children ? (
-                <ul className="sidebar-submenu" style={layout1 !== "compact-sidebar compact-small" ? (menuItem?.active || CurrentPath.includes(menuItem?.title?.toLowerCase()) ? (sidebartoogle ? { opacity: 1, transition: "opacity 500ms ease-in" } : { display: "block" }) : { display: "none" }) : { display: "none" }}>
-                  {menuItem.children.map((childrenItem, index) => {
-                    return (
-                      <li key={index}>
-                        {childrenItem.type === "sub" ? (
-                          <a
-                            href="javascript"
-                            className={`${CurrentPath.includes(childrenItem?.title?.toLowerCase()) ? "active" : ""}`}
-                            // className={`${childrenItem.active ? 'active' : ''}`}
-                            onClick={(event) => {
-                              event.preventDefault();
-                              toggletNavActive(childrenItem);
-                            }}>
-                            {t(childrenItem.title)}
-                            <span className="sub-arrow">
-                              <i className="fa fa-chevron-right"></i>
-                            </span>
-                            <div className="according-menu">{childrenItem.active ? <i className="fa fa-angle-down"></i> : <i className="fa fa-angle-right"></i>}</div>
-                          </a>
-                        ) : (
-                          ""
-                        )}
+                {menuItem.children ? (
+                  <ul className="sidebar-submenu" style={layout1 !== "compact-sidebar compact-small" ? (menuItem?.active || CurrentPath.includes(menuItem?.title?.toLowerCase()) ? (sidebartoogle ? { opacity: 1, transition: "opacity 500ms ease-in" } : { display: "block" }) : { display: "none" }) : { display: "none" }}>
+                    {menuItem.children.map((childrenItem, index) => {
+                      return (
+                        user && childrenItem.roles.includes(user.role) && (
+                          <li key={index}>
+                            {childrenItem.type === "sub" ? (
+                              <a
+                                href="javascript"
+                                className={`${CurrentPath.includes(childrenItem?.title?.toLowerCase()) ? "active" : ""}`}
+                                // className={`${childrenItem.active ? 'active' : ''}`}
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  toggletNavActive(childrenItem);
+                                }}>
+                                {t(childrenItem.title)}
+                                <span className="sub-arrow">
+                                  <i className="fa fa-chevron-right"></i>
+                                </span>
+                                <div className="according-menu">{childrenItem.active ? <i className="fa fa-angle-down"></i> : <i className="fa fa-angle-right"></i>}</div>
+                              </a>
+                            ) : (
+                              ""
+                            )}
 
-                        {childrenItem.type === "link" ? (
-                          <Link
-                            to={childrenItem.path + "/" + layoutId}
-                            className={`${CurrentPath.includes(childrenItem?.title?.toLowerCase()) ? "active" : ""}`}
-                            // className={`${childrenItem.active ? 'active' : ''}`} bonusui
-                            onClick={() => toggletNavActive(childrenItem)}>
-                            {t(childrenItem.title)}
-                          </Link>
-                        ) : (
-                          ""
-                        )}
+                            {childrenItem.type === "link" ? (
+                              <Link
+                                to={childrenItem.path + "/" + layoutId}
+                                className={`${CurrentPath.includes(childrenItem?.title?.toLowerCase()) ? "active" : ""}`}
+                                // className={`${childrenItem.active ? 'active' : ''}`} bonusui
+                                onClick={() => toggletNavActive(childrenItem)}>
+                                {t(childrenItem.title)}
+                              </Link>
+                            ) : (
+                              ""
+                            )}
 
-                        {childrenItem.children ? (
-                          <ul className="nav-sub-childmenu submenu-content" style={CurrentPath.includes(childrenItem?.title?.toLowerCase()) || childrenItem.active ? { display: "block" } : { display: "none" }}>
-                            {childrenItem.children.map((childrenSubItem, key) => (
-                              <li key={key}>
-                                {childrenSubItem.type === "link" ? (
-                                  <Link
-                                    to={childrenSubItem.path + "/" + layoutId}
-                                    className={`${CurrentPath.includes(childrenSubItem?.title?.toLowerCase()) ? "active" : ""}`}
-                                    // className={`${childrenSubItem.active ? 'active' : ''}`}
-                                    onClick={() => toggletNavActive(childrenSubItem)}>
-                                    {t(childrenSubItem.title)}
-                                  </Link>
-                                ) : (
-                                  ""
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          ""
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                ""
-              )}
-            </li>
+                            {childrenItem.children ? (
+                              <ul className="nav-sub-childmenu submenu-content" style={CurrentPath.includes(childrenItem?.title?.toLowerCase()) || childrenItem.active ? { display: "block" } : { display: "none" }}>
+                                {childrenItem.children.map((childrenSubItem, key) => (
+                                  user && childrenSubItem.roles.includes(user.role) && (
+                                    <li key={key}>
+                                      {childrenSubItem.type === "link" ? (
+                                        <Link
+                                          to={childrenSubItem.path + "/" + layoutId}
+                                          className={`${CurrentPath.includes(childrenSubItem?.title?.toLowerCase()) ? "active" : ""}`}
+                                          // className={`${childrenSubItem.active ? 'active' : ''}`}
+                                          onClick={() => toggletNavActive(childrenSubItem)}>
+                                          {t(childrenSubItem.title)}
+                                        </Link>
+                                      ) : (
+                                        ""
+                                      )}
+                                    </li>
+                                  )
+                                ))}
+                              </ul>
+                            ) : (
+                              ""
+                            )}
+                          </li>
+                        )
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  ""
+                )}
+              </li>
+            )
           ))}
         </Fragment>
       ))}

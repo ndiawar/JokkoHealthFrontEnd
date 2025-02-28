@@ -1,36 +1,46 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, LogIn, Mail, User } from "react-feather";
+import { LogIn, Mail, User } from "react-feather";
 import man from "../../../assets/images/dashboard/profile.png";
-
 import { LI, UL, Image, P } from "../../../AbstractElements";
 import CustomizerContext from "../../../_helper/Customizer";
-import { Account, Admin, Inbox, LogOut, Taskboard } from "../../../Constant";
+import { Account, Admin, Inbox, LogOut } from "../../../Constant";
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import UserContext from "../../../_helper/UserContext"; // Importez le contexte utilisateur
 
 const UserHeader = () => {
-  const history = useNavigate();
-  const [profile, setProfile] = useState("");
-  const [name, setName] = useState("Emay Walter");
+  const navigate = useNavigate();
   const { layoutURL } = useContext(CustomizerContext);
-  const authenticated = JSON.parse(localStorage.getItem("authenticated"));
-  const auth0_profile = JSON.parse(localStorage.getItem("auth0_profile"));
+  const { user, setUser } = useContext(UserContext); // Utilisez le contexte utilisateur
 
   useEffect(() => {
-    setProfile(localStorage.getItem("profileURL") || man);
-    setName(localStorage.getItem("Name") ? localStorage.getItem("Name") : name);
-  }, []);
+    axios.get('users/me', { withCredentials: true })
+      .then(response => {
+        setUser(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [setUser]);
 
-  const Logout = () => {
-    localStorage.removeItem("profileURL");
-    localStorage.removeItem("token");
-    localStorage.removeItem("auth0_profile");
-    localStorage.removeItem("Name");
-    localStorage.setItem("authenticated", false);
-    history(`${process.env.PUBLIC_URL}/login`);
+  const Logout = async () => {
+    try {
+      await axios.post('users/logout', {}, { withCredentials: true });
+      Cookies.remove('jwt');
+      localStorage.removeItem("profileURL");
+      localStorage.removeItem("token");
+      localStorage.removeItem("auth0_profile");
+      localStorage.removeItem("Name");
+      localStorage.setItem("authenticated", false);
+      navigate(`${process.env.PUBLIC_URL}/login`);
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
   };
 
   const UserMenuRedirect = (redirect) => {
-    history(redirect);
+    navigate(redirect);
   };
 
   return (
@@ -39,14 +49,14 @@ const UserHeader = () => {
         <Image
           attrImage={{
             className: "b-r-10 m-0",
-            src: `${authenticated ? auth0_profile.picture : profile}`,
+            src: user ? user.picture || man : man,
             alt: "",
           }}
         />
         <div className="media-body">
-          <span>{authenticated ? auth0_profile.name : name}</span>
+          <span>{user ? `${user.nom} ${user.prenom}` : "Emay Walter"}</span>
           <P attrPara={{ className: "mb-0 font-roboto" }}>
-            {Admin} <i className="middle fa fa-angle-down"></i>
+            {user ? user.role : Admin} <i className="middle fa fa-angle-down"></i>
           </P>
         </div>
       </div>
@@ -64,13 +74,6 @@ const UserHeader = () => {
           }}>
           <Mail />
           <span>{Inbox}</span>
-        </LI>
-        <LI
-          attrLI={{
-            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/app/todo-app/todo/${layoutURL}`),
-          }}>
-          <FileText />
-          <span>{Taskboard}</span>
         </LI>
         <LI attrLI={{ onClick: Logout }}>
           <LogIn />

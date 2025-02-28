@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import $ from "jquery";  // Importation de jQuery
-import "bootstrap-notify";  // Importation de Bootstrap Notify
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import $ from "jquery";
+import "bootstrap-notify";
 import {
   fetchUsers,
   fetchUserById,
@@ -13,249 +13,216 @@ import {
   unarchiveUser,
   deleteUser,
   logoutUser,
-} from "../api/users"; // Import des méthodes d'API
+} from "../../api/users";
+
+// Fonction pour afficher les notifications d'erreur
+const showErrorNotification = (message) => {
+  $.notify({ message: message }, { type: "danger" });
+};
 
 const useUsers = () => {
   const queryClient = useQueryClient();
 
-  // Requête pour récupérer tous les utilisateurs
+  // Requête pour tous les utilisateurs
   const {
     data: users,
     isLoading: loading,
     error,
-  } = useQuery("users", fetchUsers, {
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
     onError: (err) => {
-      $.notify(
-        { message: `Erreur lors du chargement des utilisateurs: ${err.message}` },
-        { type: "danger" }
-      );
+      showErrorNotification(`Erreur lors du chargement des utilisateurs: ${err.message}`);
     },
   });
 
-  // Requête pour récupérer un utilisateur spécifique par son ID
-  const fetchUser = async (id) => {
-    const { data } = await fetchUserById(id);
-    return data;
+  // Requête pour un utilisateur spécifique
+  const useUserById = (id) => {
+    return useQuery({
+      queryKey: ["user", id],
+      queryFn: () => fetchUserById(id),
+      enabled: !!id,
+      onError: (err) => {
+        showErrorNotification(`Erreur lors du chargement de l'utilisateur: ${err.message}`);
+      },
+    });
   };
 
-  // Mutation pour inscrire un utilisateur
-  const {
-    mutate: registerUserMutation,
-    isLoading: registerLoading,
-    error: registerError,
-  } = useMutation(registerUser, {
-    onSuccess: (data) => {
-      $.notify(
-        { message: "L'utilisateur a été inscrit avec succès." },
-        { type: "success" }
-      );
-    },
-    onError: (error) => {
-      $.notify(
-        { message: `Erreur d'inscription: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
-      );
-    },
-  });
-
-  // Mutation pour se connecter
-  const {
-    mutate: loginUserMutation,
-    isLoading: loginLoading,
-    error: loginError,
-  } = useMutation(loginUser, {
-    onSuccess: (data) => {
-      $.notify(
-        { message: "Bienvenue ! Vous êtes connecté." },
-        { type: "success" }
-      );
-    },
-    onError: (error) => {
-      $.notify(
-        { message: `Erreur de connexion: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
-      );
-    },
-  });
-
-  // Mutation pour mettre à jour un utilisateur
-  const {
-    isLoading: updateLoading,
-    mutate: updateUserMutation,
-    error: updateError,
-  } = useMutation(updateUserProfile, {
+  // Mutation d'inscription
+  const { mutate: registerUserMutation, isLoading: registerLoading, error: registerError } = useMutation({
+    mutationFn: registerUser,
     onSuccess: () => {
-      queryClient.invalidateQueries("users");
-      $.notify(
-        { message: "Les informations de l'utilisateur ont été mises à jour avec succès." },
-        { type: "success" }
-      );
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Utilisateur inscrit avec succès !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Échec de la mise à jour: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec de l'inscription: ${error.response?.data?.message || "Erreur serveur"}`
       );
     },
   });
 
-  // Mutation pour bloquer un utilisateur
-  const {
-    isLoading: blockLoading,
-    mutate: blockUserMutation,
-    error: blockError,
-  } = useMutation(blockUser, {
-    onSuccess: () => {
-      queryClient.invalidateQueries("users");
-      $.notify(
-        { message: "L'utilisateur a été bloqué avec succès." },
-        { type: "success" }
-      );
+  // Mutation de connexion
+  const { mutate: loginUserMutation, isLoading: loginLoading, error: loginError } = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (response) => {
+      localStorage.setItem("auth_token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      $.notify({ message: "Connexion réussie !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Erreur de blocage: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec de la connexion: ${error.response?.data?.message || "Identifiants invalides"}`
       );
     },
   });
 
-  // Mutation pour débloquer un utilisateur
-  const {
-    isLoading: unblockLoading,
-    mutate: unblockUserMutation,
-    error: unblockError,
-  } = useMutation(unblockUser, {
+  // Mutation de mise à jour
+  const { mutate: updateUserMutation, isLoading: updateLoading, error: updateError } = useMutation({
+    mutationFn: updateUserProfile,
     onSuccess: () => {
-      queryClient.invalidateQueries("users");
-      $.notify(
-        { message: "L'utilisateur a été débloqué avec succès." },
-        { type: "success" }
-      );
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Profil utilisateur mis à jour !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Erreur de déblocage: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec de la mise à jour: ${error.response?.data?.message || "Erreur serveur"}`
       );
     },
   });
 
-  // Mutation pour archiver un utilisateur
-  const {
-    isLoading: archiveLoading,
-    mutate: archiveUserMutation,
-    error: archiveError,
-  } = useMutation(archiveUser, {
+  // Mutation de blocage
+  const { mutate: blockUserMutation, isLoading: blockLoading, error: blockError } = useMutation({
+    mutationFn: blockUser,
     onSuccess: () => {
-      queryClient.invalidateQueries("users");
-      $.notify(
-        { message: "L'utilisateur a été archivé avec succès." },
-        { type: "success" }
-      );
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Utilisateur bloqué avec succès !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Erreur d'archivage: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec du blocage: ${error.response?.data?.message || "Erreur serveur"}`
       );
     },
   });
 
-  // Mutation pour désarchiver un utilisateur
-  const {
-    isLoading: unarchiveLoading,
-    mutate: unarchiveUserMutation,
-    error: unarchiveError,
-  } = useMutation(unarchiveUser, {
+  // Mutation de déblocage
+  const { mutate: unblockUserMutation, isLoading: unblockLoading, error: unblockError } = useMutation({
+    mutationFn: unblockUser,
     onSuccess: () => {
-      queryClient.invalidateQueries("users");
-      $.notify(
-        { message: "L'utilisateur a été désarchivé avec succès." },
-        { type: "success" }
-      );
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Utilisateur débloqué avec succès !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Erreur de désarchivage: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec du déblocage: ${error.response?.data?.message || "Erreur serveur"}`
       );
     },
   });
 
-  // Mutation pour supprimer un utilisateur
-  const {
-    isLoading: deleteLoading,
-    mutate: deleteUserMutation,
-    error: deleteError,
-  } = useMutation(deleteUser, {
+  // Mutation d'archivage
+  const { mutate: archiveUserMutation, isLoading: archiveLoading, error: archiveError } = useMutation({
+    mutationFn: archiveUser,
     onSuccess: () => {
-      queryClient.invalidateQueries("users");
-      $.notify(
-        { message: "L'utilisateur a été supprimé avec succès." },
-        { type: "success" }
-      );
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Utilisateur archivé avec succès !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Erreur de suppression: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec de l'archivage: ${error.response?.data?.message || "Erreur serveur"}`
       );
     },
   });
 
-  // Mutation pour déconnecter un utilisateur
-  const {
-    isLoading: logoutLoading,
-    mutate: logoutUserMutation,
-    error: logoutError,
-  } = useMutation(logoutUser, {
+  // Mutation de désarchivage
+  const { mutate: unarchiveUserMutation, isLoading: unarchiveLoading, error: unarchiveError } = useMutation({
+    mutationFn: unarchiveUser,
     onSuccess: () => {
-      $.notify(
-        { message: "Vous avez été déconnecté." },
-        { type: "success" }
-      );
-      // Effectuer un redirect si nécessaire
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Utilisateur désarchivé avec succès !" }, { type: "success" });
     },
     onError: (error) => {
-      $.notify(
-        { message: `Erreur de déconnexion: ${error.response?.data?.message || "Une erreur est survenue."}` },
-        { type: "danger" }
+      showErrorNotification(
+        `Échec du désarchivage: ${error.response?.data?.message || "Erreur serveur"}`
+      );
+    },
+  });
+
+  // Mutation de suppression
+  const { mutate: deleteUserMutation, isLoading: deleteLoading, error: deleteError } = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      $.notify({ message: "Utilisateur supprimé avec succès !" }, { type: "success" });
+    },
+    onError: (error) => {
+      showErrorNotification(
+        `Échec de la suppression: ${error.response?.data?.message || "Erreur serveur"}`
+      );
+    },
+  });
+
+  // Mutation de déconnexion
+  const { mutate: logoutUserMutation, isLoading: logoutLoading, error: logoutError } = useMutation({
+    mutationFn: logoutUser,
+    onSuccess: () => {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user");
+      $.notify({ message: "Déconnexion réussie !" }, { type: "success" });
+    },
+    onError: (error) => {
+      showErrorNotification(
+        `Échec de la déconnexion: ${error.response?.data?.message || "Erreur serveur"}`
       );
     },
   });
 
   return {
+    // Données
     users,
     loading,
     error,
-    registerLoading,
-    registerError,
+
+    // Méthodes
+    useUserById,
+
+    // Mutations
     registerUserMutation,
-    loginLoading,
-    loginError,
     loginUserMutation,
-    updateLoading,
-    updateError,
     updateUserMutation,
-    blockLoading,
-    blockError,
     blockUserMutation,
-    unblockLoading,
-    unblockError,
     unblockUserMutation,
-    archiveLoading,
-    archiveError,
     archiveUserMutation,
-    unarchiveLoading,
-    unarchiveError,
     unarchiveUserMutation,
-    deleteLoading,
-    deleteError,
     deleteUserMutation,
-    logoutLoading,
-    logoutError,
     logoutUserMutation,
+
+    // États de chargement
+    isLoading: {
+      register: registerLoading,
+      login: loginLoading,
+      update: updateLoading,
+      block: blockLoading,
+      unblock: unblockLoading,
+      archive: archiveLoading,
+      unarchive: unarchiveLoading,
+      delete: deleteLoading,
+      logout: logoutLoading,
+    },
+
+    // Erreurs
+    errors: {
+      register: registerError,
+      login: loginError,
+      update: updateError,
+      block: blockError,
+      unblock: unblockError,
+      archive: archiveError,
+      unarchive: unarchiveError,
+      delete: deleteError,
+      logout: logoutError,
+    },
   };
 };
 
