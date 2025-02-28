@@ -1,57 +1,59 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
 import { Btn, H4 } from '../../AbstractElements';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-// Définition des colonnes avec des styles pour l'alignement équitable
+import useAppointments from '../../Hooks/JokkoHealth/useAppointments';
 const tableColumns = [
     {
         name: 'Spécialité',
-        selector: row => row.specialite,
+        selector: row => row.specialiste, // Correction ici
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
+        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Téléphone',
-        selector: row => row.telephone,
+        selector: row => row.telephone || 'Non disponible', // Vérification si absent
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
+        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Date de disponibilité',
-        selector: row => row.date,
+        selector: row => new Date(row.date).toLocaleDateString(),
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
+        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Heure',
-        selector: row => row.heure,
+        selector: row => `${row.heure_debut} - ${row.heure_fin}`,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
+        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Demande',
         cell: row => (
-            <span className={`badge ${row.demande === 'Accepté' ? 'bg-success' : 'bg-warning'}`}>
-                {row.demande}
+            <span className={`badge ${row.statutDemande === 'Accepté' ? 'bg-success' : 'bg-warning'}`}>
+                {row.statutDemande}
             </span>
         ),
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
+        style: { flex: 1, padding: '0 10px' },
     },
 ];
 
-const dummytabledata = [
-    { id: 1, specialite: 'Cardiologue', telephone: '77 123 45 67', date: '18-02-2025', heure: '08h-12h', demande: 'Accepté' },
-    { id: 2, specialite: 'Dentiste', telephone: '76 234 56 78', date: '19-02-2025', heure: '10h-15h', demande: 'En attente' },
-    { id: 3, specialite: 'Pédiatre', telephone: '70 345 67 89', date: '20-02-2025', heure: '09h-13h', demande: 'Accepté' },
-    { id: 4, specialite: 'Dermatologue', telephone: '33 456 78 90', date: '21-02-2025', heure: '11h-14h', demande: 'En attente' },
-];
 
 const TableRV = () => {
     const [selectedRows, setSelectedRows] = useState([]);
+    const [appointments, setAppointments] = useState([]);  // État local des rendez-vous
     const [toggleDelet, setToggleDelet] = useState(false);
-    const [data, setData] = useState(dummytabledata);
+
+    // Utilisation du hook personnalisé pour récupérer les rendez-vous
+    const { appointments: fetchedAppointments, loading, error } = useAppointments();
+
+    useEffect(() => {
+        if (fetchedAppointments !== appointments) {  // Vérifier si les rendez-vous ont changé
+            setAppointments(fetchedAppointments); // Mettre à jour uniquement si fetchedAppointments a changé
+        }
+    }, [fetchedAppointments, appointments]);  // Mettre à jour à chaque changement de fetchedAppointments
 
     const handleRowSelected = useCallback(state => {
         setSelectedRows(state.selectedRows);
@@ -60,10 +62,19 @@ const TableRV = () => {
     const handleDelete = () => {
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer:\r ${selectedRows.map(r => r.specialite)}?`)) {
             setToggleDelet(!toggleDelet);
-            setData(data.filter((item) => selectedRows.filter((elem) => elem.id === item.id).length > 0 ? false : true));
+            setAppointments(appointments.filter((item) => selectedRows.filter((elem) => elem.id === item.id).length > 0 ? false : true));
             setSelectedRows([]);
         }
     };
+
+    // Affichage du chargement ou de l'erreur
+    if (loading) {
+        return <p>Chargement des rendez-vous...</p>;
+    }
+
+    if (error) {
+        return <p>{error}</p>;
+    }
 
     return (
         <Fragment>
@@ -74,13 +85,11 @@ const TableRV = () => {
                 </div>
             }
 
-            {/* Titre aligné à gauche */}
             <h2 style={{ textAlign: 'left', marginTop: '20px', paddingLeft: '10px' }}>Mes Rendez-vous</h2>
 
-            {/* Table responsive */}
             <div className="table-responsive">
                 <DataTable
-                    data={data}
+                    data={appointments}  // Utiliser les rendez-vous récupérés via le hook
                     columns={tableColumns}
                     striped={true}
                     pagination

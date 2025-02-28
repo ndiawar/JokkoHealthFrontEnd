@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // Importez QueryClient et QueryClientProvider
 import Routers from './Route';
 import ChartistProvider from './_helper/Chartist/ChartistProvider';
 import ChartjsProvider from './_helper/Chartjs/ChartProvider';
@@ -16,10 +17,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
 // Configuration d'axios
-axios.defaults.baseURL = "http://localhost:3001/api";  // URL de ton backend
+axios.defaults.baseURL = "http://localhost:3001/api";  // URL de votre backend
 axios.defaults.headers.post['Content-Type'] = 'application/json';  // Spécifie le type de contenu pour les requêtes POST
 axios.defaults.headers.post['Accept'] = 'application/json';  // Accepte la réponse JSON
 axios.defaults.withCredentials = true;  // Permet d'envoyer les cookies avec les requêtes (utile pour la gestion de session)
+
+// Créez une instance de QueryClient
+const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
@@ -60,35 +64,36 @@ const App = () => {
   }, []);  // Le tableau vide signifie que cet effet se lance seulement une fois après le montage du composant
 
   return (
-    <div className='App'>
-      <CustomizerProvider>
-        <JobSearchProvider>
-          <WishListProvider>
-            <FilterProvider>
-              <CartProvider>
-                <SearchResultProvider>
-                  <TableProvider>
-                    <ChatProvider>
-                      <GoogleChartProvider>
-                        <ChartjsProvider>
-                          <ChartistProvider>
-                            <AnimationThemeProvider>
-                              <Routers />  {/* Routeur principal */}
-                            </AnimationThemeProvider>
-                          </ChartistProvider>
-                        </ChartjsProvider>
-                      </GoogleChartProvider>
-                    </ChatProvider>
-                  </TableProvider>
-                </SearchResultProvider>
-              </CartProvider>
-            </FilterProvider>
-          </WishListProvider>
-        </JobSearchProvider>
-      </CustomizerProvider>
-    </div>
+    <QueryClientProvider client={queryClient}> {/* Enveloppez votre application avec QueryClientProvider */}
+      <div className='App'>
+        <CustomizerProvider>
+          <JobSearchProvider>
+            <WishListProvider>
+              <FilterProvider>
+                <CartProvider>
+                  <SearchResultProvider>
+                    <TableProvider>
+                      <ChatProvider>
+                        <GoogleChartProvider>
+                          <ChartjsProvider>
+                            <ChartistProvider>
+                              <AnimationThemeProvider>
+                                <Routers />  {/* Routeur principal */}
+                              </AnimationThemeProvider>
+                            </ChartistProvider>
+                          </ChartjsProvider>
+                        </GoogleChartProvider>
+                      </ChatProvider>
+                    </TableProvider>
+                  </SearchResultProvider>
+                </CartProvider>
+              </FilterProvider>
+            </WishListProvider>
+          </JobSearchProvider>
+        </CustomizerProvider>
+      </div>
+    </QueryClientProvider>
   );
 };
-
 
 export default App;

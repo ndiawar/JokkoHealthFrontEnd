@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, LogIn, Mail, User } from "react-feather";
+import { LogIn, Mail, User } from "react-feather";
 import man from "../../../assets/images/dashboard/profile.png";
 
 import { LI, UL, Image, P } from "../../../AbstractElements";
 import CustomizerContext from "../../../_helper/Customizer";
-import { Account, Admin, Inbox, LogOut, Taskboard } from "../../../Constant";
+import { Account, Admin, Inbox, LogOut } from "../../../Constant";
 
 const UserHeader = () => {
   const history = useNavigate();
@@ -64,13 +64,6 @@ const UserHeader = () => {
           }}>
           <Mail />
           <span>{Inbox}</span>
-        </LI>
-        <LI
-          attrLI={{
-            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/app/todo-app/todo/${layoutURL}`),
-          }}>
-          <FileText />
-          <span>{Taskboard}</span>
         </LI>
         <LI attrLI={{ onClick: Logout }}>
           <LogIn />
