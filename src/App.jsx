@@ -1,4 +1,5 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // Importez QueryClient et QueryClientProvider
 import Routers from './Route';
 import CartProvider from './_helper/Ecommerce/Cart/CardProvider';
 import FilterProvider from './_helper/Ecommerce/Filter/FilterProvider';
@@ -34,24 +35,29 @@ axios.interceptors.response.use(
   }
 );
 
+// Créez une instance de QueryClient
+const queryClient = new QueryClient();
+
 const App = () => {
   return (
-    <div className='App'>
-      <UserProvider> {/* Enveloppez l'application avec UserProvider */}
-        <CustomizerProvider>
-          <WishListProvider>
-            <FilterProvider>
-              <CartProvider>
-                <AnimationThemeProvider>
-                  <ToastContainer position="top-right" />
-                  <Routers />
-                </AnimationThemeProvider>
-              </CartProvider>
-            </FilterProvider>
-          </WishListProvider>
-        </CustomizerProvider>
-      </UserProvider>
-    </div>
+    <QueryClientProvider client={queryClient}> {/* Enveloppez votre application avec QueryClientProvider */}
+      <div className='App'>
+        <UserProvider> {/* Enveloppez l'application avec UserProvider */}
+          <CustomizerProvider>
+            <WishListProvider>
+              <FilterProvider>
+                <CartProvider>
+                  <AnimationThemeProvider>
+                    <ToastContainer position="top-right" />
+                    <Routers />
+                  </AnimationThemeProvider>
+                </CartProvider>
+              </FilterProvider>
+            </WishListProvider>
+          </CustomizerProvider>
+        </UserProvider>
+      </div>
+    </QueryClientProvider>
   );
 };
 
