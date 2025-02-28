@@ -13,8 +13,7 @@ import Cookies from 'js-cookie';
 const Signin = () => {
   const navigate = useNavigate();
   const { layoutURL } = useContext(CustomizerContext);
-
-  const [email, setEmail] = useState("");
+ const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
