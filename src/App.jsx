@@ -9,6 +9,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from "react-toastify";
 import axios from 'axios';
 import { UserProvider } from './_helper/UserContext'; // Importez le UserProvider
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+
+// Créez une instance de QueryClient
+const queryClient = new QueryClient();
+
 
 // Configuration d'axios
 axios.defaults.baseURL = "http://localhost:3001/api/";
@@ -37,20 +43,22 @@ axios.interceptors.response.use(
 const App = () => {
   return (
     <div className='App'>
-      <UserProvider> {/* Enveloppez l'application avec UserProvider */}
-        <CustomizerProvider>
-          <WishListProvider>
-            <FilterProvider>
-              <CartProvider>
-                <AnimationThemeProvider>
-                  <ToastContainer position="top-right" />
-                  <Routers />
-                </AnimationThemeProvider>
-              </CartProvider>
-            </FilterProvider>
-          </WishListProvider>
-        </CustomizerProvider>
-      </UserProvider>
+      <QueryClientProvider client={queryClient}>
+        <UserProvider> {/* Enveloppez l'application avec UserProvider */}
+          <CustomizerProvider>
+            <WishListProvider>
+              <FilterProvider>
+                <CartProvider>
+                  <AnimationThemeProvider>
+                    <ToastContainer position="top-right" />
+                    <Routers />
+                  </AnimationThemeProvider>
+                </CartProvider>
+              </FilterProvider>
+            </WishListProvider>
+          </CustomizerProvider>
+        </UserProvider>
+      </QueryClientProvider>,
     </div>
   );
 };
