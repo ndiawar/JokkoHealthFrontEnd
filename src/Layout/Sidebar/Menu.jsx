@@ -97,7 +97,7 @@ export const MENUITEMS = [
         icon: "chat",
         type: "link",
         active: false,
-        path: `${process.env.PUBLIC_URL}/app/chat-app/chats`,
+        path: `${process.env.PUBLIC_URL}/pages/chats`,
         protected: true,
         roles: ['Medecin', 'Patient'] // Indique que cet élément de menu est pour les Medecin et Patients
       },
