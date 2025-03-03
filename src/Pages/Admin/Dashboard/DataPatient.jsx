@@ -1,50 +1,33 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 import DataTable from 'react-data-table-component';
-import { patientData } from '../../Medcin/ListePatient/DefaultDataPatient';
+import { usePatientData, tableColumns } from '../../Medcin/ListePatient/DefaultDataPatient';
 import './Dashboard.css';
 
 const DataPatient = () => {
     const [showAll, setShowAll] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 4; // Nombre d'éléments par page
-    
+
+    const { patientData, error, isLoading } = usePatientData();
+
     // Quand on change de page
     const handlePageChange = page => {
         setCurrentPage(page);
     };
 
     // Quand on clique sur "Voir tout", on affiche toutes les données
-    const displayedData = showAll ? patientData : patientData.slice(0, itemsPerPage * currentPage);
-
-    const columns = [
-        {
-            name: 'Nom du patient',
-            selector: row => row.name,
-            sortable: true,
-            minWidth: '250px'
-        },
-        {
-            name: 'Email',
-            selector: row => row.email,
-            sortable: true,
-            center: true
-        },
-        {
-            name: 'Statut',
-            selector: row => row.status,
-            sortable: true,
-            center: true,
-            cell: row => <div className="status-wrapper">{row.status}</div>
-        },
-        {
-            name: 'Diagnostic',
-            selector: row => row.diagnostic,
-            sortable: true,
-            center: true
+    const displayedData = useMemo(() => {
+        if (showAll) {
+            return patientData;
+        } else {
+            return patientData.slice(0, itemsPerPage * currentPage);
         }
-    ];
+    }, [showAll, patientData, currentPage, itemsPerPage]);
 
     const totalItems = patientData.length;
+
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
 
     return (
         <Fragment>
@@ -72,7 +55,7 @@ const DataPatient = () => {
 
             <DataTable
                 data={displayedData}
-                columns={columns}
+                columns={tableColumns}
                 striped
                 highlightOnHover
                 customStyles={{

@@ -11,6 +11,11 @@ import { ToastContainer } from "react-toastify";
 import axios from 'axios';
 import { UserProvider } from './_helper/UserContext'; // Importez le UserProvider
 
+
+// Créez une instance de QueryClient
+const queryClient = new QueryClient();
+
+
 // Configuration d'axios
 axios.defaults.baseURL = "http://localhost:3001/api/";
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -35,13 +40,11 @@ axios.interceptors.response.use(
   }
 );
 
-// Créez une instance de QueryClient
-const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}> {/* Enveloppez votre application avec QueryClientProvider */}
-      <div className='App'>
+    <div className='App'>
+      <QueryClientProvider client={queryClient}>
         <UserProvider> {/* Enveloppez l'application avec UserProvider */}
           <CustomizerProvider>
             <WishListProvider>
@@ -56,8 +59,8 @@ const App = () => {
             </WishListProvider>
           </CustomizerProvider>
         </UserProvider>
-      </div>
-    </QueryClientProvider>
+      </QueryClientProvider>,
+    </div>
   );
 };
 
