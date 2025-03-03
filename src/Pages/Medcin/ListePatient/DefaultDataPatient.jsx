@@ -18,7 +18,9 @@ export const usePatientData = () => {
         id: record._id,
         name: (
           <Media className='d-flex'>
-            <Image attrImage={{ className: 'rounded-circle img-30 me-3', src: userPlaceholder, alt: 'Generic placeholder image' }} />
+            <Image 
+              attrImage={{ className: 'rounded-circle img-30 me-3', src: userPlaceholder, alt: 'Generic placeholder image' }} 
+            />
             <Media body className='align-self-center'>
               <div>{record.patientId ? `${record.patientId.nom} ${record.patientId.prenom}` : 'Unknown'}</div>
             </Media>
@@ -26,8 +28,20 @@ export const usePatientData = () => {
         ),
         email: record.patientId ? record.patientId.email : 'Unknown',
         status: <span className={`badge badge-dark-${getStatusBadge(record.status)}`}>{record.status}</span>,
-        // Utiliser 'hospitalisation' pour le diagnostic
         diagnostic: record.hospitalisation || 'N/A',
+        patientDetails: {
+          recordId: record._id, // Inclure l'ID du dossier médical
+          nom: record.patientId?.nom || 'N/A',
+          prenom: record.patientId?.prenom || 'N/A',
+          telephone: record.patientId?.telephone || 'N/A',
+          age: record.age || 'N/A',
+          poids: record.poids || 'N/A',
+          groupeSanguin: record.groupeSanguin || 'N/A',
+          chirurgie: record.chirurgie || 'N/A',
+          hospitalisation: record.hospitalisation || 'N/A',
+          antecedentsFamiliaux: record.antecedentsFamiliaux || 'N/A',
+          status: record.status || 'N/A'
+        }
       }))
     : [];
 
@@ -50,8 +64,6 @@ const getStatusBadge = (status) => {
       return 'secondary'; // Valeur par défaut
   }
 };
-
-
 
 export const tableColumns = [
   {

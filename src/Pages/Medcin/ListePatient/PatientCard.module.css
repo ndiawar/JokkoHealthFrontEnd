@@ -1,0 +1,22 @@
+:root {
+  --primary-color: #034561;
+  --secondary-color: #404D61;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #4A4A4A;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.form-control[readonly] {
+  background-color: #f8f9fa;
+  cursor: default;
+}
+
+.form-label {
+  font-size: 0.85rem;
+}

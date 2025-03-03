@@ -28,19 +28,18 @@ const showNotification = (message, type) => {
 
 // Hook pour récupérer tous les dossiers médicaux
 export const useFetchMedicalRecords = () => {
-  // Utilisation du hook useQuery pour récupérer les dossiers médicaux
   const { data, error, isLoading, isError } = useQuery({
     queryKey: ['medicalRecords'], // Clé unique pour la requête
     queryFn: fetchMedicalRecords, // Fonction pour récupérer les données
     onError: (error) => {
-      showNotification(`Erreur: ${error.message}`, 'danger'); // Notification en cas d'erreur
+      showNotification(`Erreur lors de la récupération des dossiers médicaux: ${error.message}`, 'danger');
     },
-    // Option pour mettre en cache et refetch des données à intervalle régulier si nécessaire
-    refetchOnWindowFocus: false, // Exemple d'option pour éviter le refetch automatique lors du focus de la fenêtre
+    // Options supplémentaires
+    refetchOnWindowFocus: false, // Ne pas refetch quand l'utilisateur revient dans l'onglet
     retry: 1, // Nombre de tentatives en cas d'échec de la requête
   });
 
-  // Retourne les données, les erreurs et l'état de chargement
+  // Retourne les données, l'état de chargement, et les erreurs
   return { data, error, isLoading, isError };
 };
 
@@ -49,9 +48,9 @@ export const useFetchMedicalRecordById = (id) => {
   const { data, error, isLoading, isError } = useQuery({
     queryKey: ['medicalRecord', id],
     queryFn: () => fetchMedicalRecordById(id),
-    enabled: !!id, // N'exécute la requête que si l'ID est défini
+    enabled: !!id, // La requête ne s'exécute que si l'ID est valide
     onError: (error) => {
-      showNotification(`Erreur: ${error.message}`, 'danger');
+      showNotification(`Erreur lors de la récupération du dossier médical: ${error.message}`, 'danger');
     }
   });
 
@@ -61,14 +60,16 @@ export const useFetchMedicalRecordById = (id) => {
 // Hook pour mettre à jour un dossier médical
 export const useUpdateMedicalRecord = () => {
   const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: updateMedicalRecord,
-    onSuccess: () => {
-      queryClient.invalidateQueries(['medicalRecords']); // Invalide la requête pour rafraîchir les données
+    onSuccess: (data) => {
+      // Invalider les données après une mise à jour pour forcer un nouveau fetch
+      queryClient.invalidateQueries(['medicalRecords']);
       showNotification('Dossier médical mis à jour avec succès', 'success');
     },
     onError: (error) => {
-      showNotification(`Erreur: ${error.message}`, 'danger');
+      showNotification(`Erreur lors de la mise à jour du dossier médical: ${error.message}`, 'danger');
     }
   });
 };
@@ -76,14 +77,16 @@ export const useUpdateMedicalRecord = () => {
 // Hook pour supprimer un dossier médical
 export const useDeleteMedicalRecord = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: deleteMedicalRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries(['medicalRecords']); // Invalide la requête pour rafraîchir les données
+      // Invalider les données après une suppression pour forcer un nouveau fetch
+      queryClient.invalidateQueries(['medicalRecords']);
       showNotification('Dossier médical supprimé avec succès', 'success');
     },
     onError: (error) => {
-      showNotification(`Erreur: ${error.message}`, 'danger');
+      showNotification(`Erreur lors de la suppression du dossier médical: ${error.message}`, 'danger');
     }
   });
 };
