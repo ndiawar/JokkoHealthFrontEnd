@@ -1,88 +1,155 @@
-import { Fragment } from 'react'; // Ajoutez cette ligne
-import { FaPen } from 'react-icons/fa'; // Importer l'icône bic (stylo)
+import { Fragment, useEffect, useState } from 'react';
+import { FaPen } from 'react-icons/fa'; // Importer l'icône de crayon
 import { Btn, H4 } from "../../AbstractElements";
-import { useForm } from "react-hook-form";
-import { Row, Col, CardHeader, CardBody, CardFooter, Form, FormGroup, Label, Input } from 'reactstrap';
+import { Row, Col, CardHeader, CardBody, Form, FormGroup, Label, Input } from 'reactstrap';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001/api'; // Remplacez par l'URL correcte
 
 const EditMyProfile = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
-    const onEditSubmit = (data) => {
-        alert(JSON.stringify(data));
-    }
+    const [record, setRecord] = useState({
+        _id: '', // Ajoutez l'ID ici
+        nom: '',
+        prenom: '',
+        email: '',
+        telephone: '',
+        age: '',
+        poids: '',
+        groupeSanguin: '',
+        chirurgie: '',
+        hospitalisation: '',
+        antecedentsFamiliaux: '',
+        status: '',
+    });
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/medical/me`);
+                if (response.data.success) {
+                    const medicalData = response.data.record;
+                    setRecord({
+                        _id: medicalData._id,
+                        nom: medicalData.patientId.nom,
+                        prenom: medicalData.patientId.prenom,
+                        email: medicalData.patientId.email,
+                        telephone: medicalData.patientId.telephone,
+                        age: medicalData.age,
+                        poids: medicalData.poids,
+                        groupeSanguin: medicalData.groupeSanguin,
+                        chirurgie: medicalData.chirurgie,
+                        hospitalisation: medicalData.hospitalisation,
+                        antecedentsFamiliaux: medicalData.antecedentsFamiliaux,
+                        status: medicalData.status,
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données :', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setRecord((prevRecord) => ({
+            ...prevRecord,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.put(`${API_URL}/medical/${record._id}`, {
+                nom: record.nom,
+                prenom: record.prenom,
+                email: record.email,
+                telephone: record.telephone,
+                age: record.age,
+                poids: record.poids,
+                groupeSanguin: record.groupeSanguin,
+                chirurgie: record.chirurgie,
+                hospitalisation: record.hospitalisation,
+                antecedentsFamiliaux: record.antecedentsFamiliaux,
+                status: record.status,
+            });
+    
+            if (response.data.success) {
+                alert("Profil mis à jour avec succès !");
+            }
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour du profil :', error.response ? error.response.data : error.message);
+            alert("Erreur lors de la mise à jour du profil.");
+        }
+    };
+    
     return (
         <Fragment>
-            <Form className="card" onSubmit={handleSubmit(onEditSubmit)}>
+            <Form onSubmit={handleSubmit}>
                 <CardHeader className="d-flex justify-content-between align-items-center">
                     <H4 attrH4={{ className: "card-title mb-0" }}>Informations personnelles</H4>
-                    <Btn attrBtn={{ color: "primary", type: "submit" }}>
-                        <FaPen style={{ marginRight: '8px' }} /> Éditer
-                    </Btn>
                 </CardHeader>
                 <CardBody>
                     <Row>
-                        {/* Première Partie - Séparée par une bordure autour du groupe */}
                         <Col xs="12">
-                            <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Prénom</Label>
-                                    <Input className="form-control" type="text" placeholder="Prénom" {...register("firstName", { required: "Prénom est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.firstName && errors.firstName.message}</span>
-                                </FormGroup>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Nom</Label>
-                                    <Input className="form-control" type="text" placeholder="Nom" {...register("lastName", { required: "Nom est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.lastName && errors.lastName.message}</span>
-                                </FormGroup>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Numéro de téléphone</Label>
-                                    <Input className="form-control" type="text" placeholder="Numéro de téléphone" {...register("phoneNumber", { required: "Numéro de téléphone est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.phoneNumber && errors.phoneNumber.message}</span>
-                                </FormGroup>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Poids</Label>
-                                    <Input className="form-control" type="number" placeholder="Poids" {...register("weight", { required: "Poids est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.weight && errors.weight.message}</span>
-                                </FormGroup>
+                            <FormGroup>
+                                <Label>Nom :</Label>
+                                <Input type="text" name="nom" value={record.nom} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Prénom :</Label>
+                                <Input type="text" name="prenom" value={record.prenom} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Email :</Label>
+                                <Input type="email" name="email" value={record.email} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Téléphone :</Label>
+                                <Input type="text" name="telephone" value={record.telephone} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Âge :</Label>
+                                <Input type="number" name="age" value={record.age} onChange={handleChange} />
+                            </FormGroup>
+                            {/* Bouton aligné à droite avec icône */}
+                            <div className="text-end mb-3">
+                                <Btn type="submit">
+                                    <FaPen /> Modifier son dossier médical
+                                </Btn>
                             </div>
-                        </Col>
-
-                        {/* Deuxième Partie - Séparée par une bordure autour du groupe */}
-                        <Col xs="12">
-                            <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '20px' }}>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Groupe sanguin</Label>
-                                    <Input className="form-control" type="text" placeholder="Groupe sanguin" {...register("bloodGroup", { required: "Groupe sanguin est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.bloodGroup && errors.bloodGroup.message}</span>
-                                </FormGroup>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Âge</Label>
-                                    <Input className="form-control" type="number" placeholder="Âge" {...register("age", { required: "Âge est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.age && errors.age.message}</span>
-                                </FormGroup>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Email</Label>
-                                    <Input className="form-control" type="email" placeholder="Email" {...register("email", { required: "Email est requis" })} />
-                                    <span style={{ color: "red" }}>{errors.email && errors.email.message}</span>
-                                </FormGroup>
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Antécédents Médicaux et Allergies</Label>
-                                    <Input type="textarea" className="form-control" rows="3" placeholder="Antécédents Médicaux et Allergies" {...register("medicalHistory")} />
-                                </FormGroup>
-                               
-                                <FormGroup className="mb-3">
-                                    <Label className="form-label">Chirurgies et hospitalisations passées</Label>
-                                    <Input type="textarea" className="form-control" rows="3" placeholder="Chirurgies et hospitalisations passées" {...register("pastSurgeries")} />
-                                </FormGroup>
-                            </div>
+                            <FormGroup>
+                                <Label>Poids :</Label>
+                                <Input type="number" name="poids" value={record.poids} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Groupe Sanguin :</Label>
+                                <Input type="text" name="groupeSanguin" value={record.groupeSanguin} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Chirurgie :</Label>
+                                <Input type="text" name="chirurgie" value={record.chirurgie} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Hospitalisation :</Label>
+                                <Input type="text" name="hospitalisation" value={record.hospitalisation} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Antécédents Familiaux :</Label>
+                                <Input type="text" name="antecedentsFamiliaux" value={record.antecedentsFamiliaux} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Statut :</Label>
+                                <Input type="text" name="status" value={record.status} onChange={handleChange} />
+                            </FormGroup>
                         </Col>
                     </Row>
                 </CardBody>
-                <CardFooter className="text-end">
-                </CardFooter>
             </Form>
         </Fragment>
     );
-}
+};
 
 export default EditMyProfile;

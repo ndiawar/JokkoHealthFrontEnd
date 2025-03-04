@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchMedicalRecords,
+  fetchMyMedicalRecord as fetchMedicalRecords, // Renommage si nécessaire
   fetchMedicalRecordById,
   updateMedicalRecord,
   deleteMedicalRecord
 } from '../../api/medical';
+
 import $ from 'jquery';
 import 'bootstrap-notify';
 

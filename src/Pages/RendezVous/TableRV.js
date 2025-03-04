@@ -1,92 +1,108 @@
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { Btn, H4 } from '../../AbstractElements';
+import { getAppointments } from '../../api/appointment';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
-// Définition des colonnes avec des styles pour l'alignement équitable
 const tableColumns = [
     {
         name: 'Spécialité',
         selector: row => row.specialite,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
     },
     {
         name: 'Téléphone',
         selector: row => row.telephone,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
     },
     {
         name: 'Date de disponibilité',
         selector: row => row.date,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
     },
     {
         name: 'Heure',
         selector: row => row.heure,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
     },
     {
         name: 'Demande',
         cell: row => (
-            <span className={`badge ${row.demande === 'Accepté' ? 'bg-success' : 'bg-warning'}`}>
+            <span className={`badge ${row.demande === 'En attente' ? 'bg-warning' : 'bg-success'}`}>
                 {row.demande}
             </span>
         ),
         sortable: true,
-        style: { flex: 1, padding: '0 10px' }, // Utilisation de Flexbox pour une largeur équitable
     },
 ];
 
-const dummytabledata = [
-    { id: 1, specialite: 'Cardiologue', telephone: '77 123 45 67', date: '18-02-2025', heure: '08h-12h', demande: 'Accepté' },
-    { id: 2, specialite: 'Dentiste', telephone: '76 234 56 78', date: '19-02-2025', heure: '10h-15h', demande: 'En attente' },
-    { id: 3, specialite: 'Pédiatre', telephone: '70 345 67 89', date: '20-02-2025', heure: '09h-13h', demande: 'Accepté' },
-    { id: 4, specialite: 'Dermatologue', telephone: '33 456 78 90', date: '21-02-2025', heure: '11h-14h', demande: 'En attente' },
-];
-
 const TableRV = () => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
-    const [toggleDelet, setToggleDelet] = useState(false);
-    const [data, setData] = useState(dummytabledata);
+    const [patientId, setPatientId] = useState(null); // L'ID du patient
 
-    const handleRowSelected = useCallback(state => {
-        setSelectedRows(state.selectedRows);
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/api/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Si vous utilisez un token d'authentification
+                    }
+                });
+                setPatientId(response.data._id);  // Mettre à jour l'ID du patient
+            } catch (err) {
+                console.error('Erreur lors de la récupération des informations utilisateur:', err);
+                setError('Erreur lors de la récupération des informations utilisateur.');
+            }
+        };
+
+        fetchUserData(); // Récupérer l'ID de l'utilisateur
     }, []);
 
-    const handleDelete = () => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer:\r ${selectedRows.map(r => r.specialite)}?`)) {
-            setToggleDelet(!toggleDelet);
-            setData(data.filter((item) => selectedRows.filter((elem) => elem.id === item.id).length > 0 ? false : true));
-            setSelectedRows([]);
+    useEffect(() => {
+        if (patientId) {
+            const fetchAppointments = async () => {
+                try {
+                    const appointments = await getAppointments();
+                    const formattedData = appointments.map(appointment => ({
+                        id: appointment._id,
+                        specialite: appointment.specialiste,
+                        telephone: appointment.doctorId.telephone,
+                        date: new Date(appointment.date).toLocaleDateString(),
+                        heure: `${appointment.heure_debut} - ${appointment.heure_fin}`,
+                        demande: 'En attente', // Valeur par défaut
+                    }));
+                    setData(formattedData);
+                } catch (err) {
+                    setError("Impossible de récupérer les rendez-vous.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchAppointments();
         }
+    }, [patientId]);
+
+    const handleRowSelected = state => {
+        setSelectedRows(state.selectedRows);  // Mise à jour de selectedRows
     };
+
+    if (loading) return <p>Chargement des rendez-vous...</p>;
+    if (error) return <p>{error}</p>;
+    if (!patientId) return <p>Veuillez vous connecter pour voir vos rendez-vous.</p>; // Vérifier si l'utilisateur est connecté
 
     return (
         <Fragment>
-            {(selectedRows.length !== 0) &&
-                <div className="d-flex align-items-center justify-content-between bg-light-info p-2">
-                    <H4 attrH4={{ className: 'text-muted m-0' }}>Supprimer les rendez-vous sélectionnés..!</H4>
-                    <Btn attrBtn={{ color: 'danger', onClick: () => handleDelete() }}>Supprimer</Btn>
-                </div>
-            }
-
-            {/* Titre aligné à gauche */}
             <h2 style={{ textAlign: 'left', marginTop: '20px', paddingLeft: '10px' }}>Mes Rendez-vous</h2>
-
-            {/* Table responsive */}
             <div className="table-responsive">
                 <DataTable
                     data={data}
                     columns={tableColumns}
                     striped={true}
                     pagination
-                    selectableRows
-                    onSelectedRowsChange={handleRowSelected}
-                    clearSelectedRows={toggleDelet}
+                    onSelectedRowsChange={handleRowSelected}  // Passer la fonction de gestion des lignes sélectionnées
                 />
             </div>
         </Fragment>

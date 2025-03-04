@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 import { H4, P, H5, H6 } from '../../../AbstractElements';
-import ProfilImage from '../../../assets/images/jokko/profil.png'; // Assurez-vous que ce chemin est correct
+import ProfilImage from '../../../../src/assets/images/Jokko/profil.png'; // Assurez-vous que ce chemin est correct
 
 const GreetingCard = () => {
   return (
