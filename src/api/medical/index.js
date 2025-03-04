@@ -44,6 +44,26 @@ export const fetchMedicalRecordById = async (id) => {
   }
 };
 
+// 🚀 Récupérer le dossier médical de l'utilisateur connecté
+export const fetchMedicalRecordByUser = async () => {
+  try {
+    const { data } = await axios.get('medical/me', {
+      headers: authHeader(), // En-tête d'authentification
+    });
+
+    // Si le serveur retourne un succès, on retourne le dossier
+    if (data.success) {
+      return data.record; // Retourne le dossier médical
+    } else {
+      console.error('Dossier médical non trouvé.');
+      return null; // Retourne null si aucun dossier n'a été trouvé
+    }
+  } catch (error) {
+    // Log détaillé pour débogage
+    console.error('Erreur lors de la récupération du dossier médical de l\'utilisateur connecté:', error);
+    throw new Error(error.response?.data?.message || "Erreur serveur");
+  }
+};
 
 // 🚀 Mettre à jour un dossier médical par son ID
 export const updateMedicalRecord = async ({ id, updates }) => {

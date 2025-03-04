@@ -1,5 +1,5 @@
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // Importez QueryClient et QueryClientProvider
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Routers from './Route';
 import CartProvider from './_helper/Ecommerce/Cart/CardProvider';
 import FilterProvider from './_helper/Ecommerce/Filter/FilterProvider';
@@ -9,12 +9,18 @@ import AnimationThemeProvider from './_helper/AnimationTheme/AnimationThemeProvi
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from "react-toastify";
 import axios from 'axios';
-import { UserProvider } from './_helper/UserContext'; // Importez le UserProvider
-
+import { UserProvider } from './_helper/UserContext';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Créez une instance de QueryClient
-const queryClient = new QueryClient();
-
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1
+    },
+  },
+});
 
 // Configuration d'axios
 axios.defaults.baseURL = "http://localhost:3001/api/";
@@ -40,12 +46,11 @@ axios.interceptors.response.use(
   }
 );
 
-
 const App = () => {
   return (
     <div className='App'>
       <QueryClientProvider client={queryClient}>
-        <UserProvider> {/* Enveloppez l'application avec UserProvider */}
+        <UserProvider>
           <CustomizerProvider>
             <WishListProvider>
               <FilterProvider>
@@ -59,7 +64,8 @@ const App = () => {
             </WishListProvider>
           </CustomizerProvider>
         </UserProvider>
-      </QueryClientProvider>,
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </div>
   );
 };

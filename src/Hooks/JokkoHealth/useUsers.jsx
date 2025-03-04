@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   fetchUsers,
   fetchUserById,
-  registerUser,
+  registerUser as registerUserApi,
   updateUserProfile,
   blockUser,
   unblockUser,
@@ -53,13 +53,11 @@ export const useFetchUserById = (id) => {
 // Hook pour inscrire un utilisateur
 export const useRegisterUser = () => {
   const queryClient = useQueryClient();
-  return useMutation(registerUser, {
+  
+  return useMutation({
+    mutationFn: (userData) => registerUserApi(userData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['users']); // Invalide la requête pour rafraîchir les données
-      showNotification('Utilisateur inscrit avec succès', 'success');
-    },
-    onError: (error) => {
-      showNotification(`Erreur: ${error.message}`, 'danger');
+      queryClient.invalidateQueries(['users']);
     }
   });
 };

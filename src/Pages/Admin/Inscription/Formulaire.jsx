@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { FaUser, FaPhone, FaEnvelope, FaLock, FaUserShield } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaUser, FaPhone, FaEnvelope, FaUserShield } from 'react-icons/fa';
+import { useRegisterUser } from '../../../Hooks/JokkoHealth/useUsers';
+import { getCurrentUser } from '../../../Services/Auth'; // Importer la fonction pour obtenir l'utilisateur connecté
 
 function Formulaire() {
-  const [prenom, setPrenom] = useState('');
-  const [nom, setNom] = useState('');
-  const [telephone, setTelephone] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
-  const [checked, setChecked] = useState(false);
+  // États du formulaire
+  const [formData, setFormData] = useState({
+    prenom: '',
+    nom: '',
+    telephone: '',
+    email: '',
+    password: '',
+    role: '',  // initialement vide
+    dateNaissance: '',
+    sexe: '',
+    adresse: ''
+  });
 
+  // États pour la gestion des erreurs et validations
+  const [serverError, setServerError] = useState(null);
   const [errors, setErrors] = useState({
     telephone: '',
     email: '',
@@ -19,275 +28,300 @@ function Formulaire() {
     required: false,
   });
 
-  const validateEmail = (email) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return regex.test(email);
+  // Hook d'inscription
+  const { mutate: register, isLoading } = useRegisterUser();
+
+  // Vérifier le rôle de l'utilisateur connecté et ajuster le rôle dans le formulaire
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user && user.role === 'Medecin') {
+      // Si l'utilisateur est médecin, on définit directement le rôle à "Patient" et désactive le champ
+      setFormData(prev => ({ ...prev, role: 'Patient' }));
+    }
+  }, []);
+
+  // Fonctions de validation
+  const validations = {
+    email: (value) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value),
+    telephone: (value) => /^(77|78|76|70|75)[0-9]{7}$/.test(value),
+    nom: (value) => value.length >= 2,
+    prenom: (value) => value.length >= 2,
+    password: (value) => value.length >= 8
   };
 
-  const validateTelephone = (telephone) => {
-    const regex = /^(77|78|76|70|75)[0-9]{7}$/; // Modèle pour les numéros sénégalais
-    return regex.test(telephone);
+  // Messages d'erreur
+  const errorMessages = {
+    email: 'Format d\'email invalide',
+    telephone: 'Format invalide (ex: 77XXXXXXX)',
+    nom: 'Le nom doit avoir au moins 2 caractères',
+    prenom: 'Le prénom doit avoir au moins 2 caractères',
+    password: 'Le mot de passe doit avoir au moins 8 caractères'
   };
 
-  const validateNom = (nom) => {
-    return nom.length >= 4;
-  };
-
-  const validatePrenom = (prenom) => {
-    return prenom.length >= 4;
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 8;
-  };
-
+  // Gestionnaire de changement des champs
   const handleChange = (e) => {
     const { id, value } = e.target;
+    const field = id.replace('exampleInput', '').toLowerCase();
 
-    // Clear error messages for real-time validation
-    setErrors((prev) => ({ ...prev, required: false }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
 
-    switch (id) {
-      case 'exampleInputEmail1':
-        setEmail(value);
-        if (!validateEmail(value)) {
-          setErrors((prev) => ({ ...prev, email: 'Email non valide.' }));
-        } else {
-          setErrors((prev) => ({ ...prev, email: '' }));
-        }
-        break;
-      case 'exampleInputTelephone':
-        setTelephone(value);
-        if (!validateTelephone(value)) {
-          setErrors((prev) => ({ ...prev, telephone: 'Numéro de téléphone non valide.' }));
-        } else {
-          setErrors((prev) => ({ ...prev, telephone: '' }));
-        }
-        break;
-      case 'exampleInputNom':
-        setNom(value);
-        if (!validateNom(value)) {
-          setErrors((prev) => ({ ...prev, nom: 'Le nom doit avoir au moins 4 caractères.' }));
-        } else {
-          setErrors((prev) => ({ ...prev, nom: '' }));
-        }
-        break;
-      case 'exampleInputPrenom':
-        setPrenom(value);
-        if (!validatePrenom(value)) {
-          setErrors((prev) => ({ ...prev, prenom: 'Le prénom doit avoir au moins 4 caractères.' }));
-        } else {
-          setErrors((prev) => ({ ...prev, prenom: '' }));
-        }
-        break;
-      case 'exampleInputPassword1':
-        setPassword(value);
-        if (!validatePassword(value)) {
-          setErrors((prev) => ({ ...prev, password: 'Le mot de passe doit avoir au moins 8 caractères.' }));
-        } else {
-          setErrors((prev) => ({ ...prev, password: '' }));
-        }
-        break;
-      default:
-        break;
+    setServerError(null);
+    setErrors(prev => ({ ...prev, required: false }));
+
+    if (validations[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: value && !validations[field](value) ? errorMessages[field] : ''
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
+  // Gestionnaire de changement du rôle
+  const handleRoleChange = (e) => {
+    if (getCurrentUser()?.role !== 'Medecin') {
+      setFormData(prev => ({ ...prev, role: e.target.value }));
+    }
+  };
+
+  // Gestionnaire de soumission
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError(null);
 
-    if (!prenom || !nom || !telephone || !email || !password || !role) {
-      setErrors((prev) => ({ ...prev, required: true }));
+    // Vérification des champs requis
+    const requiredFields = ['prenom', 'nom', 'telephone', 'email', 'role'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+
+    if (missingFields.length > 0) {
+      setErrors(prev => ({ ...prev, required: true }));
       return;
     }
 
-    if (errors.telephone || errors.email || errors.nom || errors.prenom || errors.password) {
-      return;
+    // Vérification des erreurs de validation
+    const hasValidationErrors = Object.values(errors).some(error => error);
+    if (hasValidationErrors) return;
+
+    try {
+      await register({
+        ...formData,
+        dateNaissance: formData.dateNaissance || undefined,
+        sexe: formData.sexe || undefined,
+        adresse: formData.adresse || undefined
+      }, {
+        onSuccess: () => {
+          // Réinitialisation du formulaire après succès
+          setFormData({
+            prenom: '',
+            nom: '',
+            telephone: '',
+            email: '',
+            password: '',
+            role: '',
+            dateNaissance: '',
+            sexe: '',
+            adresse: ''
+          });
+        },
+        onError: (error) => {
+          setServerError(error.response?.data?.message || 'Une erreur est survenue');
+        }
+      });
+    } catch (error) {
+      setServerError('Une erreur est survenue lors de l\'inscription');
     }
-
-    console.log({ prenom, nom, telephone, email, password, role, checked });
   };
 
-  // Vérification pour activer ou désactiver le bouton
-  const isFormValid =
-    prenom &&
-    nom &&
-    telephone &&
-    email &&
-    password &&
-    role &&
-    !errors.telephone &&
-    !errors.email &&
-    !errors.nom &&
-    !errors.prenom &&
-    !errors.password;
-
-  const formContainerStyle = {
-    background: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(10px)',
-    padding: '30px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-    width: '550px',
-    margin: 'auto',
+  // Styles
+  const styles = {
+    formContainer: {
+      background: 'rgba(255, 255, 255, 0.8)',
+      backdropFilter: 'blur(10px)',
+      padding: '30px',
+      borderRadius: '10px',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+      width: '550px',
+      margin: 'auto',
+    },
+    title: {
+      textAlign: 'left',
+      color: 'black',
+      marginBottom: '20px',
+    },
+    label: {
+      color: '#8C8C8C',
+    },
+    icon: {
+      position: 'absolute',
+      left: '10px',
+      top: '10px',
+      color: '#8C8C8C',
+    },
+    select: {
+      appearance: 'none',
+      backgroundColor: '#fff',
+      border: '1px solid #ced4da',
+      borderRadius: '0.25rem',
+      padding: '0.375rem 2.25rem 0.375rem 40px',
+      width: '100%',
+    },
+    error: {
+      color: 'red',
+      fontSize: '0.875rem',
+      marginTop: '0.25rem'
+    },
+    serverError: {
+      backgroundColor: '#fff3f3',
+      color: '#dc3545',
+      padding: '1rem',
+      borderRadius: '4px',
+      marginBottom: '1rem'
+    }
   };
 
-  const titleStyle = {
-    textAlign: 'left',
-    color: 'black',
-    marginBottom: '20px',
-  };
-
-  const labelStyle = {
-    color: '#8C8C8C',
-  };
-
-  const buttonStyle = {
-    width: '100%',
-    backgroundColor: isFormValid ? '#007bff' : '#6c757d', // Bleu si activé, gris si désactivé
-    color: 'white', // Texte blanc
-    border: 'none',
-    padding: '10px',
-    borderRadius: '5px',
-    cursor: isFormValid ? 'pointer' : 'not-allowed', // Curseur adapté
-    opacity: isFormValid ? 1 : 0.65, // Opacité réduite si désactivé
-  };
-
-  const selectStyle = {
-    appearance: 'none',
-    backgroundColor: '#fff',
-    border: '1px solid #ced4da',
-    borderRadius: '0.25rem',
-    padding: '0.375rem 2.25rem 0.375rem 40px',
-    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><polyline points='6 9 12 15 18 9' /></svg>")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: `right 0.5rem center`,
-    backgroundSize: '1.5em',
-    cursor: 'pointer',
-  };
-
-  const iconStyle = {
-    position: 'absolute',
-    left: '10px',
-    top: '10px',
-    color: '#8C8C8C',
-  };
+  // Vérification de la validité du formulaire
+  const isFormValid = 
+    formData.prenom && 
+    formData.nom && 
+    formData.telephone && 
+    formData.email && 
+    formData.role && 
+    !Object.values(errors).some(Boolean);
 
   return (
-    <div style={formContainerStyle}>
-      <h2 style={titleStyle}>Inscrire</h2>
-      <form onSubmit={handleSubmit}>
-        {errors.required && <div style={{ color: 'red' }}>Tous les champs sont obligatoires.</div>}
+    <div style={styles.formContainer}>
+      <h2 style={styles.title}>Inscription</h2>
+
+      {serverError && (
+        <div style={styles.serverError}>
+          {serverError}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} noValidate>
+        {errors.required && (
+          <div style={styles.error}>
+            Tous les champs marqués * sont obligatoires
+          </div>
+        )}
+
+        {/* Rôle */}
         <div className="mb-3">
-          <label htmlFor="exampleInputRole" className="form-label" style={labelStyle}>Rôle</label>
+          <label htmlFor="exampleInputRole" className="form-label" style={styles.label}>
+            Rôle *
+          </label>
           <div style={{ position: 'relative' }}>
-            <FaUserShield style={iconStyle} />
+            <FaUserShield style={styles.icon} />
             <select
               className="form-control"
               id="exampleInputRole"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              style={selectStyle}
+              value={formData.role}
+              onChange={handleRoleChange}
+              style={styles.select}
+              disabled={getCurrentUser()?.role === 'Medecin'} // Si l'utilisateur est médecin, on désactive le champ
             >
-              <option value="">Sélectionnez un rôle</option>
-              <option value="Administrateur">Administrateur</option>
-              <option value="Médecin">Médecin</option>
+              {getCurrentUser()?.role === 'Medecin' ? (
+                <option value="Patient">Patient</option>  // Le rôle est automatiquement "Patient"
+              ) : (
+                <>
+                  <option value="">Sélectionnez un rôle</option>
+                  <option value="Patient">Patient</option>
+                  <option value="Medecin">Médecin</option>
+                </>
+              )}
             </select>
           </div>
         </div>
+
+        {/* Prénom */}
         <div className="mb-3">
-          <label htmlFor="exampleInputPrenom" className="form-label" style={labelStyle}>Prénom</label>
+          <label htmlFor="exampleInputPrenom" className="form-label" style={styles.label}>
+            Prénom *
+          </label>
           <div style={{ position: 'relative' }}>
-            <FaUser style={iconStyle} />
+            <FaUser style={styles.icon} />
             <input
               type="text"
               className={`form-control ${errors.prenom ? 'is-invalid' : ''}`}
               id="exampleInputPrenom"
-              value={prenom}
+              value={formData.prenom}
               onChange={handleChange}
               placeholder="Entrez le prénom"
-              style={{ paddingLeft: '30px' }}
+              style={{ paddingLeft: '40px' }}
             />
-            {errors.prenom && <div style={{ color: 'red' }}>{errors.prenom}</div>}
+            {errors.prenom && <div style={styles.error}>{errors.prenom}</div>}
           </div>
         </div>
+
+        {/* Nom */}
         <div className="mb-3">
-          <label htmlFor="exampleInputNom" className="form-label" style={labelStyle}>Nom</label>
+          <label htmlFor="exampleInputNom" className="form-label" style={styles.label}>
+            Nom *
+          </label>
           <div style={{ position: 'relative' }}>
-            <FaUser style={iconStyle} />
+            <FaUser style={styles.icon} />
             <input
               type="text"
               className={`form-control ${errors.nom ? 'is-invalid' : ''}`}
               id="exampleInputNom"
-              value={nom}
+              value={formData.nom}
               onChange={handleChange}
               placeholder="Entrez le nom"
-              style={{ paddingLeft: '30px' }}
+              style={{ paddingLeft: '40px' }}
             />
-            {errors.nom && <div style={{ color: 'red' }}>{errors.nom}</div>}
+            {errors.nom && <div style={styles.error}>{errors.nom}</div>}
           </div>
         </div>
+
+        {/* Téléphone */}
         <div className="mb-3">
-          <label htmlFor="exampleInputTelephone" className="form-label" style={labelStyle}>Téléphone</label>
+          <label htmlFor="exampleInputTelephone" className="form-label" style={styles.label}>
+            Téléphone *
+          </label>
           <div style={{ position: 'relative' }}>
-            <FaPhone style={iconStyle} />
+            <FaPhone style={styles.icon} />
             <input
               type="tel"
               className={`form-control ${errors.telephone ? 'is-invalid' : ''}`}
               id="exampleInputTelephone"
-              value={telephone}
+              value={formData.telephone}
               onChange={handleChange}
-              placeholder="Entrez le numéro de téléphone"
-              style={{ paddingLeft: '30px', borderColor: errors.telephone ? 'red' : '' }}
+              placeholder="77XXXXXXX"
+              style={{ paddingLeft: '40px' }}
             />
-            {errors.telephone && <div style={{ color: 'red' }}>{errors.telephone}</div>}
+            {errors.telephone && <div style={styles.error}>{errors.telephone}</div>}
           </div>
         </div>
+
+        {/* Email */}
         <div className="mb-3">
-          <label htmlFor="exampleInputEmail1" className="form-label" style={labelStyle}>Email</label>
+          <label htmlFor="exampleInputEmail" className="form-label" style={styles.label}>
+            Email *
+          </label>
           <div style={{ position: 'relative' }}>
-            <FaEnvelope style={iconStyle} />
+            <FaEnvelope style={styles.icon} />
             <input
               type="email"
               className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-              id="exampleInputEmail1"
-              value={email}
+              id="exampleInputEmail"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Entrez l'email"
-              style={{ paddingLeft: '30px', borderColor: errors.email ? 'red' : '' }}
+              placeholder="exemple@email.com"
+              style={{ paddingLeft: '40px' }}
             />
-            {errors.email && <div style={{ color: 'red' }}>{errors.email}</div>}
-         
+            {errors.email && <div style={styles.error}>{errors.email}</div>}
           </div>
         </div>
-        <div className="mb-3">
-          <label htmlFor="exampleInputPassword1" className="form-label" style={labelStyle}>Mot de passe</label>
-          <div style={{ position: 'relative' }}>
-            <FaLock style={iconStyle} />
-            <input
-              type="password"
-              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-              id="exampleInputPassword1"
-              value={password}
-              onChange={handleChange}
-              placeholder="Entrez le mot de passe"
-              style={{ paddingLeft: '30px' }}
-            />
-            {errors.password && <div style={{ color: 'red' }}>{errors.password}</div>}
-          </div>
-        </div>
-        <div className="mb-3 form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            id="exampleCheck1"
-            checked={checked}
-            onChange={() => setChecked(!checked)}
-          />
-          <label className="form-check-label" htmlFor="exampleCheck1">Check me out</label>
-        </div>
-        <button type="submit" className="btn btn-primary" style={buttonStyle} disabled={!isFormValid}>
-          Inscrire
+
+        {/* Bouton de soumission */}
+        <button
+          type="submit"
+          className="btn btn-primary w-100"
+          disabled={!isFormValid || isLoading}
+        >
+          {isLoading ? 'Inscription en cours...' : 'S\'inscrire'}
         </button>
       </form>
     </div>

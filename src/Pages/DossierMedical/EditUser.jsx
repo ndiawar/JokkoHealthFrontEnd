@@ -3,9 +3,7 @@ import { FaPen, FaSave } from 'react-icons/fa';
 import { Btn, H4 } from "../../AbstractElements";
 import { useForm } from "react-hook-form";
 import { Row, Col, CardHeader, CardBody, CardFooter, Form, FormGroup, Label, Input } from 'reactstrap';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3001/api'; // Remplacez par l'URL correcte
+import { fetchMedicalRecordByUser, updateMedicalRecord } from '../../api/medical';
 
 const EditMyProfile = () => {
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
@@ -13,13 +11,12 @@ const EditMyProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false); // État pour le mode édition
-    const medicalRecordId = '67c0996aa165e7f922096fc7'; // ID du dossier médical
 
     // Fonction pour récupérer le dossier médical
     const fetchProfile = async () => {
         try {
-            const response = await axios.get(`${API_URL}/medical/${medicalRecordId}`);
-            setProfile(response.data);
+            const record = await fetchMedicalRecordByUser();
+            setProfile(record);
         } catch (error) {
             setError("Erreur lors de la récupération des informations.");
             console.error(error);
@@ -43,8 +40,8 @@ const EditMyProfile = () => {
                 antecedentsFamiliaux: data.antecedentsFamiliaux
             };
 
-            const response = await axios.put(`${API_URL}/medical/${medicalRecordId}`, payload);
-            setProfile(response.data.record); // Mettre à jour l'état avec les nouvelles données
+            const updatedRecord = await updateMedicalRecord({ id: profile._id, updates: payload });
+            setProfile(updatedRecord); // Mettre à jour l'état avec les nouvelles données
             alert("Profil mis à jour avec succès !");
             setIsEditing(false); // Quitter le mode édition après la mise à jour
         } catch (error) {
@@ -95,7 +92,6 @@ const EditMyProfile = () => {
     
         await updateProfile(data);
     };
-    
 
     // Basculer entre le mode édition et enregistrement
     const handleEditToggle = () => {

@@ -12,9 +12,10 @@ import {
   fetchRejectedAppointments,
   fetchParticipationRequests,
   fetchAcceptedAppointmentsToday
-} from '../../api/rendezvous';
+} from '../../api/rendezvous';  // Utilise la casse correcte ici
 import $ from 'jquery';
 import 'bootstrap-notify';
+
 
 // Fonction utilitaire pour afficher les notifications
 const showNotification = (message, type) => {
