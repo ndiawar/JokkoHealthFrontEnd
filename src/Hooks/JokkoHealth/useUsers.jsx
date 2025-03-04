@@ -58,6 +58,10 @@ export const useRegisterUser = () => {
     mutationFn: (userData) => registerUserApi(userData),
     onSuccess: () => {
       queryClient.invalidateQueries(['users']);
+      showNotification('Utilisateur inscrit avec succès', 'success');
+    },
+    onError: (error) => {
+      showNotification(`Erreur: ${error.message}`, 'danger');
     }
   });
 };
