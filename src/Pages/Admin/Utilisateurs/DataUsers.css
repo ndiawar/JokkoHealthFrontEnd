@@ -9,6 +9,34 @@
     display: flex;
     align-items: center;
 }
+/* Styles pour les boutons dans le modal */
+.modal-footer .btn {
+    width: 100%; /* Faites en sorte que les boutons prennent toute la largeur disponible */
+    padding: 0.5rem; /* Ajustez le padding pour correspondre aux champs de saisie */
+}
+
+/* Style pour le bouton Annuler avec une spécificité accrue */
+.modal-footer .btn-cancel {
+    background-color: rgb(138, 31, 31) !important; /* Couleur rouge pour le bouton Annuler */
+    border-color: rgb(135, 35, 35) !important; /* Bordure rouge pour correspondre au fond */
+}
+
+.modal-footer .btn-cancel:hover {
+    background-color: darkred !important; /* Couleur légèrement plus foncée au survol */
+    border-color: darkred !important;
+}
+
+/* Style pour le bouton Mettre à jour */
+.modal-footer .btn-update {
+    background-color: #409D9B !important; /* Couleur spécifiée pour le bouton Mettre à jour */
+    border-color: #409D9B !important; /* Bordure de la même couleur */
+}
+
+.modal-footer .btn-update:hover {
+    background-color: #3a8e8c !important; /* Couleur légèrement plus foncée au survol */
+    border-color: #3a8e8c !important;
+}
+
 
 .search-input {
     padding: 8px;
