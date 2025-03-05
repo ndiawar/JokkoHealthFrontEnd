@@ -10,7 +10,6 @@ import {
   fetchAppointmentsByDoctor,
   fetchAcceptedAppointments,
   fetchRejectedAppointments,
-  fetchParticipationRequests,
   fetchAcceptedAppointmentsToday
 } from '../../api/rendezvous';  // Utilise la casse correcte ici
 import $ from 'jquery';
@@ -171,14 +170,14 @@ export const useFetchRejectedAppointments = () => {
   };
 };
 
-// Hook React Query pour récupérer les demandes de participation
-export const useParticipationRequests = () => {
-  return useQuery({
-    queryKey: ['participationRequests'],
-    queryFn: fetchParticipationRequests,
-    enabled: localStorage.getItem('userRole') === 'Medecin',
-  });
-};
+// // Hook React Query pour récupérer les demandes de participation
+// export const useParticipationRequests = (appointmentId) => {
+//   return useQuery({
+//     queryKey: ['participationRequests', appointmentId],
+//     queryFn: () => getDemandesParticipation(appointmentId),
+//     enabled: !!appointmentId, // Assurez-vous que l'ID du rendez-vous est défini
+//   });
+// };
 
 // Hook React Query pour récupérer les rendez-vous acceptés aujourd'hui
 export const useAcceptedAppointmentsToday = () => {
