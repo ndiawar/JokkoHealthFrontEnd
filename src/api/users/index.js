@@ -128,6 +128,33 @@ export const deleteUser = async (id) => {
   }
 };
 
+// �� Réinitialiser le mot de passe d'un utilisateur
+export const sendPasswordResetEmail = async (email) => {
+  try {
+    const { data } = await axios.post("users/reset-password", {
+      email
+    });
+    return data;
+  } catch (error) {
+    console.error("Erreur lors de la réinitialisation du mot de passe:", error);
+    throw error;
+  }
+};
+
+// Créer nouveau mot de passe
+export const createNewPassword = async (token, password) => {
+  try {
+    const { data } = await axios.put("users/reset-password", {
+      token,
+      password
+    });
+    return data;
+  } catch (error) {
+    console.error("Erreur lors de la création du nouveau mot de passe:", error);
+    throw error;
+  }
+};
+
 // 🚀 Connexion d'un utilisateur (Login)
 export const loginUser = async ({ email, motDePasse }) => {
   const { data } = await axios.post("users/login", {

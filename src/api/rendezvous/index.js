@@ -31,6 +31,24 @@ export const fetchAppointments = async () => {
   }
 };
 
+// 🚀 Récupérer les rendez-vous pour le calendrier dans une plage de dates
+export const fetchAppointmentsForCalendar = async (startDate, endDate) => {
+  try {
+    // Assurez-vous de passer les paramètres startDate et endDate dans la query string
+    const { data } = await axios.get("appointments/calendar", {
+      params: {
+        startDate: startDate,
+        endDate: endDate
+      },
+      headers: authHeader() // Ajouter l'authHeader si nécessaire
+    });
+    return data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des rendez-vous pour le calendrier:", error);
+    throw error;
+  }
+};
+
 
 // 🚀 Demander la participation à un rendez-vous
 export const requestParticipation = async (id, { patientId }) => {

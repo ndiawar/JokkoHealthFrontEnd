@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaPhone, FaEnvelope, FaUserShield } from 'react-icons/fa';
+import { FaUser, FaPhone, FaEnvelope, FaUserShield, FaUserAlt } from 'react-icons/fa';
 import { useRegisterUser } from '../../../Hooks/JokkoHealth/useUsers';
 import { getCurrentUser } from '../../../Services/Auth'; // Importer la fonction pour obtenir l'utilisateur connecté
 
@@ -13,7 +13,7 @@ function Formulaire() {
     password: '',
     role: '',  // initialement vide
     dateNaissance: '',
-    sexe: '',
+    sexe: '',  // Ajout du sexe
     adresse: ''
   });
 
@@ -25,6 +25,7 @@ function Formulaire() {
     nom: '',
     prenom: '',
     password: '',
+    sexe: '',  // Validation du sexe
     required: false,
   });
 
@@ -46,7 +47,8 @@ function Formulaire() {
     telephone: (value) => /^(77|78|76|70|75)[0-9]{7}$/.test(value),
     nom: (value) => value.length >= 2,
     prenom: (value) => value.length >= 2,
-    password: (value) => value.length >= 8
+    password: (value) => value.length >= 8,
+    sexe: (value) => ['Homme', 'Femme', 'Autre'].includes(value),  // Validation du sexe
   };
 
   // Messages d'erreur
@@ -55,7 +57,8 @@ function Formulaire() {
     telephone: 'Format invalide (ex: 77XXXXXXX)',
     nom: 'Le nom doit avoir au moins 2 caractères',
     prenom: 'Le prénom doit avoir au moins 2 caractères',
-    password: 'Le mot de passe doit avoir au moins 8 caractères'
+    password: 'Le mot de passe doit avoir au moins 8 caractères',
+    sexe: 'Veuillez sélectionner un sexe',  // Message d'erreur pour le sexe
   };
 
   // Gestionnaire de changement des champs
@@ -92,7 +95,7 @@ function Formulaire() {
     setServerError(null);
 
     // Vérification des champs requis
-    const requiredFields = ['prenom', 'nom', 'telephone', 'email', 'role'];
+    const requiredFields = ['prenom', 'nom', 'telephone', 'email', 'role', 'sexe'];
     const missingFields = requiredFields.filter(field => !formData[field]);
 
     if (missingFields.length > 0) {
@@ -121,7 +124,7 @@ function Formulaire() {
             password: '',
             role: '',
             dateNaissance: '',
-            sexe: '',
+            sexe: '', // Réinitialiser le sexe
             adresse: ''
           });
         },
@@ -181,13 +184,13 @@ function Formulaire() {
     }
   };
 
-  // Vérification de la validité du formulaire
   const isFormValid = 
     formData.prenom && 
     formData.nom && 
     formData.telephone && 
     formData.email && 
     formData.role && 
+    formData.sexe &&  // Assurez-vous que le sexe est sélectionné
     !Object.values(errors).some(Boolean);
 
   return (
@@ -312,6 +315,28 @@ function Formulaire() {
               style={{ paddingLeft: '40px' }}
             />
             {errors.email && <div style={styles.error}>{errors.email}</div>}
+          </div>
+        </div>
+
+        {/* Sexe */}
+        <div className="mb-3">
+          <label htmlFor="exampleInputSexe" className="form-label" style={styles.label}>
+            Sexe *
+          </label>
+          <div style={{ position: 'relative' }}>
+            <FaUserAlt style={styles.icon} /> {/* Icône pour le sexe */}
+            <select
+              className="form-control"
+              id="exampleInputSexe"
+              value={formData.sexe}
+              onChange={handleChange}
+              style={styles.select}
+            >
+              <option value="">Sélectionnez un sexe</option>
+              <option value="Homme">Homme</option>
+              <option value="Femme">Femme</option>
+            </select>
+            {errors.sexe && <div style={styles.error}>{errors.sexe}</div>}
           </div>
         </div>
 
