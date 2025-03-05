@@ -1,105 +1,115 @@
-import React, { Fragment, useCallback, useState, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { Btn, H4 } from '../../AbstractElements';
+import { getAppointments } from '../../api/appointment';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import useAppointments from '../../Hooks/JokkoHealth/useAppointments';
+import axios from 'axios';
+
 const tableColumns = [
     {
         name: 'Spécialité',
-        selector: row => row.specialiste, // Correction ici
+        selector: row => row.specialite,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Téléphone',
-        selector: row => row.telephone || 'Non disponible', // Vérification si absent
+        selector: row => row.telephone,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Date de disponibilité',
-        selector: row => new Date(row.date).toLocaleDateString(),
+        selector: row => row.date,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Heure',
-        selector: row => `${row.heure_debut} - ${row.heure_fin}`,
+        selector: row => row.heure,
         sortable: true,
-        style: { flex: 1, padding: '0 10px' },
     },
     {
         name: 'Demande',
         cell: row => (
-            <span className={`badge ${row.statutDemande === 'Accepté' ? 'bg-success' : 'bg-warning'}`}>
-                {row.statutDemande}
+            <span className={`badge ${row.demande === 'En attente' ? 'bg-warning' : 'bg-success'}`}>
+                {row.demande}
             </span>
         ),
         sortable: true,
-        style: { flex: 1, padding: '0 10px' },
     },
 ];
 
-
 const TableRV = () => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [selectedRows, setSelectedRows] = useState([]);
-    const [appointments, setAppointments] = useState([]);  // État local des rendez-vous
-    const [toggleDelet, setToggleDelet] = useState(false);
-
-    // Utilisation du hook personnalisé pour récupérer les rendez-vous
-    const { appointments: fetchedAppointments, loading, error } = useAppointments();
+    const [patientId, setPatientId] = useState(null); // L'ID du patient
 
     useEffect(() => {
-        if (fetchedAppointments !== appointments) {  // Vérifier si les rendez-vous ont changé
-            setAppointments(fetchedAppointments); // Mettre à jour uniquement si fetchedAppointments a changé
-        }
-    }, [fetchedAppointments, appointments]);  // Mettre à jour à chaque changement de fetchedAppointments
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/api/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Si vous utilisez un token d'authentification
+                    }
+                });
+                setPatientId(response.data._id);  // Mettre à jour l'ID du patient
+            } catch (err) {
+                console.error('Erreur lors de la récupération des informations utilisateur:', err);
+                setError('Erreur lors de la récupération des informations utilisateur.');
+            }
+        };
 
-    const handleRowSelected = useCallback(state => {
-        setSelectedRows(state.selectedRows);
+        fetchUserData(); // Récupérer l'ID de l'utilisateur
     }, []);
 
-    const handleDelete = () => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer:\r ${selectedRows.map(r => r.specialite)}?`)) {
-            setToggleDelet(!toggleDelet);
-            setAppointments(appointments.filter((item) => selectedRows.filter((elem) => elem.id === item.id).length > 0 ? false : true));
-            setSelectedRows([]);
+    useEffect(() => {
+        if (patientId) {
+            const fetchAppointments = async () => {
+                try {
+                    const appointments = await getAppointments();
+                    const formattedData = appointments.map(appointment => ({
+                        id: appointment._id,
+                        specialite: appointment.specialiste,
+                        telephone: appointment.doctorId.telephone,
+                        date: new Date(appointment.date).toLocaleDateString(),
+                        heure: `${appointment.heure_debut} - ${appointment.heure_fin}`,
+                        demande: 'En attente', // Valeur par défaut
+                    }));
+                    setData(formattedData);
+                } catch (err) {
+                    setError("Impossible de récupérer les rendez-vous.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchAppointments();
         }
+    }, [patientId]);
+
+    const handleRowSelected = state => {
+        setSelectedRows(state.selectedRows);  // Mise à jour de selectedRows
     };
 
-    // Affichage du chargement ou de l'erreur
-    if (loading) {
-        return <p>Chargement des rendez-vous...</p>;
-    }
-
-    if (error) {
-        return <p>{error}</p>;
-    }
+    if (loading) return <p>Chargement des rendez-vous...</p>;
+    if (error) return <p>{error}</p>;
+    if (!patientId) return <p>Veuillez vous connecter pour voir vos rendez-vous.</p>; // Vérifier si l'utilisateur est connecté
 
     return (
         <Fragment>
-            {(selectedRows.length !== 0) &&
-                <div className="d-flex align-items-center justify-content-between bg-light-info p-2">
-                    <H4 attrH4={{ className: 'text-muted m-0' }}>Supprimer les rendez-vous sélectionnés..!</H4>
-                    <Btn attrBtn={{ color: 'danger', onClick: () => handleDelete() }}>Supprimer</Btn>
-                </div>
-            }
-
             <h2 style={{ textAlign: 'left', marginTop: '20px', paddingLeft: '10px' }}>Mes Rendez-vous</h2>
-
             <div className="table-responsive">
                 <DataTable
-                    data={appointments}  // Utiliser les rendez-vous récupérés via le hook
+                    data={data}
                     columns={tableColumns}
                     striped={true}
                     pagination
-                    selectableRows
-                    onSelectedRowsChange={handleRowSelected}
-                    clearSelectedRows={toggleDelet}
+                    onSelectedRowsChange={handleRowSelected}  // Passer la fonction de gestion des lignes sélectionnées
                 />
             </div>
         </Fragment>
     );
 };
+
+
 
 export default TableRV;

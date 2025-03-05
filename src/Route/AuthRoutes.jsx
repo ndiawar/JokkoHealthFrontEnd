@@ -21,6 +21,8 @@ import ComingBgImg from '../Components/Pages/ComingSoon/ComingBgImg';
 import ComingBgVideo from '../Components/Pages/ComingSoon/ComingBgVideo';
 import Error500 from '../Components/Pages/ErrorPages/ErrorPage500';
 import Error503 from '../Components/Pages/ErrorPages/ErrorPage503';
+import ForgotPassword from '../Auth/ForgotPassword';
+import CreatePassword from '../Auth/CreatePassword';
 
 export const authRoutes = [
   { path: `${process.env.PUBLIC_URL}/login`, Component: <Logins /> },
@@ -37,6 +39,8 @@ export const authRoutes = [
   { path: `${process.env.PUBLIC_URL}/pages/authentication/forget-pwd/:layout`, Component: <ForgetPwd /> },
   { path: `${process.env.PUBLIC_URL}/pages/authentication/create-pwd/:layout`, Component: <CreatePwd /> },
   { path: `${process.env.PUBLIC_URL}/pages/authentication/maintenance/:layout`, Component: <Maintenance /> },
+  { path: `${process.env.PUBLIC_URL}/forgot-password`, Component: <ForgotPassword /> },
+  { path: `${process.env.PUBLIC_URL}/create-password`, Component: <CreatePassword /> },
 
   //Coming-soon
   { path: `${process.env.PUBLIC_URL}/pages/comingsoon/comingsoon/:layout`, Component: <ComingSimple /> },

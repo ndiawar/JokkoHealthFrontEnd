@@ -1,131 +1,136 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaCheck, FaTimes } from 'react-icons/fa';
+import axios from 'axios';
+import { getAppointments, updateDemandeStatut } from '../../../api/appointment';
 
-const AppointmentCard = ({ appointments }) => {
-    const [status, setStatus] = useState(Array(appointments.length).fill(null));
-    const [currentPage, setCurrentPage] = useState(0);
-    const [currentPageToday, setCurrentPageToday] = useState(0);
-    const appointmentsPerPage = 6;
+const AppointmentCard = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [acceptedAppointments, setAcceptedAppointments] = useState([]); // État pour les rendez-vous acceptés
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [doctorId, setDoctorId] = useState(null);
 
-    const handleConfirm = (index) => {
-        const newStatus = [...status];
-        newStatus[index] = 'confirmed';
-        setStatus(newStatus);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/users/me', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        setDoctorId(response.data._id);
+      } catch (err) {
+        console.error('Erreur lors de la récupération des informations utilisateur:', err);
+      }
     };
 
-    const handleCancel = (index) => {
-        const newStatus = [...status];
-        newStatus[index] = 'cancelled';
-        setStatus(newStatus);
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (!doctorId) return; // Assurer que doctorId est défini avant d'exécuter la requête
+    const fetchAppointments = async () => {
+      try {
+        const data = await getAppointments();
+        console.log('Rendez-vous reçus:', data);  // Vérifiez la structure ici
+
+        const filteredAppointments = data.filter(appointment =>
+          appointment.doctorId._id === doctorId && appointment.demandeParticipe === true
+        );
+
+        setAppointments(filteredAppointments);
+      } catch (error) {
+        setError('Impossible de récupérer les rendez-vous.');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Filtrer les rendez-vous pour n'afficher que ceux du jour
-    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
-    const todayAppointments = appointments.filter(appointment => {
-        const appointmentDate = new Date(appointment.date).toISOString().split('T')[0];
-        return appointmentDate === today && appointment.status === 'confirmed';
-    });
+    fetchAppointments();
+  }, [doctorId]);
 
-    const paginate = (appointments, currentPage, appointmentsPerPage) => {
-        const startIndex = currentPage * appointmentsPerPage;
-        return appointments.slice(startIndex, startIndex + appointmentsPerPage);
-    };
+  const handleUpdateStatut = async (statut, appointmentId) => {
+    try {
+      const updatedRequest = await updateDemandeStatut(appointmentId, statut);
+      setAppointments((prevAppointments) =>
+        prevAppointments.map((appointment) =>
+          appointment._id === appointmentId ? updatedRequest : appointment
+        )
+      );
 
-    const paginatedAppointments = paginate(appointments, currentPage, appointmentsPerPage);
-    const paginatedTodayAppointments = paginate(todayAppointments, currentPageToday, appointmentsPerPage);
+      // Si le statut est accepté, ajoutez le rendez-vous aux rendez-vous acceptés
+      if (statut === 'accepté') {
+        const acceptedAppointment = appointments.find(appointment => appointment._id === appointmentId);
+        setAcceptedAppointments((prevAccepted) => [...prevAccepted, acceptedAppointment]);
+        console.log('Demande acceptée:', updatedRequest);
+      }
 
-    return (
-        <div className="container">
-            <div className="row">
-                <div className="col-md-6 mb-4">
-                    <div className="card">
-                        <div className="card-header">
-                            <h5>Rendez-vous</h5>
-                        </div>
-                        <div className="card-body">
-                            {paginatedAppointments.map((appointment, index) => (
-                                <div key={appointment.id} className="d-flex align-items-center mb-2">
-                                    <img src={appointment.avatar} alt="Avatar" className="rounded-circle me-3" style={{ width: '30px', height: '30px' }} />
-                                    <div className="flex-grow-1">
-                                        <h6 className="mb-1">{appointment.name}</h6>
-                                        <small className="text-muted">{new Date(appointment.date).toLocaleString()}</small>
-                                    </div>
-                                    <div className="ms-auto d-flex">
-                                        {status[appointment.id - 1] === 'confirmed' ? (
-                                            <span className="badge bg-success me-2">Confirmé</span>
-                                        ) : (
-                                            <button onClick={() => handleConfirm(appointment.id - 1)} className="btn btn-success btn-sm me-2" style={{ fontSize: '0.8rem' }}>
-                                                <FaCheck />
-                                            </button>
-                                        )}
-                                        {status[appointment.id - 1] === 'cancelled' ? (
-                                            <span className="badge bg-danger">Annulé</span>
-                                        ) : (
-                                            <button onClick={() => handleCancel(appointment.id - 1)} className="btn btn-danger btn-sm" style={{ fontSize: '0.8rem' }}>
-                                                <FaTimes />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="card-footer d-flex justify-content-between align-items-center">
-                            <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 0))}
-                                disabled={currentPage === 0}
-                            >
-                                Précédent
-                            </button>
-                            <span>{currentPage + 1}</span>
-                            <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(appointments.length / appointmentsPerPage) - 1))}
-                                disabled={currentPage >= Math.ceil(appointments.length / appointmentsPerPage) - 1}
-                            >
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-6 mb-4">
-                    <div className="card">
-                        <div className="card-header">
-                            <h5>Rendez-vous du jour</h5>
-                        </div>
-                        <div className="card-body">
-                            {paginatedTodayAppointments.map((appointment) => (
-                                <div key={appointment.id} className="d-flex align-items-center mb-2">
-                                    <img src={appointment.avatar} alt="Avatar" className="rounded-circle me-3" style={{ width: '30px', height: '30px' }} />
-                                    <div className="flex-grow-1">
-                                        <h6 className="mb-1">{appointment.name}</h6>
-                                        <small className="text-muted">{new Date(appointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="card-footer d-flex justify-content-between align-items-center">
-                            <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => setCurrentPageToday(prev => Math.max(prev - 1, 0))}
-                                disabled={currentPageToday === 0}
-                            >
-                                Précédent
-                            </button>
-                            <span>{currentPageToday + 1}</span>
-                            <button
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => setCurrentPageToday(prev => Math.min(prev + 1, Math.ceil(todayAppointments.length / appointmentsPerPage) - 1))}
-                                disabled={currentPageToday >= Math.ceil(todayAppointments.length / appointmentsPerPage) - 1}
-                            >
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
+      console.log('Demande mise à jour:', updatedRequest);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+    }
+  };
+
+  if (loading) return <p>Chargement des rendez-vous...</p>;
+  if (error) return <p>{error}</p>;
+
+  return (
+    <div className="container">
+      <div className="row">
+        {/* Carte des demandes de rendez-vous */}
+        <div className="col-md-6 mb-4">
+          <div className="card h-100">
+            <div className="card-header">
+              <h5>Demandes de rendez-vous ({appointments.length})</h5>
             </div>
+            <div className="card-body">
+              {appointments.map((appointment) => (
+                <div key={appointment._id} className="d-flex align-items-center mb-3 p-2 border rounded">
+                  <div className="flex-grow-1">
+                    <h6 className="mb-1">
+                      {appointment.patientId && appointment.patientId.nom && appointment.patientId.prenom &&
+                        `${appointment.patientId.nom} ${appointment.patientId.prenom}`}
+                    </h6>
+                    <small className="text-muted d-block">Date: {new Date(appointment.date).toLocaleDateString()}</small>
+                    <small className="text-muted d-block">Heure: {appointment.heure_debut} - {appointment.heure_fin}</small>
+                  </div>
+                  <div className="ms-auto d-flex gap-2">
+                    <button className="btn btn-success btn-sm" onClick={() => handleUpdateStatut('accepté', appointment._id)}>
+                      <FaCheck /> Accepter
+                    </button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleUpdateStatut('rejeté', appointment._id)}>
+                      <FaTimes /> Refuser
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-    );
+
+        {/* Carte des rendez-vous confirmés */}
+        <div className="col-md-6 mb-4">
+          <div className="card h-100">
+            <div className="card-header">
+              <h5>Rendez-vous confirmés ({acceptedAppointments.length})</h5>
+            </div>
+            <div className="card-body">
+              {acceptedAppointments.map((appointment) => (
+                <div key={appointment._id} className="mb-3 p-3 border rounded">
+                  <h6>
+                    {appointment.patientId && appointment.patientId.nom && appointment.patientId.prenom &&
+                      `${appointment.patientId.nom} ${appointment.patientId.prenom}`}
+                  </h6>
+                  <p className="text-muted">Date: {new Date(appointment.date).toLocaleDateString()}</p>
+                  <p className="text-muted">Heure: {appointment.heure_debut} - {appointment.heure_fin}</p>
+                  <p className="text-success">Statut: Accepté</p>
+                  <p className="text-success">Message: Votre rendez-vous a été confirmé avec succès.</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default AppointmentCard;

@@ -17,23 +17,29 @@
     border-color: #007bff;
 }
 
-/* Style sombre pour les badges d'alerte urgente, stable, etc. */
-.badge-dark-danger {
-    background-color: #dc3545; /* Rouge foncé */
+/* Styles pour les badges de status */
+.badge-dark-stable {
+    background-color: #28a745; /* Vert foncé pour stable */
     color: white;
 }
 
-.badge-dark-warning {
-    background-color: #ffc107; /* Jaune foncé */
+.badge-dark-en-traitement {
+    background-color: #ffc107; /* Jaune pour en traitement */
     color: white;
 }
 
-.badge-dark-info {
-    background-color: #17a2b8; /* Bleu foncé */
+.badge-dark-hospitalise {
+    background-color: #17a2b8; /* Bleu pour hospitalisé */
     color: white;
 }
 
-.badge-dark-success {
-    background-color: #28a745; /* Vert foncé */
+.badge-dark-sortie {
+    background-color: #6c757d; /* Gris pour sortie */
     color: white;
 }
+
+.badge-dark-urgent {
+    background-color: #dc3545; /* Rouge pour urgent */
+    color: white;
+}
+
