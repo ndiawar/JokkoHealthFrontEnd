@@ -1,9 +1,9 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import DataTable from 'react-data-table-component';
-import { getAppointments } from '../../api/appointment';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
+import React, { useState, useEffect, Fragment } from 'react'; // Import React, hooks, and Fragment
+import DataTable from 'react-data-table-component'; // Import DataTable
+import { getAppointments } from '../../api/appointment'; // Import getAppointments
+import axios from 'axios'; // Import axios
 
+// Define tableColumns (if not imported from another file)
 const tableColumns = [
     {
         name: 'Spécialité',
@@ -28,7 +28,11 @@ const tableColumns = [
     {
         name: 'Demande',
         cell: row => (
-            <span className={`badge ${row.demande === 'En attente' ? 'bg-warning' : 'bg-success'}`}>
+            <span className={`badge ${
+                row.demande === 'en attente' ? 'bg-warning' :
+                row.demande === 'rejeté' ? 'bg-danger' :
+                'bg-success'
+            }`}>
                 {row.demande}
             </span>
         ),
@@ -36,29 +40,27 @@ const tableColumns = [
     },
 ];
 
-const TableRV = () => {
+const TableRV = ({ selectedAppointmentId }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
-    const [patientId, setPatientId] = useState(null); // L'ID du patient
+    const [patientId, setPatientId] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/api/users/me', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Si vous utilisez un token d'authentification
-                    }
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });
-                setPatientId(response.data._id);  // Mettre à jour l'ID du patient
+                setPatientId(response.data._id);
             } catch (err) {
                 console.error('Erreur lors de la récupération des informations utilisateur:', err);
                 setError('Erreur lors de la récupération des informations utilisateur.');
             }
         };
 
-        fetchUserData(); // Récupérer l'ID de l'utilisateur
+        fetchUserData();
     }, []);
 
     useEffect(() => {
@@ -72,7 +74,7 @@ const TableRV = () => {
                         telephone: appointment.doctorId.telephone,
                         date: new Date(appointment.date).toLocaleDateString(),
                         heure: `${appointment.heure_debut} - ${appointment.heure_fin}`,
-                        demande: 'En attente', // Valeur par défaut
+                        demande: appointment.statutDemande,
                     }));
                     setData(formattedData);
                 } catch (err) {
@@ -86,12 +88,22 @@ const TableRV = () => {
     }, [patientId]);
 
     const handleRowSelected = state => {
-        setSelectedRows(state.selectedRows);  // Mise à jour de selectedRows
+        setSelectedRows(state.selectedRows);
     };
+
+    const conditionalRowStyles = [
+        {
+            when: row => row.id === selectedAppointmentId,
+            style: {
+                backgroundColor: '#f8f9fa',
+                fontWeight: 'bold',
+            },
+        },
+    ];
 
     if (loading) return <p>Chargement des rendez-vous...</p>;
     if (error) return <p>{error}</p>;
-    if (!patientId) return <p>Veuillez vous connecter pour voir vos rendez-vous.</p>; // Vérifier si l'utilisateur est connecté
+    if (!patientId) return <p>Veuillez vous connecter pour voir vos rendez-vous.</p>;
 
     return (
         <Fragment>
@@ -102,7 +114,11 @@ const TableRV = () => {
                     columns={tableColumns}
                     striped={true}
                     pagination
-                    onSelectedRowsChange={handleRowSelected}  // Passer la fonction de gestion des lignes sélectionnées
+                    onSelectedRowsChange={handleRowSelected}
+                    conditionalRowStyles={conditionalRowStyles}
+                    selectableRows
+                    selectableRowsSingle // Permettre la sélection d'une seule ligne
+                    selectableRowSelected={row => row.id === selectedAppointmentId} // Sélectionner la ligne correspondante
                 />
             </div>
         </Fragment>
