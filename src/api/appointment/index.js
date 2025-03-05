@@ -24,3 +24,25 @@ export const demanderParticipation = async (appointmentId, patientId) => {
         throw error;
     }
 };
+// Récupérer les demandes de participation pour un rendez-vous spécifique
+export const getDemandesParticipation = async (appointmentId) => {
+    try {
+      const response = await axios.get(`${API_URL}/${appointmentId}/demandes-participation`);
+      return response.data; // Retourne les données
+    } catch (error) {
+      console.error('Erreur lors de la récupération des demandes de participation:', error);
+      throw error;
+    }
+  };
+  // API: mettre à jour le statut d'une demande
+export const updateDemandeStatut = async (appointmentId, statutDemande) => {
+    try {
+        const response = await axios.put(`${API_URL}/${appointmentId}/statu-demande`, {
+            statutDemande: statutDemande
+        });
+        return response.data; // Retourne les données de la réponse
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut de la demande:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+};

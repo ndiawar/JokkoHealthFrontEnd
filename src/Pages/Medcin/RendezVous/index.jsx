@@ -24,18 +24,19 @@ const appointments = [
   { id: 13, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/13.jpg', status: 'confirmed' },
 ];
 
-  return (
-    <Fragment>
-      <Breadcrumbs mainTitle="Default" parent="RendezVous" title="Default" />
-      <Container fluid={true}>
-        <Row className="widget-grid">
-          <ResumeRendezVous />
-          <AjoutRendezVous />
-          <AppointmentCard appointments={appointments} />
-        </Row>
-      </Container>
-    </Fragment>
-  );
+return (
+  <>
+    <Breadcrumbs mainTitle="Default" parent="RendezVous" title="Default" />
+    <Container fluid={true}>
+      <Row className="widget-grid">
+        <ResumeRendezVous />
+        <AjoutRendezVous />
+        <AppointmentCard />
+      </Row>
+    </Container>
+  </>
+);
+
 };
 
 export default RendezVous;

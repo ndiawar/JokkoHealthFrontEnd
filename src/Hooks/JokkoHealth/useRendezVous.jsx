@@ -13,6 +13,7 @@ import {
   fetchParticipationRequests,
   fetchAcceptedAppointmentsToday
 } from '../../api/rendezvous';
+import { getDemandesParticipation } from '../../api/appointment';
 import $ from 'jquery';
 import 'bootstrap-notify';
 
@@ -171,11 +172,11 @@ export const useFetchRejectedAppointments = () => {
 };
 
 // Hook React Query pour récupérer les demandes de participation
-export const useParticipationRequests = () => {
+export const useParticipationRequests = (appointmentId) => {
   return useQuery({
-    queryKey: ['participationRequests'],
-    queryFn: fetchParticipationRequests,
-    enabled: localStorage.getItem('userRole') === 'Medecin',
+    queryKey: ['participationRequests', appointmentId],
+    queryFn: () => getDemandesParticipation(appointmentId),
+    enabled: !!appointmentId, // Assurez-vous que l'ID du rendez-vous est défini
   });
 };
 
