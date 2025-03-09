@@ -7,6 +7,7 @@ import "./i18n";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+
 // Créer une instance de QueryClient
 const queryClient = new QueryClient();
 

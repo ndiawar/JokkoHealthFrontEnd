@@ -4,25 +4,50 @@ import { Card, CardBody, Col } from 'reactstrap';
 import { Btn } from '../../../AbstractElements';
 import CommonModal from '../../../Components/UiKits/Modals/common/modal';
 import { FaClock, FaCalendar, FaUserMd } from 'react-icons/fa';
-import { useCreateAppointment } from '../../../Hooks/JokkoHealth/useRendezVous';
+import { createAppointment } from '../../../api/ApiRendezVous'; // Importer la fonction d'API
+import { toast } from 'react-toastify'; // Importer toast depuis react-toastify
+import 'react-toastify/dist/ReactToastify.css'; // Importer le CSS de react-toastify
 import './RendezVous.css'; // Importer le fichier CSS
 
 const AjoutRendezVous = () => {
   const [SmallModalOpen, setSmallModalOpen] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { mutate: createAppointment, isLoading } = useCreateAppointment();
+  const [isLoading, setIsLoading] = useState(false); // État pour gérer le chargement
 
   const toggleLargeModal = () => setSmallModalOpen(!SmallModalOpen);
 
-  const onSubmit = (data) => {
-    createAppointment(data, {
-      onSuccess: () => {
-        toggleLargeModal();
-      },
-      onError: (error) => {
-        console.error('Erreur lors de la création du rendez-vous:', error);
-      }
-    });
+  const onSubmit = async (data) => {
+    setIsLoading(true); // Activer l'état de chargement
+    try {
+      const response = await createAppointment(data); // Appeler l'API
+      console.log('Rendez-vous créé avec succès:', response);
+
+      // Afficher une notification de succès
+      toast.success('Rendez-vous créé avec succès !', {
+        position: "top-right",
+        autoClose: 3000, // Fermer après 3 secondes
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      toggleLargeModal(); // Fermer le modal après la création
+    } catch (error) {
+      console.error('Erreur lors de la création du rendez-vous:', error);
+
+      // Afficher une notification d'erreur
+      toast.error('Erreur lors de la création du rendez-vous.', {
+        position: "top-right",
+        autoClose: 3000, // Fermer après 3 secondes
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setIsLoading(false); // Désactiver l'état de chargement
+    }
   };
 
   return (

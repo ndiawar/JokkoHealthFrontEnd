@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { Card, ListGroup, Form } from 'react-bootstrap';
 import { BsCircle } from 'react-icons/bs';
-import { useFetchAppointments } from '../../../Hooks/JokkoHealth/useRendezVous'; // Import du hook pour récupérer les rendez-vous
+import axios from 'axios';  // Import d'axios pour effectuer la requête API
 import './Dashboard.css';
 
 moment.locale('fr');
@@ -11,17 +11,42 @@ const localizer = momentLocalizer(moment);
 
 const CalendarComponent = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { data: appointments, isLoading, isError } = useFetchAppointments();
+  const [appointments, setAppointments] = useState([]);  // Stocke les rendez-vous
+  const [isLoading, setIsLoading] = useState(true);  // Gère l'état de chargement
+  const [isError, setIsError] = useState(false);  // Gère les erreurs
+
+  // Utilisation de useEffect pour récupérer les rendez-vous depuis l'API
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/rendezvous/tous', { withCredentials: true });
+        setAppointments(response.data);  // Mise à jour de l'état avec les rendez-vous
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des rendez-vous:', error);
+        setIsError(true);
+        setIsLoading(false);
+      }
+    };
+
+    fetchAppointments();  // Appel de la fonction pour récupérer les rendez-vous
+  }, []);
 
   // Fonction pour mapper les rendez-vous dans le format attendu par le calendrier
-  const events = appointments?.map((appointment) => ({
-    title: `Rendez-vous ${appointment.specialiste}`,
-    start: new Date(`${appointment.date}T${appointment.heure_debut}:00`),
-    end: new Date(`${appointment.date}T${appointment.heure_fin}:00`),
-    doctorId: appointment.doctorId?._id,
-    status: appointment.statutDemande, // Statut de la demande (accepté, en attente, etc.)
-    patient: `${appointment.patientId?.prenom} ${appointment.patientId?.nom}`,
-  })) || [];
+  const events = appointments?.map((appointment) => {
+    // Convertir la date et l'heure en un objet Date pour le début et la fin du rendez-vous
+    const startDate = new Date(`${appointment.date}T${appointment.heure_debut}:00`);  // Combinaison de la date et de l'heure de début
+    const endDate = new Date(`${appointment.date}T${appointment.heure_fin}:00`);  // Combinaison de la date et de l'heure de fin
+
+    return {
+      title: `Rendez-vous ${appointment.specialiste}`,
+      start: startDate,
+      end: endDate,
+      doctorId: appointment.doctorId?._id,
+      status: appointment.statutDemande, // Statut de la demande (accepté, en attente, etc.)
+      patient: `${appointment.patientId?.prenom} ${appointment.patientId?.nom}`,
+    };
+  }) || [];
 
   // Filtrer les événements pour la date sélectionnée
   const dayEvents = events.filter((event) =>

@@ -3,21 +3,24 @@ import { authHeader } from "../../Services/Auth"; // Importation du header d'aut
 
 const API_BASE_URL = "http://localhost:3001/api"; // Définition de l'URL de base pour l'API
 
-
-// 🚀 Récupérer le dossier médical de l'utilisateur connecté
-export const fetchMyMedicalRecord = async () => {
+// 🚀 Récupérer tous les dossiers médicaux
+export const fetchMedicalRecords = async () => {
   try {
-    console.log("🔄 Récupération du dossier médical de l'utilisateur connecté...");
-
-    const { data } = await axios.get("medical/me", {
-      headers: authHeader(),
+    const { data } = await axios.get('medical', {
+      headers: authHeader(), // En-tête d'authentification
     });
 
-    console.log("✅ Données reçues:", data);
-
-    return data.success ? data.record : null;
+    // Vérification de la réponse de l'API et renvoi des données appropriées
+    if (data.success) {
+      return data.records; // Si la réponse contient `records`, on les retourne
+    } else {
+      console.error("Aucun dossier médical trouvé.");
+      return []; // Retourner un tableau vide en cas d'absence de données
+    }
   } catch (error) {
-    console.error("❌ Erreur lors de la récupération du dossier médical de l'utilisateur :", error);
+    // Log détaillé pour débogage, capture des erreurs spécifiques du backend ou réseau
+    console.error("Erreur lors de la récupération des dossiers médicaux:", error);
+    // Gestion des erreurs spécifiques
     throw new Error(error.response?.data?.message || "Erreur serveur");
   }
 };
