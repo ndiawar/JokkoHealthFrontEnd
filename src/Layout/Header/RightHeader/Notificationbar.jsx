@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import SvgIcon from '../../../Components/Common/Component/SvgIcon';
-import { CHECKALL, DeliveryComplete, DeliveryProcessing, Notification, OrderComplete, TicketsGenerated } from '../../../Constant';
+import { CHECKALL, Notification, } from '../../../Constant';
 
 const Notificationbar = () => {
   const [notificationDropDown, setNotificationDropDown] = useState(false);
