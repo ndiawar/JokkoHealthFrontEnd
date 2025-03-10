@@ -1,37 +1,47 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { Container, Row } from "reactstrap";
 import { Breadcrumbs } from "../../../AbstractElements";
 import ResumeRendezVous from "./ResumeRendezVous";
 import AjoutRendezVous from "./AjoutRendezVous";
-import AppointmentCard from "./Appointment";
+// import AppointmentCard from "./Appointment";
+import AcceptedAppointmentsToday from "./AppointmentAccepté";
+import PendingAppointments from "./Appointment";
+
 
 const RendezVous = () => {
 
   // Exemple d'utilisation du composant
-const appointments = [
-  { id: 1, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/1.jpg', status: 'confirmed' },
-  { id: 2, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/2.jpg', status: 'confirmed' },
-  { id: 3, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/3.jpg', status: 'confirmed' },
-  { id: 4, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/4.jpg', status: 'confirmed' },
-  { id: 5, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/5.jpg', status: 'confirmed' },
-  { id: 6, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/6.jpg', status: 'confirmed' },
-  { id: 7, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/7.jpg', status: 'confirmed' },
-  { id: 8, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/8.jpg', status: 'confirmed' },
-  { id: 9, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/9.jpg', status: 'confirmed' },
-  { id: 10, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/10.jpg', status: 'confirmed' },
-  { id: 11, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/11.jpg', status: 'confirmed' },
-  { id: 12, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/12.jpg', status: 'confirmed' },
-  { id: 13, name: 'Astou Diouf', date: '2025-01-15T09:30:00', avatar: '../../../assets/images/user/13.jpg', status: 'confirmed' },
-];
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPageToday, setCurrentPageToday] = useState(0);
+  const appointmentsPerPage = 6;
+  
 return (
   <>
-    <Breadcrumbs mainTitle="Default" parent="RendezVous" title="Default" />
+    <Breadcrumbs mainTitle="Gestion Rendez-Vous" parent="RendezVous" title="Gestion Rendez-Vous" />
     <Container fluid={true}>
       <Row className="widget-grid">
         <ResumeRendezVous />
         <AjoutRendezVous />
-        <AppointmentCard />
+      </Row>
+      <Row className="widget-grid">
+        <div className="col-md-6">
+            {/* Liste des demandes de rendez-vous */}
+            <PendingAppointments 
+              currentPage={currentPage} 
+              setCurrentPage={setCurrentPage} 
+              appointmentsPerPage={appointmentsPerPage} 
+            />
+        </div>
+        <div className="col-md-6">
+            {/* Rendez-vous acceptés du jour */}
+            <AcceptedAppointmentsToday 
+              currentPageToday={currentPageToday} 
+              setCurrentPageToday={setCurrentPageToday} 
+              appointmentsPerPage={appointmentsPerPage} 
+            />
+        </div>
+        
       </Row>
     </Container>
   </>

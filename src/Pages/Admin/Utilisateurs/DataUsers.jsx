@@ -2,21 +2,103 @@ import React, { Fragment, useCallback, useState, useMemo, useEffect } from 'reac
 import DataTable from 'react-data-table-component';
 import { Btn, H4 } from '../../../AbstractElements';
 import { Input } from 'reactstrap';
-import { FaTrash, FaUserSlash, FaUser, FaEdit, FaPlus } from 'react-icons/fa';
+import { FaTrash, FaUserSlash, FaUser, FaEdit } from 'react-icons/fa';
 import { getAllUsers, deleteUser, blockUser, unblockUser, updateUser } from '../../../api/Crud-Admin/index';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import Swal from 'sweetalert2';
-
+import { confirmAlert } from 'react-confirm-alert'; // Importer react-confirm-alert
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Importer le CSS
 import './DataUsers.css';
+import { Breadcrumbs } from '../../../AbstractElements';
 
+// Composant Modal pour la modification des utilisateurs
+const UserModal = ({ isOpen, toggle, user, onSave }) => {
+    const [localUser, setLocalUser] = useState(user);
+
+    useEffect(() => {
+        setLocalUser(user);
+    }, [user]);
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(localUser);
+    };
+
+    return (
+        <Modal isOpen={isOpen} toggle={toggle}>
+            <ModalHeader toggle={toggle}>Modification des informations</ModalHeader>
+            <ModalBody>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label htmlFor="nom" className="form-label">Nom</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="nom"
+                            value={localUser?.nom || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, nom: e.target.value })}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="prenom" className="form-label">Prénom</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="prenom"
+                            value={localUser?.prenom || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, prenom: e.target.value })}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="email" className="form-label">Email</label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            id="email"
+                            value={localUser?.email || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, email: e.target.value })}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="telephone" className="form-label">Téléphone</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="telephone"
+                            value={localUser?.telephone || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, telephone: e.target.value })}
+                        />
+                    </div>
+                    <ModalFooter>
+                        <Button className="btn-cancel" onClick={toggle}>Annuler</Button>
+                        <Button className="btn-update" type="submit">Mettre à jour</Button>
+                    </ModalFooter>
+                </form>
+            </ModalBody>
+        </Modal>
+    );
+};
+
+// Composant principal DataUsers
 const DataUsers = () => {
     const [selectedRows, setSelectedRows] = useState([]);
-    const [toggleDelete, setToggleDelete] = useState(false);
     const [data, setData] = useState([]);
     const [filterText, setFilterText] = useState('');
+    const [debouncedFilterText, setDebouncedFilterText] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
+    // Délai pour la recherche
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedFilterText(filterText);
+        }, 300); // Délai de 300ms
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [filterText]);
+
+    // Chargement des utilisateurs
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -33,146 +115,208 @@ const DataUsers = () => {
         fetchUsers();
     }, []);
 
+    // Gestion de la sélection des lignes
     const handleRowSelected = useCallback(state => {
         setSelectedRows(state.selectedRows);
     }, []);
 
+    // Suppression d'un seul utilisateur
     const handleDeleteSingle = async (row) => {
         if (!row._id) {
             console.error("L'ID de l'utilisateur est undefined !");
             return;
         }
 
-        const result = await Swal.fire({
-            title: 'Êtes-vous sûr ?',
-            text: "Cette action est irréversible.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Oui, supprimer',
-            cancelButtonText: 'Annuler'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                await deleteUser(row._id);
-                setData(data.filter(item => item._id !== row._id));
-                Swal.fire('Supprimé !', 'L\'utilisateur a été supprimé.', 'success');
-            } catch (error) {
-                console.error("Erreur lors de la suppression :", error);
-                Swal.fire('Erreur !', 'Un problème est survenu lors de la suppression.', 'error');
-            }
-        }
-    };
-
-    const handleDeleteMultiple = async () => {
-        if (window.confirm(`Êtes-vous sûr de vouloir supprimer :\r ${selectedRows.map(r => r.nom)}?`)) {
-            await Promise.all(selectedRows.map(async (row) => {
-                try {
-                    await deleteUser(row.id);
-                } catch (error) {
-                    console.error("Erreur lors de la suppression :", error);
+        confirmAlert({
+            title: 'Confirmation',
+            message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+            buttons: [
+                {
+                    label: 'Oui',
+                    onClick: async () => {
+                        try {
+                            await deleteUser(row._id);
+                            setData(data.filter(item => item._id !== row._id));
+                            confirmAlert({
+                                title: 'Succès',
+                                message: 'L\'utilisateur a été supprimé.',
+                                buttons: [{ label: 'OK' }]
+                            });
+                        } catch (error) {
+                            console.error("Erreur lors de la suppression :", error);
+                            confirmAlert({
+                                title: 'Erreur',
+                                message: 'Un problème est survenu lors de la suppression.',
+                                buttons: [{ label: 'OK' }]
+                            });
+                        }
+                    }
+                },
+                {
+                    label: 'Non',
+                    onClick: () => {}
                 }
-            }));
-            setData(data.filter(item => !selectedRows.some(elem => elem.id === item.id)));
-            setSelectedRows([]);
-        }
+            ]
+        });
     };
 
+    // Suppression de plusieurs utilisateurs
+    const handleDeleteMultiple = async () => {
+        confirmAlert({
+            title: 'Confirmation',
+            message: `Êtes-vous sûr de vouloir supprimer les utilisateurs suivants : ${selectedRows.map(r => r.nom).join(', ')} ?`,
+            buttons: [
+                {
+                    label: 'Oui',
+                    onClick: async () => {
+                        const results = await Promise.all(selectedRows.map(async (row) => {
+                            try {
+                                await deleteUser(row._id);
+                                return { success: true, id: row._id };
+                            } catch (error) {
+                                console.error("Erreur lors de la suppression :", error);
+                                return { success: false, id: row._id, error };
+                            }
+                        }));
+
+                        const failedDeletions = results.filter(result => !result.success);
+                        if (failedDeletions.length > 0) {
+                            confirmAlert({
+                                title: 'Erreur',
+                                message: `Échec de la suppression de ${failedDeletions.length} utilisateur(s).`,
+                                buttons: [{ label: 'OK' }]
+                            });
+                        } else {
+                            confirmAlert({
+                                title: 'Succès',
+                                message: 'Tous les utilisateurs ont été supprimés.',
+                                buttons: [{ label: 'OK' }]
+                            });
+                        }
+
+                        setData(data.filter(item => !selectedRows.some(elem => elem._id === item._id)));
+                        setSelectedRows([]);
+                    }
+                },
+                {
+                    label: 'Non',
+                    onClick: () => {}
+                }
+            ]
+        });
+    };
+
+    // Blocage d'un utilisateur
     const handleBlockUser = async (row) => {
-        const userId = row.id || row._id;
+        const userId = row._id;
         if (!userId) {
             console.error("L'ID de l'utilisateur est manquant !");
             return;
         }
 
-        const result = await Swal.fire({
-            title: 'Êtes-vous sûr ?',
-            text: `Voulez-vous vraiment bloquer cet utilisateur ?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Oui',
-            cancelButtonText: 'Annuler'
+        confirmAlert({
+            title: 'Confirmation',
+            message: 'Voulez-vous vraiment bloquer cet utilisateur ?',
+            buttons: [
+                {
+                    label: 'Oui',
+                    onClick: async () => {
+                        await blockUser(userId);
+                        setData(prevData =>
+                            prevData.map(user =>
+                                user._id === userId ? { ...user, isBlocked: true } : user
+                            )
+                        );
+                        confirmAlert({
+                            title: 'Succès',
+                            message: 'L\'utilisateur a été bloqué.',
+                            buttons: [{ label: 'OK' }]
+                        });
+                    }
+                },
+                {
+                    label: 'Non',
+                    onClick: () => {}
+                }
+            ]
         });
-
-        if (result.isConfirmed) {
-            await blockUser(userId);
-            setData(prevData =>
-                prevData.map(user =>
-                    user.id === userId ? { ...user, isBlocked: true } : user
-                )
-            );
-            Swal.fire('Succès!', 'L\'utilisateur a été bloqué.', 'success');
-        }
     };
 
+    // Déblocage d'un utilisateur
     const handleUnblockUser = async (row) => {
-        const userId = row.id || row._id;
+        const userId = row._id;
         if (!userId) {
             console.error("L'ID de l'utilisateur est manquant !");
             return;
         }
 
-        const result = await Swal.fire({
-            title: 'Êtes-vous sûr ?',
-            text: `Voulez-vous vraiment débloquer cet utilisateur ?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Oui',
-            cancelButtonText: 'Annuler'
+        confirmAlert({
+            title: 'Confirmation',
+            message: 'Voulez-vous vraiment débloquer cet utilisateur ?',
+            buttons: [
+                {
+                    label: 'Oui',
+                    onClick: async () => {
+                        await unblockUser(userId);
+                        setData(prevData =>
+                            prevData.map(user =>
+                                user._id === userId ? { ...user, isBlocked: false } : user
+                            )
+                        );
+                        confirmAlert({
+                            title: 'Succès',
+                            message: 'L\'utilisateur a été débloqué.',
+                            buttons: [{ label: 'OK' }]
+                        });
+                    }
+                },
+                {
+                    label: 'Non',
+                    onClick: () => {}
+                }
+            ]
         });
-
-        if (result.isConfirmed) {
-            await unblockUser(userId);
-            setData(prevData =>
-                prevData.map(user =>
-                    user.id === userId ? { ...user, isBlocked: false } : user
-                )
-            );
-            Swal.fire('Succès!', 'L\'utilisateur a été débloqué.', 'success');
-        }
     };
 
+    // Ouverture de la modale pour l'édition
     const handleEdit = (row) => {
         setSelectedUser(row);
         setModalOpen(true);
     };
 
-    const handleUpdateUser = async (e) => {
-        e.preventDefault();
+    // Mise à jour d'un utilisateur
+    const handleUpdateUser = async (updatedUser) => {
         try {
-            console.log("Données de l'utilisateur à mettre à jour :", selectedUser);
-    
-            if (!selectedUser || !selectedUser._id) {
+            if (!updatedUser || !updatedUser._id) {
                 console.error("L'ID de l'utilisateur est manquant ou invalide !");
                 return;
             }
-    
-            await updateUser(selectedUser._id, selectedUser);
-    
-            setData(prevData =>
-                prevData.map(user =>
-                    user._id === selectedUser._id ? selectedUser : user
-                )
-            );
+
+            await updateUser(updatedUser._id, updatedUser);
+
+            // Recharger les données après la mise à jour
+            const users = await getAllUsers();
+            if (users?.elements && Array.isArray(users.elements)) {
+                setData(users.elements);
+            }
+
             setModalOpen(false);
-            Swal.fire('Succès!', 'L\'utilisateur a été mis à jour.', 'success');
+            confirmAlert({
+                title: 'Succès',
+                message: 'L\'utilisateur a été mis à jour.',
+                buttons: [{ label: 'OK' }]
+            });
         } catch (error) {
             console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
-            Swal.fire('Erreur!', 'Un problème est survenu lors de la mise à jour.', 'error');
+            confirmAlert({
+                title: 'Erreur',
+                message: 'Un problème est survenu lors de la mise à jour.',
+                buttons: [{ label: 'OK' }]
+            });
         }
     };
-    
-    const handleAddUser = () => {
-        console.log("Ajouter un utilisateur");
-        // Ajoutez ici la logique pour ouvrir un formulaire ou une modal pour ajouter un nouvel utilisateur
-    };
 
+    // Boutons d'action pour chaque ligne
     const actionButtons = (row) => {
         return (
             <div className="action-buttons">
@@ -189,6 +333,7 @@ const DataUsers = () => {
         );
     };
 
+    // Colonnes du tableau
     const customColumns = [
         { name: 'Nom', selector: row => row.nom, sortable: true },
         { name: 'Prénom', selector: row => row.prenom, sortable: true },
@@ -198,27 +343,26 @@ const DataUsers = () => {
         { name: 'Actions', cell: row => actionButtons(row), ignoreRowClick: true, allowOverflow: true, button: true },
     ];
 
+    // Filtrage des données
     const filteredData = useMemo(() => {
         return data.filter(row =>
             [row.nom, row.prenom, row.adresse, row.telephone, row.email]
-                .some(field => field.toLowerCase().includes(filterText.toLowerCase()))
+                .some(field => field.toLowerCase().includes(debouncedFilterText.toLowerCase()))
         );
-    }, [data, filterText]);
+    }, [data, debouncedFilterText]);
 
     return (
         <Fragment>
+            <Breadcrumbs mainTitle="Utilisateurs" parent="Administrateur" title="Utilisateurs" />
             <div className="d-flex align-items-center justify-content-between m-3 p-3 bg-light">
                 <H4 attrH4={{ className: 'm-0 text-dark' }}>Total Utilisateurs ({data.length})</H4>
                 <div className="d-flex gap-2 mt-4">
-                    <Btn attrBtn={{ color: 'primary', onClick: handleAddUser }}>
-                        <FaPlus />
-                    </Btn>
                     <Input
                         type="text"
                         placeholder="Rechercher..."
                         value={filterText}
                         onChange={(e) => setFilterText(e.target.value)}
-                        className="search-input"
+                        className="search-input w-100"
                     />
                 </div>
             </div>
@@ -238,63 +382,14 @@ const DataUsers = () => {
                 pagination
                 selectableRows
                 onSelectedRowsChange={handleRowSelected}
-                clearSelectedRows={toggleDelete}
             />
 
-            <Modal isOpen={modalOpen} toggle={() => setModalOpen(!modalOpen)}>
-                <ModalHeader toggle={() => setModalOpen(!modalOpen)}>Modification des informations</ModalHeader>
-                <ModalBody>
-                    <form onSubmit={handleUpdateUser}>
-                        <div className="mb-3">
-                            <label htmlFor="nom" className="form-label">Nom</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="nom"
-                                value={selectedUser?.nom || ''}
-                                onChange={(e) => setSelectedUser({...selectedUser, nom: e.target.value})}
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="prenom" className="form-label">Prénom</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="prenom"
-                                value={selectedUser?.prenom || ''}
-                                onChange={(e) => setSelectedUser({...selectedUser, prenom: e.target.value})}
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="email" className="form-label">Email</label>
-                            <input
-                                type="email"
-                                className="form-control"
-                                id="email"
-                                value={selectedUser?.email || ''}
-                                onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})}
-                            />
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="telephone" className="form-label">Téléphone</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="telephone"
-                                value={selectedUser?.telephone || ''}
-                                onChange={(e) => setSelectedUser({...selectedUser, telephone: e.target.value})}
-                            />
-                        </div>
-                        <ModalFooter>
-                        <Button className="btn-cancel" onClick={() => setModalOpen(false)}>Annuler</Button>
-                        <Button className="btn-update" type="submit">Mettre à jour</Button>
-                        </ModalFooter>
-
-
-
-                    </form>
-                </ModalBody>
-            </Modal>
+            <UserModal
+                isOpen={modalOpen}
+                toggle={() => setModalOpen(!modalOpen)}
+                user={selectedUser}
+                onSave={handleUpdateUser}
+            />
         </Fragment>
     );
 };

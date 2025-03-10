@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchMyMedicalRecord as fetchMedicalRecords, // Renommage si nécessaire
+  fetchMedicalRecords, // Renommage si nécessaire
   fetchMedicalRecordById,
   updateMedicalRecord,
   deleteMedicalRecord

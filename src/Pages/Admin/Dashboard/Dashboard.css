@@ -137,5 +137,27 @@ cursor: pointer;
 }
 
 .react-pagination-button:hover {
-background-color: #0d4d5c;
+background-color: #12687B;
+}
+
+/* Ajoutez ce CSS dans votre fichier de style */
+.fc-toolbar-title {
+  font-size: 1.5em;
+}
+
+.fc-event {
+  background-color: #12687B;
+  border: none;
+}
+
+.fc-event-title {
+  color: white;
+}
+
+.fc-daygrid-day-number {
+  color: #333;
+}
+
+.fc-daygrid-day.fc-day-today {
+  background-color: #e6f7ff;
 }

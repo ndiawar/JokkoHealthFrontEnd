@@ -51,20 +51,16 @@ const Leftbar = () => {
       <Col className="header-logo-wrapper col-auto p-0" id="out_side_click">
         <div className="logo-wrapper">
           <Link to={`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`}>
-            <Image
-              attrImage={{
-                className: "img-fluid for-light",
-                src: `${require("../../../assets/images/logo/logo_dark.png")}`,
-                alt: "",
-              }}
-            />
-            <Image
-              attrImage={{
-                className: "img-fluid for-dark",
-                src: `${require("../../../assets/images/logo/logo_dark.png")}`,
-                alt: "",
-              }}
-            />
+          <Image
+            attrImage={{
+              className: "",
+              src: `${require("../../../assets/images/logo/logo_dark.png")}`,
+              alt: "",
+              width: 110,  // Définir la largeur à 150px
+              height: 50,  // Définir la hauteur à 50px
+            }}
+          />
+
           </Link>
         </div>
         <div className="toggle-sidebar" onClick={() => responsive_openCloseSidebar(sidebartoggle)} style={window.innerWidth <= 991 ? { display: "block" } : { display: "none" }}>

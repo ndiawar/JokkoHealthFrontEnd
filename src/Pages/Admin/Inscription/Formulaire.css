@@ -1,0 +1,91 @@
+/* Conteneur du formulaire */
+.form-container {
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(10px); /* Préfixe pour Safari et iOS */
+  backdrop-filter: blur(10px); /* Version standard */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 550px;
+  margin: auto;
+}
+
+/* Titre du formulaire */
+.form-title {
+  text-align: left;
+  color: black;
+  margin-bottom: 20px;
+}
+
+/* Labels des champs */
+.form-label {
+  color: #8C8C8C;
+}
+
+/* Conteneur des icônes */
+.input-icon-container {
+  position: relative;
+}
+
+/* Icônes */
+.input-icon {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  color: #8C8C8C;
+}
+
+/* Champs de formulaire */
+.form-control {
+  padding-left: 40px;
+  width: 100%;
+}
+
+/* Messages d'erreur */
+.error {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Erreur serveur */
+.server-error {
+  background-color: #fff3f3;
+  color: #dc3545;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Conteneur de l'input file */
+.file-input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Label personnalisé pour l'input file */
+.file-input-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Input file masqué */
+.file-input {
+  display: none;
+}
+
+/* Aperçu de l'image */
+.image-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #007bff;
+}
