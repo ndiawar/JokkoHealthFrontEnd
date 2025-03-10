@@ -106,6 +106,7 @@
     "rembg": "^1.0.6",
     "sass": "^1.62.0",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "styled-components": "^5.3.10",
