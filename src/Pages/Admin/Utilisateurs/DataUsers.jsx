@@ -8,6 +8,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { confirmAlert } from 'react-confirm-alert'; // Importer react-confirm-alert
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Importer le CSS
 import './DataUsers.css';
+import { Breadcrumbs } from '../../../AbstractElements';
 
 // Composant Modal pour la modification des utilisateurs
 const UserModal = ({ isOpen, toggle, user, onSave }) => {
@@ -352,6 +353,7 @@ const DataUsers = () => {
 
     return (
         <Fragment>
+            <Breadcrumbs mainTitle="Utilisateurs" parent="Administrateur" title="Utilisateurs" />
             <div className="d-flex align-items-center justify-content-between m-3 p-3 bg-light">
                 <H4 attrH4={{ className: 'm-0 text-dark' }}>Total Utilisateurs ({data.length})</H4>
                 <div className="d-flex gap-2 mt-4">
