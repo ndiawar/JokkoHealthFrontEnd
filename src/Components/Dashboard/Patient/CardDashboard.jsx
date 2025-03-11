@@ -1,25 +1,24 @@
-import React from "react";
-import { FaHeartbeat } from "react-icons/fa";  // Pour la fréquence cardiaque
-import { FaWind } from "react-icons/fa";       // Pour le flux d'air
-import { FaThermometerHalf } from "react-icons/fa"; // Pour la température
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { FaHeartbeat, FaWind, FaThermometerHalf } from "react-icons/fa";
 
 function Card({ icon, title, value, unit, status, color }) {
-  const darkerColor = shadeColor(color, -20); // Function to darken the color
+  const darkerColor = shadeColor(color, -20);
 
   return (
     <div
       className="card shadow-sm bg-white rounded"
       style={{
-        width: "12rem", // Largeur augmentée
-        height: "12rem", // Hauteur égale à la largeur pour un carré
+        width: "12rem",
+        height: "12rem",
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start", // Align icons and text to the left
+        alignItems: "flex-start",
         justifyContent: "center",
         padding: "1rem",
         borderLeft: `5px solid ${color}`,
-        textAlign: "left", // Align text to the left
-        backgroundColor: darkerColor // Use darker background color
+        textAlign: "left",
+        backgroundColor: darkerColor
       }}
     >
       <div style={{ fontSize: "2rem", color: color }}>{icon}</div>
@@ -44,7 +43,6 @@ function Card({ icon, title, value, unit, status, color }) {
   );
 }
 
-// Function to darken a color
 function shadeColor(color, percent) {
   const num = parseInt(color.slice(1), 16);
   const amt = Math.floor(2.55 * percent);
@@ -55,31 +53,66 @@ function shadeColor(color, percent) {
 }
 
 function CardDashboard() {
+  const [sensorData, setSensorData] = useState([]);
+
+  const fetchSensorData = async () => {
+    try {
+      const response = await axios.get('/sensorPoul');
+      console.log("Données récupérées :", response.data);
+
+      // Assurez-vous que les données sont triées par ordre décroissant de timestamp
+      const sortedData = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setSensorData(sortedData);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données :", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSensorData();
+    const intervalId = setInterval(fetchSensorData, 2000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const defaultValues = {
+    oxygen: { value: "N/A", unit: "%", status: "Inconnu", color: "#EAB308" },
+    bloodPressure: { value: "N/A", unit: "bpm", status: "Inconnu", color: "#DC3545" },
+    temperature: { value: "N/A", unit: "°C", status: "Inconnu", color: "#0DCAF0" },
+  };
+
+  if (sensorData.length > 0) {
+    const latestData = sensorData[0]; // Prendre le premier élément après le tri
+    console.log("Dernières données :", latestData);
+    defaultValues.oxygen.value = latestData.oxygenLevel !== undefined ? latestData.oxygenLevel : defaultValues.oxygen.value;
+    defaultValues.bloodPressure.value = latestData.heartRate !== undefined ? latestData.heartRate : defaultValues.bloodPressure.value;
+    // Ajoutez d'autres champs si nécessaire
+  }
+
   return (
     <div className="d-flex justify-content-center gap-3" style={{ gap: "1.5rem" }}>
-      <Card 
-        icon={<FaWind size={50} color="#EAB308" />} 
-        title="Oxygène" 
-        value="80" 
-        unit="%" 
-        status="Normal" 
-        color="#EAB308" 
+      <Card
+        icon={<FaWind size={50} color={defaultValues.oxygen.color} />}
+        title="Oxygène"
+        value={defaultValues.oxygen.value}
+        unit={defaultValues.oxygen.unit}
+        status={defaultValues.oxygen.status}
+        color={defaultValues.oxygen.color}
       />
-      <Card 
-        icon={<FaHeartbeat size={50} color="#DC3545" />} 
-        title="Pression artérielle" 
-        value="98 / 72" 
-        unit="mmHg" 
-        status="Normal" 
-        color="#DC3545" 
+      <Card
+        icon={<FaHeartbeat size={50} color={defaultValues.bloodPressure.color} />}
+        title="Fréquence cardiaque"
+        value={defaultValues.bloodPressure.value}
+        unit={defaultValues.bloodPressure.unit}
+        status={defaultValues.bloodPressure.status}
+        color={defaultValues.bloodPressure.color}
       />
-      <Card 
-        icon={<FaThermometerHalf size={50} color="#0DCAF0" />} 
-        title="Température" 
-        value="102" 
-        unit="°C" 
-        status="Normal" 
-        color="#0DCAF0" 
+      <Card
+        icon={<FaThermometerHalf size={50} color={defaultValues.temperature.color} />}
+        title="Température"
+        value={defaultValues.temperature.value}
+        unit={defaultValues.temperature.unit}
+        status={defaultValues.temperature.status}
+        color={defaultValues.temperature.color}
       />
     </div>
   );
