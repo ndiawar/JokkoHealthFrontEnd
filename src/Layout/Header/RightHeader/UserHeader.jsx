@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogIn, Mail, User } from "react-feather";
+import { LogIn, User } from "react-feather";
 import man from "../../../assets/images/dashboard/profile.png";
 import { LI, UL, Image, P } from "../../../AbstractElements";
 import CustomizerContext from "../../../_helper/Customizer";
-import { Account, Admin, Inbox, LogOut } from "../../../Constant";
+import { Account, Admin, LogOut } from "../../../Constant";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import UserContext from "../../../_helper/UserContext"; // Importez le contexte utilisateur
@@ -67,13 +67,6 @@ const UserHeader = () => {
           }}>
           <User />
           <span>{Account} </span>
-        </LI>
-        <LI
-          attrLI={{
-            onClick: () => UserMenuRedirect(`${process.env.PUBLIC_URL}/app/email-app/${layoutURL}`),
-          }}>
-          <Mail />
-          <span>{Inbox}</span>
         </LI>
         <LI attrLI={{ onClick: Logout }}>
           <LogIn />

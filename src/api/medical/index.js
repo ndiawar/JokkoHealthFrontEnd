@@ -1,7 +1,6 @@
 import axios from "axios";
 import { authHeader } from "../../Services/Auth"; // Importation du header d'authentification
 
-const API_BASE_URL = "http://localhost:3001/api"; // Définition de l'URL de base pour l'API
 
 // 🚀 Récupérer tous les dossiers médicaux
 export const fetchMedicalRecords = async () => {
@@ -31,7 +30,7 @@ export const fetchUserData = async () => {
     console.log("🔄 Récupération des données de l'utilisateur...");
     console.log("Headers envoyés:", authHeader());
 
-    const { data } = await axios.get(`${API_BASE_URL}/users/me`, {
+    const { data } = await axios.get('/users/me', {
       headers: authHeader(),
     });
 
@@ -51,7 +50,7 @@ export const fetchMedicalRecordById = async (id) => {
   try {
     console.log(`🔄 Récupération du dossier médical ID: ${id}...`);
 
-    const { data } = await axios.get(`${API_BASE_URL}/medical/${id}`, {
+    const { data } = await axios.get(`/medical/${id}`, {
       headers: authHeader(),
     });
 
@@ -98,7 +97,7 @@ export const updateMedicalRecord = async ({ id, updates }) => {
   try {
     console.log(`🔄 Mise à jour du dossier médical ID: ${id}...`);
     
-    const { data } = await axios.put(`${API_BASE_URL}/medical/${id}`, updates, {
+    const { data } = await axios.put(`/medical/${id}`, updates, {
       headers: authHeader(),
     });
 
@@ -116,7 +115,7 @@ export const deleteMedicalRecord = async (id) => {
   try {
     console.log(`🗑️ Suppression du dossier médical ID: ${id}...`);
 
-    const { data } = await axios.delete(`${API_BASE_URL}/medical/${id}`, {
+    const { data } = await axios.delete(`/medical/${id}`, {
       headers: authHeader(),
     });
 
@@ -126,5 +125,16 @@ export const deleteMedicalRecord = async (id) => {
   } catch (error) {
     console.error(`❌ Erreur lors de la suppression du dossier médical ID ${id}:`, error);
     throw new Error(error.response?.data?.message || "Erreur serveur");
+  }
+};
+
+// Fonction pour récupérer les statistiques des dossiers médicaux créés par mois pour le médecin connecté
+export const getMedicalRecordsStatsByMonthForMedecin = async () => {
+  try {
+      const response = await axios.get('/medical/medical-records/stats-by-month-for-medecin');
+      return response.data; // Retourne les données de la réponse
+  } catch (error) {
+      console.error('Erreur lors de la récupération des statistiques des dossiers médicaux :', error.response ? error.response.data : error.message);
+      throw error;
   }
 };

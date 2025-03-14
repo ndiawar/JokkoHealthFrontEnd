@@ -12,7 +12,7 @@ const CalendarComponent = () => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/rendezvous/tous');
+        const response = await axios.get('/rendezvous/tous');
         const appointments = response.data;
 
         const formattedEvents = appointments.map(appointment => {

@@ -146,5 +146,15 @@ export const updateDemandeStatut = async (appointmentId, statutDemande) => {
       }
     };
     
+    // Fonction pour récupérer les statistiques des rendez-vous par mois pour le médecin connecté
+  export const getAppointmentsStatsByMonthForMedecin = async () => {
+    try {
+        const response = await axios.get('/rendezvous/stats/month');
+        return response.data; // Retourne les données de la réponse
+    } catch (error) {
+        console.error('Erreur lors de la récupération des statistiques des rendez-vous:', error.response ? error.response.data : error.message);
+        throw error;
+    }
+  };
     
     

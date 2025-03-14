@@ -10,7 +10,7 @@ function Card({ icon, title, value, unit, status, color }) {
     <div
       className="card shadow-sm bg-white rounded"
       style={{
-        width: "12rem", // Largeur augmentée
+        width: "14rem", // Largeur augmentée de chaque carte
         height: "12rem", // Hauteur égale à la largeur pour un carré
         display: "flex",
         flexDirection: "column",
@@ -56,31 +56,37 @@ function shadeColor(color, percent) {
 
 function CardDashboard() {
   return (
-    <div className="d-flex justify-content-center gap-3" style={{ gap: "1.5rem" }}>
-      <Card 
-        icon={<FaWind size={50} color="#EAB308" />} 
-        title="Oxygène" 
-        value="80" 
-        unit="%" 
-        status="Normal" 
-        color="#EAB308" 
-      />
-      <Card 
-        icon={<FaHeartbeat size={50} color="#DC3545" />} 
-        title="Pression artérielle" 
-        value="98 / 72" 
-        unit="mmHg" 
-        status="Normal" 
-        color="#DC3545" 
-      />
-      <Card 
-        icon={<FaThermometerHalf size={50} color="#0DCAF0" />} 
-        title="Température" 
-        value="102" 
-        unit="°C" 
-        status="Normal" 
-        color="#0DCAF0" 
-      />
+    <div className="d-flex flex-wrap justify-content-center gap-3">
+      <div className="col-6 col-md-4 col-lg-3">
+        <Card 
+          icon={<FaWind size={50} color="#EAB308" />} 
+          title="Oxygène" 
+          value="80" 
+          unit="%" 
+          status="Normal" 
+          color="#EAB308" 
+        />
+      </div>
+      <div className="col-6 col-md-4 col-lg-3">
+        <Card 
+          icon={<FaHeartbeat size={50} color="#DC3545" />} 
+          title="Pression artérielle" 
+          value="98 / 72" 
+          unit="mmHg" 
+          status="Normal" 
+          color="#DC3545" 
+        />
+      </div>
+      <div className="col-6 col-md-4 col-lg-3">
+        <Card 
+          icon={<FaThermometerHalf size={50} color="#0DCAF0" />} 
+          title="Température" 
+          value="102" 
+          unit="°C" 
+          status="Normal" 
+          color="#0DCAF0" 
+        />
+      </div>
     </div>
   );
 }

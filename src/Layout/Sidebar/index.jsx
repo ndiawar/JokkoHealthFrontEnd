@@ -112,7 +112,7 @@ const Sidebar = (props) => {
   return (
     <Fragment>
       <div
-        className="bg-overlay1"
+        className="bg-overlay1 mt-2"
         onClick={() => {
           closeOverlay();
         }}></div>

@@ -65,7 +65,7 @@ const CarteRv = ({ onAppointmentAdded }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/users/me", {
+        const response = await axios.get("/users/me", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

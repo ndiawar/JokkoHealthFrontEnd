@@ -354,7 +354,7 @@ const DataUsers = () => {
     return (
         <Fragment>
             <Breadcrumbs mainTitle="Utilisateurs" parent="Administrateur" title="Utilisateurs" />
-            <div className="d-flex align-items-center justify-content-between m-3 p-3 bg-light">
+            <div className="d-flex align-items-center justify-content-between bg-light">
                 <H4 attrH4={{ className: 'm-0 text-dark' }}>Total Utilisateurs ({data.length})</H4>
                 <div className="d-flex gap-2 mt-4">
                     <Input
