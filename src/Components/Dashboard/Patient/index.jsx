@@ -14,10 +14,10 @@ const Patient = () => {
       <Breadcrumbs mainTitle="Patient" parent="Dashboard" title="Patient" />
       <Container fluid={true}>
         <Row className="widget-grid">
-          <Col md={7}>
+          <Col md={6}>
             <GreetingPatient />
           </Col>
-          <Col md={4}>
+          <Col md={6}>
             <CardDashboard />
           </Col>
         </Row>

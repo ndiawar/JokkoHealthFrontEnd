@@ -103,7 +103,7 @@ const Header = () => {
   return (
     <Fragment>
       <div className={`page-header ${toggleIcon ? 'close_icon' : ''}`}>
-        <Row className='header-wrapper m-0'>
+        <Row className='header-wrapper pb-3'>
           <Form className='form-inline search-full col' action='#' method='get'>
             <div className='form-group w-100'>
               <div className='Typeahead Typeahead--twitterUsers'>

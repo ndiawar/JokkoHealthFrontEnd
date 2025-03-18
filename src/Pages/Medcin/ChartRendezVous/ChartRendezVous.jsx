@@ -1,28 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader, Col } from 'reactstrap';
 import ReactApexChart from 'react-apexcharts';
+import { getAppointmentsStatsByMonthForMedecin } from '../../../api/ApiRendezVous/index'; // Assure-toi que le chemin est correct
+import { getMedicalRecordsStatsByMonthForMedecin } from '../../../api/medical/index'; // Assure-toi que le chemin est correct
 
 const ChartRendezVous = () => {
-  // Données des séries pour le graphique avec des variations
-  const series = [
-    {
-      name: 'Consultation',
-      data: [45, 50, 40, 55, 35, 40, 50, 45, 55, 40, 50, 48]
-    },
-    {
-      name: 'Rendez-vous',
-      data: [30, 35, 40, 30, 40, 35, 45, 30, 35, 40, 30, 33]
-    },
-    {
-      name: 'Urgence',
-      data: [25, 30, 35, 20, 40, 25, 30, 35, 20, 25, 30, 27]
-    },
-    {
-      name: 'Guérisons',
-      data: [15, 20, 25, 10, 30, 15, 20, 25, 10, 15, 20, 18]
-    }
-  ];
+  // États pour les données et les erreurs
+  const [appointmentsStats, setAppointmentsStats] = useState([]);
+  const [medicalRecordsStats, setMedicalRecordsStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    // Récupérer les statistiques des rendez-vous et des dossiers médicaux
+    const fetchData = async () => {
+      try {
+        const appointmentsResponse = await getAppointmentsStatsByMonthForMedecin();
+        const medicalRecordsResponse = await getMedicalRecordsStatsByMonthForMedecin();
+        
+        setAppointmentsStats(appointmentsResponse.stats); // Assurez-vous que 'stats' est la clé contenant les données
+        setMedicalRecordsStats(medicalRecordsResponse.stats);
+      } catch (error) {
+        setError('Erreur lors de la récupération des statistiques.');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // L'effet ne se déclenche qu'une fois lors du montage du composant
+
+  // Si les données sont en cours de chargement, afficher un message de chargement
+  if (loading) {
+    return <div>Chargement des données...</div>;
+  }
+
+  // Si une erreur survient, afficher un message d'erreur
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  // Transformer les données pour le graphique
+  const appointmentsData = appointmentsStats.map((stat) => stat.count);
+  const medicalRecordsData = medicalRecordsStats.map((stat) => stat.count);
+  
   // Options du graphique
   const options = {
     chart: {
@@ -83,15 +105,33 @@ const ChartRendezVous = () => {
     }
   };
 
+  // Séries de données pour le graphique
+  const series = [
+    {
+      name: 'Rendez-vous',
+      data: appointmentsData
+    },
+    {
+      name: 'Dossiers Médicaux',
+      data: medicalRecordsData
+    }
+  ];
+
   return (
     <Col md='6' className='p-0'>
       <Card>
-        <CardHeader>
-          <h4>Graphique des Rendez-vous</h4>
+        <CardHeader className='mb-2'>
+          <h4>Graphique des Rendez-vous et Dossiers Médicaux</h4>
         </CardHeader>
         <CardBody className='p-0'>
           <div className='current-sale-container order-container'>
-            <ReactApexChart className='overview-wrapper' type='line' height={350} options={options} series={series} />
+            <ReactApexChart
+              className='overview-wrapper'
+              type='line'
+              height={350}
+              options={options}
+              series={series}
+            />
           </div>
         </CardBody>
       </Card>
