@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardBody, Col, Row } from 'reactstrap';
-<<<<<<< HEAD
-import { H4, P, H5, H6 } from '../../../AbstractElements';
-import ProfilImage from '../../../../src/assets/images/Jokko/profil.png'; // Assurez-vous que ce chemin est correct
-=======
 import { P, H5, H6 } from '../../../AbstractElements';
-import ProfilImage from '../../../assets/images/jokko/medecin.svg';
->>>>>>> e2a2a66521e373198c0d048e3c3b632eba91e353
+import ProfilImage from '../../../assets/images/Jokko/medecin.svg';
 
 const GreetingCard = () => {
   const [newPatientsCount, setNewPatientsCount] = useState(0);
