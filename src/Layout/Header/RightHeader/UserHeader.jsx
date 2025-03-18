@@ -17,7 +17,11 @@ const UserHeader = () => {
   useEffect(() => {
     axios.get('users/me', { withCredentials: true })
       .then(response => {
-        setUser(response.data);
+        setUser(response.data);console.log('UserHeader component rendered');
+        console.log('User data:', user);
+        console.log('Layout URL:', layoutURL);
+        console.log('User context:', UserContext);
+        console.log('Customizer context:', CustomizerContext);
       })
       .catch(error => {
         console.log(error);
