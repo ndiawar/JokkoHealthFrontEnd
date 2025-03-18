@@ -1,28 +1,25 @@
 import React, { Fragment } from "react";
-import { Container, Row } from "reactstrap";
+import { Container, Row, Col } from "reactstrap";
 import { Breadcrumbs } from "../../../../AbstractElements";
-import UserProfile from "../../../Bonus-Ui/Tour/UserProfile";
-import UserDetails from "./UserDetail";
-import UserDetails2 from "./UserDetail2";
 import UserDetails3 from "./UserDetails3";
-import UserDetails4 from "./UserDetail4";
+import UserDetail4 from "./UserDetail4";
 
 const UsersProfileContain = () => {
   return (
     <Fragment>
       <Breadcrumbs mainTitle="User Profile" parent="Users" title="User Profile" />
       <Container fluid={true}>
-        <div className="user-profile">
-          <Row>
-            <UserProfile />
-            <UserDetails />
-            <UserDetails2 />
+        <Row className="g-0">
+          <Col xs="12" sm="4" md="3" className="p-3 d-flex justify-content-center align-items-center">
             <UserDetails3 />
-            <UserDetails4 />
-          </Row>
-        </div>
+          </Col>
+          <Col xs="12" sm="8" md="9" className="p-3">
+            <UserDetail4 />
+          </Col>
+        </Row>
       </Container>
     </Fragment>
   );
 };
+
 export default UsersProfileContain;
