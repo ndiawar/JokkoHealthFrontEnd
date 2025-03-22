@@ -72,12 +72,18 @@ const DataPatient = () => {
   };
 
   const handleDetails = (row) => {
-    setSelectedPatient(row.patientDetails); // Mettre à jour l'état avec le patient sélectionné
+    console.log("Détails du patient sélectionné :", row); // Log pour vérifier les données
+    setSelectedPatient({
+      ...row.patientDetails,
+      recordId: row.patientDetails.recordId, // Assurez-vous que l'ID du dossier médical est inclus
+    });
     setModal(true); // Ouvrir la modal
   };
 
   const toggleModal = () => {
-    setModal(!modal); // Fermer la modal
+    console.log("État du modal avant changement :", modal); // Log pour vérifier l'état actuel
+    setModal(!modal); // Inverser l'état du modal
+    console.log("État du modal après changement :", !modal); // Log pour vérifier le nouvel état
   };
 
   const actionButtons = (row) => (
@@ -154,7 +160,7 @@ const DataPatient = () => {
         <ModalHeader toggle={toggleModal}>Détails du Patient</ModalHeader>
         <ModalBody>
           {selectedPatient && (
-            <PatientCard patient={selectedPatient} />
+            <PatientCard patient={selectedPatient} isModalOpen={modal} /> // Passer isModalOpen
           )}
         </ModalBody>
         <ModalFooter>

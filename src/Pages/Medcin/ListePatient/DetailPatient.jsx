@@ -1,13 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeartbeat, faTint, faThermometerHalf, faStethoscope } from '@fortawesome/free-solid-svg-icons';
 import { useUpdateMedicalRecord } from '../../../Hooks/JokkoHealth/useMedical';
 import './PatientCard.module.css';
+import axios from 'axios'; // Importez axios pour faire des requêtes HTTP
+import $ from 'jquery'; // jQuery est requis pour bootstrap-notify
+import 'bootstrap-notify'; // Importer bootstrap-notify
+import 'animate.css'; // Importer animate.css pour les animations
 
-const PatientCard = ({ patient }) => {
+const DetailPatient = ({ patient, isModalOpen }) => {
+  console.log("Patient reçu dans DetailPatient :", patient); // Log pour vérifier les données du patient
+
   const [formData, setFormData] = useState({ ...patient });
+  const [macAddress, setMacAddress] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const updateMedicalRecordMutation = useUpdateMedicalRecord();
+
+  // Fonction pour récupérer les dernières données du capteur
+  const fetchLatestSensorData = async () => {
+    try {
+      console.log("Appel de fetchLatestSensorData"); // Log pour vérifier l'appel
+      const response = await axios.get('http://localhost:3001/api/sensorPatient/sensorPoul/latest');
+      console.log("Données reçues du serveur :", response.data); // Log des données reçues
+
+      const { macAddress } = response.data;
+      console.log("Adresse MAC reçue :", macAddress); // Log de l'adresse MAC reçue
+
+      setMacAddress(macAddress); // Mettre à jour l'adresse MAC dans l'état
+    } catch (error) {
+      console.error("❌ Erreur lors de la récupération des données du capteur :", error);
+    }
+  };
+
+  const handleAssignSensor = async () => {
+    try {
+      console.log("Données envoyées :", { macAddress, recordId: patient.recordId }); // Log des données envoyées
+      const response = await axios.post('http://localhost:3001/api/sensorPatient/assignSensorToUser', {
+        macAddress: macAddress,
+        recordId: patient.recordId, // Utiliser l'ID du dossier médical
+      });
+  
+      // Afficher une notification de succès
+      $.notify({
+        icon: 'fa fa-check', // Icône de succès
+        title: 'Succès', // Titre de la notification
+        message: response.data.message, // Message de succès renvoyé par le serveur
+      }, {
+        type: 'success', // Type de notification (success, info, warning, danger)
+        placement: {
+          from: 'top', // Position verticale (top ou bottom)
+          align: 'right' // Position horizontale (left, right, center)
+        },
+        delay: 3000, // Durée d'affichage de la notification (en millisecondes)
+        animate: {
+          enter: 'animated fadeInRight', // Animation d'entrée
+          exit: 'animated fadeOutRight' // Animation de sortie
+        }
+      });
+  
+      setErrorMessage(''); // Effacer les erreurs précédentes
+    } catch (error) {
+      console.error("❌ Erreur lors de l'assignation du capteur :", error);
+  
+      // Afficher une notification d'erreur
+      $.notify({
+        icon: 'fa fa-times', // Icône d'erreur
+        title: 'Erreur', // Titre de la notification
+        message: error.response?.data?.message || "Une erreur inattendue s'est produite.", // Message d'erreur
+      }, {
+        type: 'danger', // Type de notification (danger pour les erreurs)
+        placement: {
+          from: 'top', // Position verticale (top ou bottom)
+          align: 'right' // Position horizontale (left, right, center)
+        },
+        delay: 5000, // Durée d'affichage de la notification (en millisecondes)
+        animate: {
+          enter: 'animated fadeInRight', // Animation d'entrée
+          exit: 'animated fadeOutRight' // Animation de sortie
+        }
+      });
+  
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message); // Afficher le message d'erreur du serveur
+      } else {
+        setErrorMessage("Une erreur inattendue s'est produite.");
+      }
+    }
+  };
+
+  // Utiliser un intervalle pour mettre à jour les données toutes les secondes
+  useEffect(() => {
+    let intervalId;
+
+    if (isModalOpen) {
+      console.log("Modal ouvert, appel de fetchLatestSensorData"); // Log pour vérifier l'appel
+      fetchLatestSensorData();
+
+      // Configurer un intervalle pour appeler fetchLatestSensorData toutes les secondes
+      intervalId = setInterval(fetchLatestSensorData, 1000);
+    } else {
+      console.log("Modal fermé, réinitialisation des données"); // Log pour vérifier la réinitialisation
+      setMacAddress('');
+      setErrorMessage('');
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isModalOpen]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -137,6 +241,30 @@ const PatientCard = ({ patient }) => {
           <FontAwesomeIcon icon={faStethoscope} className="me-2" />
           Mettre à jour
         </button>
+
+        {/* Adresse MAC */}
+        <div className="mb-3">
+          <label className="form-label text-secondary small">Adresse MAC</label>
+          <input 
+            type="text" 
+            className="form-control bg-light border-0" 
+            name="macAddress"
+            value={macAddress} 
+            readOnly // Empêcher la modification manuelle
+          />
+          {errorMessage && (
+            <div className="text-danger small mt-2">{errorMessage}</div> // Afficher le message d'erreur
+          )}
+        </div>
+
+        {/* Bouton Assigner */}
+        <button 
+          type="button" 
+          className="btn btn-secondary mt-2"
+          onClick={handleAssignSensor}
+        >
+          Assigner le capteur
+        </button>
       </form>
 
       {/* Section Données vitales */}
@@ -202,4 +330,4 @@ const PatientCard = ({ patient }) => {
   );
 };
 
-export default PatientCard;
+export default DetailPatient;
