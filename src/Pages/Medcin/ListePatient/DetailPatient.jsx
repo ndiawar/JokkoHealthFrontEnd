@@ -1,13 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeartbeat, faTint, faThermometerHalf, faStethoscope } from '@fortawesome/free-solid-svg-icons';
 import { useUpdateMedicalRecord } from '../../../Hooks/JokkoHealth/useMedical';
 import './PatientCard.module.css';
+import axios from 'axios'; // Importez axios pour faire des requêtes HTTP
+import $ from 'jquery'; // jQuery est requis pour bootstrap-notify
+import 'bootstrap-notify'; // Importer bootstrap-notify
+import 'animate.css'; // Importer animate.css pour les animations
 
-const PatientCard = ({ patient }) => {
+const DetailPatient = ({ patient, isModalOpen }) => {
   const [formData, setFormData] = useState({ ...patient });
+  const [macAddress, setMacAddress] = useState('');
+  const [sensorData, setSensorData] = useState(null); // État pour les données du capteur
+  const [errorMessage, setErrorMessage] = useState('');
   const updateMedicalRecordMutation = useUpdateMedicalRecord();
+
+  // Fonction pour récupérer les données du capteur en fonction du dossier médical
+  const fetchSensorData = async () => {
+    try {
+      const response = await axios.get(`/sensorPatient/sensorPoul/${patient.recordId}`);
+      setSensorData(response.data); // Mettre à jour directement les données du capteur
+      setMacAddress(response.data.mac); // Mettre à jour l'adresse MAC
+    } catch (error) {
+      console.error("❌ Erreur lors de la récupération des données du capteur :", error);
+    }
+  };
+
+  // Fonction pour récupérer les dernières données du capteur
+  const fetchLatestSensorData = async () => {
+    try {
+      const response = await axios.get('/sensorPatient/sensorPoul/latest');
+      const { macAddress } = response.data;
+      setMacAddress(macAddress); // Mettre à jour l'adresse MAC dans l'état
+    } catch (error) {
+      console.error("❌ Erreur lors de la récupération des données du capteur :", error);
+    }
+  };
+
+  const handleAssignSensor = async () => {
+    try {
+      if (!macAddress) {
+        throw new Error("Adresse MAC non définie");
+      }
+
+      const response = await axios.post('/sensorPatient/assignSensorToUser', {
+        macAddress: macAddress,
+        recordId: patient.recordId, // Utiliser l'ID du dossier médical
+      });
+
+      // Mettre à jour les données du patient avec le dossier médical renvoyé
+      setFormData(response.data.medicalRecord);
+
+      // Afficher une notification de succès
+      $.notify({
+        icon: 'fa fa-check', // Icône de succès
+        title: 'Succès', // Titre de la notification
+        message: response.data.message, // Message de succès renvoyé par le serveur
+      }, {
+        type: 'success', // Type de notification (success, info, warning, danger)
+        placement: {
+          from: 'top', // Position verticale (top ou bottom)
+          align: 'right' // Position horizontale (left, right, center)
+        },
+        delay: 3000, // Durée d'affichage de la notification (en millisecondes)
+        animate: {
+          enter: 'animated fadeInRight', // Animation d'entrée
+          exit: 'animated fadeOutRight' // Animation de sortie
+        }
+      });
+
+      setErrorMessage(''); // Effacer les erreurs précédentes
+    } catch (error) {
+      console.error("❌ Erreur lors de l'assignation du capteur :", error);
+
+      // Afficher une notification d'erreur
+      $.notify({
+        icon: 'fa fa-times', // Icône d'erreur
+        title: 'Erreur', // Titre de la notification
+        message: error.response?.data?.message || error.message || "Une erreur inattendue s'est produite.", // Message d'erreur
+      }, {
+        type: 'danger', // Type de notification (danger pour les erreurs)
+        placement: {
+          from: 'top', // Position verticale (top ou bottom)
+          align: 'right' // Position horizontale (left, right, center)
+        },
+        delay: 5000, // Durée d'affichage de la notification (en millisecondes)
+        animate: {
+          enter: 'animated fadeInRight', // Animation d'entrée
+          exit: 'animated fadeOutRight' // Animation de sortie
+        }
+      });
+
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message); // Afficher le message d'erreur du serveur
+      } else {
+        setErrorMessage(error.message || "Une erreur inattendue s'est produite.");
+      }
+    }
+  };
+
+  // Utiliser un intervalle pour mettre à jour les données toutes les secondes
+  useEffect(() => {
+    let intervalId;
+
+    if (isModalOpen) {
+      fetchSensorData();
+      fetchLatestSensorData();
+
+      // Configurer un intervalle pour appeler fetchSensorData toutes les secondes
+      intervalId = setInterval(fetchSensorData, 1000);
+    } else {
+      setMacAddress('');
+      setSensorData(null); // Réinitialiser les données du capteur
+      setErrorMessage('');
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isModalOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,6 +138,17 @@ const PatientCard = ({ patient }) => {
     primary: '#409D9B',
     secondary: '#034561',
     text: '#4A4A4A'
+  };
+
+  // Déterminer la couleur de l'état
+  const getStatusColor = (value, min, max) => {
+    if (value < min || value > max) {
+      return 'text-danger'; // Rouge pour anormal
+    } else if (value >= min && value <= max) {
+      return 'text-success'; // Vert pour normal
+    } else {
+      return 'text-warning'; // Jaune pour constant
+    }
   };
 
   return (
@@ -137,6 +262,30 @@ const PatientCard = ({ patient }) => {
           <FontAwesomeIcon icon={faStethoscope} className="me-2" />
           Mettre à jour
         </button>
+
+        {/* Adresse MAC */}
+        <div className="mb-3">
+          <label className="form-label text-secondary small">Adresse MAC</label>
+          <input 
+            type="text" 
+            className="form-control bg-light border-0" 
+            name="macAddress"
+            value={macAddress} 
+            readOnly // Empêcher la modification manuelle
+          />
+          {errorMessage && (
+            <div className="text-danger small mt-2">{errorMessage}</div> // Afficher le message d'erreur
+          )}
+        </div>
+
+        {/* Bouton Assigner */}
+        <button 
+          type="button" 
+          className="btn btn-secondary mt-2"
+          onClick={handleAssignSensor}
+        >
+          Assigner le capteur
+        </button>
       </form>
 
       {/* Section Données vitales */}
@@ -155,10 +304,14 @@ const PatientCard = ({ patient }) => {
                 />
                 <h6 className="text-secondary small mb-2">Fréquence cardiaque</h6>
                 <div className="d-flex align-items-end">
-                  <h3 className="mb-0 me-2" style={{ color: colors.secondary }}>98</h3>
-                  <span className="text-success small">Normal</span>
+                  <h3 className={`mb-0 me-2 ${sensorData ? getStatusColor(sensorData.heartRate, 60, 100) : ''}`}>
+                    {sensorData ? sensorData.heartRate : 'N/A'}
+                  </h3>
+                  <span className={`small ${sensorData ? getStatusColor(sensorData.heartRate, 60, 100) : ''}`}>
+                    {sensorData && sensorData.heartRate >= 60 && sensorData.heartRate <= 100 ? 'Normal' : 'Anormal'}
+                  </span>
                 </div>
-                <div className="text-muted small mt-1">72 mmig</div>
+                <div className="text-muted small mt-1">BPM</div>
               </div>
             </div>
 
@@ -189,17 +342,34 @@ const PatientCard = ({ patient }) => {
                 />
                 <h6 className="text-secondary small mb-2">Saturation O2</h6>
                 <div className="d-flex align-items-end">
-                  <h3 className="mb-0 me-2" style={{ color: colors.secondary }}>95%</h3>
-                  <span className="text-success small">Normal</span>
+                  <h3 className={`mb-0 me-2 ${sensorData ? getStatusColor(sensorData.spo2, 95, 100) : ''}`}>
+                    {sensorData ? sensorData.spo2 : 'N/A'}
+                  </h3>
+                  <span className={`small ${sensorData ? getStatusColor(sensorData.spo2, 95, 100) : ''}`}>
+                    {sensorData && sensorData.spo2 >= 95 ? 'Normal' : 'Anormal'}
+                  </span>
                 </div>
-                <div className="text-muted small mt-1">Niveau</div>
+                <div className="text-muted small mt-1">%</div>
               </div>
             </div>
           </div>
+
+          {/* Section Anomalies */}
+          {sensorData && sensorData.anomalies && sensorData.anomalies.length > 0 && (
+            <div className="mt-4">
+              <h6 className="text-secondary small mb-2">Anomalies détectées</h6>
+              <ul>
+                {sensorData.anomalies.map((anomaly, index) => (
+                  <li key={index} className="text-danger small">{anomaly}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default PatientCard;
+export default DetailPatient;
+

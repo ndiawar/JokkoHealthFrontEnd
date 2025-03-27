@@ -4,8 +4,6 @@ import { Btn, H4 } from "../../AbstractElements";
 import { Row, Col, CardHeader, CardBody, Form, FormGroup, Label, Input } from 'reactstrap';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api'; // Remplacez par l'URL correcte
-
 const EditMyProfile = () => {
     const [record, setRecord] = useState({
         _id: '', // Ajoutez l'ID ici
@@ -25,7 +23,7 @@ const EditMyProfile = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`${API_URL}/medical/me`);
+                const response = await axios.get('/medical/me');
                 if (response.data.success) {
                     const medicalData = response.data.record;
                     setRecord({
@@ -62,7 +60,7 @@ const EditMyProfile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`${API_URL}/medical/${record._id}`, {
+            const response = await axios.put(`/medical/${record._id}`, {
                 nom: record.nom,
                 prenom: record.prenom,
                 email: record.email,
