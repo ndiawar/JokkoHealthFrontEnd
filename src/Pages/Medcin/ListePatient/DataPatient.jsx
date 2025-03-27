@@ -11,6 +11,7 @@ import './DataPatient.css';
 import _ from 'lodash'; // Importer lodash pour la comparaison profonde
 import PatientCard from './DetailPatient'; // Importer le composant PatientCard
 
+// Utiliser un hook personnalisé pour comparer profondément les dépendances
 const useDeepCompareEffect = (callback, dependencies) => {
   const ref = useRef();
 
@@ -37,7 +38,7 @@ const DataPatient = () => {
     if (patientData) {
       setData(patientData);
     }
-  }, [patientData]); // Plus besoin de vérifier 'data', patientData suffit
+  }, [patientData]);
 
   const handleRowSelected = useCallback(state => {
     setSelectedRows(state.selectedRows);
@@ -72,18 +73,17 @@ const DataPatient = () => {
   };
 
   const handleDetails = (row) => {
-    console.log("Détails du patient sélectionné :", row); // Log pour vérifier les données
     setSelectedPatient({
       ...row.patientDetails,
-      recordId: row.patientDetails.recordId, // Assurez-vous que l'ID du dossier médical est inclus
+      recordId: row.id,
+      patientId: row.patientDetails.patientId, // Doit être présent dans les données
+      macAddress: row.patientDetails.mac || '' // Assurez-vous que l'adresse MAC est incluse
     });
-    setModal(true); // Ouvrir la modal
+    setModal(true);
   };
 
   const toggleModal = () => {
-    console.log("État du modal avant changement :", modal); // Log pour vérifier l'état actuel
     setModal(!modal); // Inverser l'état du modal
-    console.log("État du modal après changement :", !modal); // Log pour vérifier le nouvel état
   };
 
   const actionButtons = (row) => (

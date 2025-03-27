@@ -10,23 +10,28 @@ import 'bootstrap-notify'; // Importer bootstrap-notify
 import 'animate.css'; // Importer animate.css pour les animations
 
 const DetailPatient = ({ patient, isModalOpen }) => {
-  console.log("Patient reçu dans DetailPatient :", patient); // Log pour vérifier les données du patient
-
   const [formData, setFormData] = useState({ ...patient });
   const [macAddress, setMacAddress] = useState('');
+  const [sensorData, setSensorData] = useState(null); // État pour les données du capteur
   const [errorMessage, setErrorMessage] = useState('');
   const updateMedicalRecordMutation = useUpdateMedicalRecord();
+
+  // Fonction pour récupérer les données du capteur en fonction du dossier médical
+  const fetchSensorData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/sensorPatient/sensorPoul/${patient.recordId}`);
+      setSensorData(response.data); // Mettre à jour directement les données du capteur
+      setMacAddress(response.data.mac); // Mettre à jour l'adresse MAC
+    } catch (error) {
+      console.error("❌ Erreur lors de la récupération des données du capteur :", error);
+    }
+  };
 
   // Fonction pour récupérer les dernières données du capteur
   const fetchLatestSensorData = async () => {
     try {
-      console.log("Appel de fetchLatestSensorData"); // Log pour vérifier l'appel
       const response = await axios.get('http://localhost:3001/api/sensorPatient/sensorPoul/latest');
-      console.log("Données reçues du serveur :", response.data); // Log des données reçues
-
       const { macAddress } = response.data;
-      console.log("Adresse MAC reçue :", macAddress); // Log de l'adresse MAC reçue
-
       setMacAddress(macAddress); // Mettre à jour l'adresse MAC dans l'état
     } catch (error) {
       console.error("❌ Erreur lors de la récupération des données du capteur :", error);
@@ -35,12 +40,18 @@ const DetailPatient = ({ patient, isModalOpen }) => {
 
   const handleAssignSensor = async () => {
     try {
-      console.log("Données envoyées :", { macAddress, recordId: patient.recordId }); // Log des données envoyées
+      if (!macAddress) {
+        throw new Error("Adresse MAC non définie");
+      }
+
       const response = await axios.post('http://localhost:3001/api/sensorPatient/assignSensorToUser', {
         macAddress: macAddress,
         recordId: patient.recordId, // Utiliser l'ID du dossier médical
       });
-  
+
+      // Mettre à jour les données du patient avec le dossier médical renvoyé
+      setFormData(response.data.medicalRecord);
+
       // Afficher une notification de succès
       $.notify({
         icon: 'fa fa-check', // Icône de succès
@@ -58,16 +69,16 @@ const DetailPatient = ({ patient, isModalOpen }) => {
           exit: 'animated fadeOutRight' // Animation de sortie
         }
       });
-  
+
       setErrorMessage(''); // Effacer les erreurs précédentes
     } catch (error) {
       console.error("❌ Erreur lors de l'assignation du capteur :", error);
-  
+
       // Afficher une notification d'erreur
       $.notify({
         icon: 'fa fa-times', // Icône d'erreur
         title: 'Erreur', // Titre de la notification
-        message: error.response?.data?.message || "Une erreur inattendue s'est produite.", // Message d'erreur
+        message: error.response?.data?.message || error.message || "Une erreur inattendue s'est produite.", // Message d'erreur
       }, {
         type: 'danger', // Type de notification (danger pour les erreurs)
         placement: {
@@ -80,11 +91,11 @@ const DetailPatient = ({ patient, isModalOpen }) => {
           exit: 'animated fadeOutRight' // Animation de sortie
         }
       });
-  
+
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message); // Afficher le message d'erreur du serveur
       } else {
-        setErrorMessage("Une erreur inattendue s'est produite.");
+        setErrorMessage(error.message || "Une erreur inattendue s'est produite.");
       }
     }
   };
@@ -94,14 +105,14 @@ const DetailPatient = ({ patient, isModalOpen }) => {
     let intervalId;
 
     if (isModalOpen) {
-      console.log("Modal ouvert, appel de fetchLatestSensorData"); // Log pour vérifier l'appel
+      fetchSensorData();
       fetchLatestSensorData();
 
-      // Configurer un intervalle pour appeler fetchLatestSensorData toutes les secondes
-      intervalId = setInterval(fetchLatestSensorData, 1000);
+      // Configurer un intervalle pour appeler fetchSensorData toutes les secondes
+      intervalId = setInterval(fetchSensorData, 1000);
     } else {
-      console.log("Modal fermé, réinitialisation des données"); // Log pour vérifier la réinitialisation
       setMacAddress('');
+      setSensorData(null); // Réinitialiser les données du capteur
       setErrorMessage('');
     }
 
@@ -111,7 +122,6 @@ const DetailPatient = ({ patient, isModalOpen }) => {
       }
     };
   }, [isModalOpen]);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,6 +138,17 @@ const DetailPatient = ({ patient, isModalOpen }) => {
     primary: '#409D9B',
     secondary: '#034561',
     text: '#4A4A4A'
+  };
+
+  // Déterminer la couleur de l'état
+  const getStatusColor = (value, min, max) => {
+    if (value < min || value > max) {
+      return 'text-danger'; // Rouge pour anormal
+    } else if (value >= min && value <= max) {
+      return 'text-success'; // Vert pour normal
+    } else {
+      return 'text-warning'; // Jaune pour constant
+    }
   };
 
   return (
@@ -283,10 +304,14 @@ const DetailPatient = ({ patient, isModalOpen }) => {
                 />
                 <h6 className="text-secondary small mb-2">Fréquence cardiaque</h6>
                 <div className="d-flex align-items-end">
-                  <h3 className="mb-0 me-2" style={{ color: colors.secondary }}>98</h3>
-                  <span className="text-success small">Normal</span>
+                  <h3 className={`mb-0 me-2 ${sensorData ? getStatusColor(sensorData.heartRate, 60, 100) : ''}`}>
+                    {sensorData ? sensorData.heartRate : 'N/A'}
+                  </h3>
+                  <span className={`small ${sensorData ? getStatusColor(sensorData.heartRate, 60, 100) : ''}`}>
+                    {sensorData && sensorData.heartRate >= 60 && sensorData.heartRate <= 100 ? 'Normal' : 'Anormal'}
+                  </span>
                 </div>
-                <div className="text-muted small mt-1">72 mmig</div>
+                <div className="text-muted small mt-1">BPM</div>
               </div>
             </div>
 
@@ -317,13 +342,29 @@ const DetailPatient = ({ patient, isModalOpen }) => {
                 />
                 <h6 className="text-secondary small mb-2">Saturation O2</h6>
                 <div className="d-flex align-items-end">
-                  <h3 className="mb-0 me-2" style={{ color: colors.secondary }}>95%</h3>
-                  <span className="text-success small">Normal</span>
+                  <h3 className={`mb-0 me-2 ${sensorData ? getStatusColor(sensorData.spo2, 95, 100) : ''}`}>
+                    {sensorData ? sensorData.spo2 : 'N/A'}
+                  </h3>
+                  <span className={`small ${sensorData ? getStatusColor(sensorData.spo2, 95, 100) : ''}`}>
+                    {sensorData && sensorData.spo2 >= 95 ? 'Normal' : 'Anormal'}
+                  </span>
                 </div>
-                <div className="text-muted small mt-1">Niveau</div>
+                <div className="text-muted small mt-1">%</div>
               </div>
             </div>
           </div>
+
+          {/* Section Anomalies */}
+          {sensorData && sensorData.anomalies && sensorData.anomalies.length > 0 && (
+            <div className="mt-4">
+              <h6 className="text-secondary small mb-2">Anomalies détectées</h6>
+              <ul>
+                {sensorData.anomalies.map((anomaly, index) => (
+                  <li key={index} className="text-danger small">{anomaly}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -331,3 +372,4 @@ const DetailPatient = ({ patient, isModalOpen }) => {
 };
 
 export default DetailPatient;
+
