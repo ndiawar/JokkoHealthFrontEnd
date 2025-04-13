@@ -13,7 +13,7 @@ import newyork from '../../../assets/images/layouts/newyork.jpg';
 import paris from '../../../assets/images/layouts/paris.jpg';
 import romo from '../../../assets/images/layouts/romo.jpg';
 import seoul from '../../../assets/images/layouts/seoul.jpg';
-import senegal from '../../../assets/images/layouts/senegal.jpg';
+import singapore from '../../../assets/images/layouts/singapore.jpg';
 import tokyo from '../../../assets/images/layouts/tokyo.jpg';
 import { classes } from '../../../Data/Layouts';
 import { useNavigate } from 'react-router';
@@ -100,8 +100,8 @@ const CheckLayout = () => {
         </LI>
         <LI attrLI={{ dataattr: 'enterprice-type', onClick: (e) => handlePageLayputs(classes[9]) }}>
           <div className='layout-img'>
-            <Media src={senegal} className='img-fluid' alt='' />
-            <H6>Senegal</H6>
+            <Media src={singapore} className='img-fluid' alt='' />
+            <H6>Singapore</H6>
           </div>
         </LI>
         <LI attrLI={{ dataattr: 'material-icon', onClick: (e) => handlePageLayputs(classes[10]) }}>

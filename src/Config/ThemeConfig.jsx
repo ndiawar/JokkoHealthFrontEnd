@@ -3,7 +3,7 @@ export class ConfigDB {
     settings: {
       layout_type: 'ltr',  // Reste inchangé
       sidebar: {
-        type: 'horizontal-wrapper enterprice-type', // Modification de "compact-wrapper" à "horizontal-wrapper enterprice-type"
+        type: 'page-wrapper horizontal-wrapper enterprice-type', // Modification de "compact-wrapper" à "horizontal-wrapper enterprice-type"
         iconType: 'stroke-svg', // Pas de changement ici
       },
       sidebar_setting: null, // Changement de 'default-sidebar' à null

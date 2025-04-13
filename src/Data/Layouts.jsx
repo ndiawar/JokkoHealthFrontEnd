@@ -8,7 +8,7 @@ export const classes = [
   { Madrid: 'compact-wrapper color-sidebar' },
   { Moscow: 'compact-sidebar compact-small' },
   { NewYork: 'compact-wrapper box-layout' },
-  { Senegal: 'horizontal-wrapper enterprice-type' },
+  { Singapore: 'horizontal-wrapper enterprice-type' },
   { Rome: 'compact-sidebar compact-small material-icon' },
   { Barcelona: 'horizontal-wrapper enterprice-type advance-layout' }
 ];
