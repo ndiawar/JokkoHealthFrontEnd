@@ -19,7 +19,7 @@ const DetailPatient = ({ patient, isModalOpen }) => {
   // Fonction pour récupérer les données du capteur en fonction du dossier médical
   const fetchSensorData = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/sensorPatient/sensorPoul/${patient.recordId}`);
+      const response = await axios.get(`/sensorPatient/sensorPoul/${patient.recordId}`);
       setSensorData(response.data); // Mettre à jour directement les données du capteur
       setMacAddress(response.data.mac); // Mettre à jour l'adresse MAC
     } catch (error) {
@@ -30,7 +30,7 @@ const DetailPatient = ({ patient, isModalOpen }) => {
   // Fonction pour récupérer les dernières données du capteur
   const fetchLatestSensorData = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/sensorPatient/sensorPoul/latest');
+      const response = await axios.get('/sensorPatient/sensorPoul/latest');
       const { macAddress } = response.data;
       setMacAddress(macAddress); // Mettre à jour l'adresse MAC dans l'état
     } catch (error) {
@@ -44,7 +44,7 @@ const DetailPatient = ({ patient, isModalOpen }) => {
         throw new Error("Adresse MAC non définie");
       }
 
-      const response = await axios.post('http://localhost:3001/api/sensorPatient/assignSensorToUser', {
+      const response = await axios.post('/sensorPatient/assignSensorToUser', {
         macAddress: macAddress,
         recordId: patient.recordId, // Utiliser l'ID du dossier médical
       });
