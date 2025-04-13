@@ -5,10 +5,12 @@ import { Input } from 'reactstrap';
 import { FaTrash, FaUserSlash, FaUser, FaEdit } from 'react-icons/fa';
 import { getAllUsers, deleteUser, blockUser, unblockUser, updateUser } from '../../../api/Crud-Admin/index';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { confirmAlert } from 'react-confirm-alert'; // Importer react-confirm-alert
-import 'react-confirm-alert/src/react-confirm-alert.css'; // Importer le CSS
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import './DataUsers.css';
 import { Breadcrumbs } from '../../../AbstractElements';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 // Composant Modal pour la modification des utilisateurs
 const UserModal = ({ isOpen, toggle, user, onSave }) => {
@@ -86,34 +88,61 @@ const DataUsers = () => {
     const [debouncedFilterText, setDebouncedFilterText] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     // Délai pour la recherche
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedFilterText(filterText);
-        }, 300); // Délai de 300ms
+        }, 300);
 
         return () => {
             clearTimeout(handler);
         };
     }, [filterText]);
 
-    // Chargement des utilisateurs
+    // Récupération de l'utilisateur connecté
     useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await axios.get('users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                setCurrentUserId(response.data._id);
+            } catch (error) {
+                console.error('Erreur lors de la récupération de l\'utilisateur connecté:', error);
+                toast.error('Erreur lors de la récupération de votre profil');
+            }
+        };
+        fetchCurrentUser();
+    }, []);
+
+    // Chargement des utilisateurs (exclut l'utilisateur connecté)
+    useEffect(() => {
+        if (!currentUserId) return;
+
         const fetchUsers = async () => {
             try {
                 const users = await getAllUsers();
                 if (users?.elements && Array.isArray(users.elements)) {
-                    setData(users.elements);
+                    const filteredUsers = users.elements.filter(user => user._id !== currentUserId);
+                    setData(filteredUsers);
                 } else {
                     console.error('Format inattendu des données utilisateurs:', users);
+                    toast.error('Format de données inattendu');
                 }
             } catch (error) {
                 console.error('Erreur lors de la récupération des utilisateurs:', error);
+                toast.error('Erreur lors du chargement des utilisateurs');
+            } finally {
+                setLoading(false);
             }
         };
         fetchUsers();
-    }, []);
+    }, [currentUserId]);
 
     // Gestion de la sélection des lignes
     const handleRowSelected = useCallback(state => {
@@ -137,18 +166,10 @@ const DataUsers = () => {
                         try {
                             await deleteUser(row._id);
                             setData(data.filter(item => item._id !== row._id));
-                            confirmAlert({
-                                title: 'Succès',
-                                message: 'L\'utilisateur a été supprimé.',
-                                buttons: [{ label: 'OK' }]
-                            });
+                            toast.success('L\'utilisateur a été supprimé');
                         } catch (error) {
                             console.error("Erreur lors de la suppression :", error);
-                            confirmAlert({
-                                title: 'Erreur',
-                                message: 'Un problème est survenu lors de la suppression.',
-                                buttons: [{ label: 'OK' }]
-                            });
+                            toast.error('Un problème est survenu lors de la suppression');
                         }
                     }
                 },
@@ -181,17 +202,9 @@ const DataUsers = () => {
 
                         const failedDeletions = results.filter(result => !result.success);
                         if (failedDeletions.length > 0) {
-                            confirmAlert({
-                                title: 'Erreur',
-                                message: `Échec de la suppression de ${failedDeletions.length} utilisateur(s).`,
-                                buttons: [{ label: 'OK' }]
-                            });
+                            toast.error(`Échec de la suppression de ${failedDeletions.length} utilisateur(s)`);
                         } else {
-                            confirmAlert({
-                                title: 'Succès',
-                                message: 'Tous les utilisateurs ont été supprimés.',
-                                buttons: [{ label: 'OK' }]
-                            });
+                            toast.success('Tous les utilisateurs ont été supprimés');
                         }
 
                         setData(data.filter(item => !selectedRows.some(elem => elem._id === item._id)));
@@ -221,17 +234,18 @@ const DataUsers = () => {
                 {
                     label: 'Oui',
                     onClick: async () => {
-                        await blockUser(userId);
-                        setData(prevData =>
-                            prevData.map(user =>
-                                user._id === userId ? { ...user, isBlocked: true } : user
-                            )
-                        );
-                        confirmAlert({
-                            title: 'Succès',
-                            message: 'L\'utilisateur a été bloqué.',
-                            buttons: [{ label: 'OK' }]
-                        });
+                        try {
+                            await blockUser(userId);
+                            setData(prevData =>
+                                prevData.map(user =>
+                                    user._id === userId ? { ...user, isBlocked: true } : user
+                                )
+                            );
+                            toast.success('L\'utilisateur a été bloqué');
+                        } catch (error) {
+                            console.error("Erreur lors du blocage :", error);
+                            toast.error('Erreur lors du blocage de l\'utilisateur');
+                        }
                     }
                 },
                 {
@@ -257,17 +271,18 @@ const DataUsers = () => {
                 {
                     label: 'Oui',
                     onClick: async () => {
-                        await unblockUser(userId);
-                        setData(prevData =>
-                            prevData.map(user =>
-                                user._id === userId ? { ...user, isBlocked: false } : user
-                            )
-                        );
-                        confirmAlert({
-                            title: 'Succès',
-                            message: 'L\'utilisateur a été débloqué.',
-                            buttons: [{ label: 'OK' }]
-                        });
+                        try {
+                            await unblockUser(userId);
+                            setData(prevData =>
+                                prevData.map(user =>
+                                    user._id === userId ? { ...user, isBlocked: false } : user
+                                )
+                            );
+                            toast.success('L\'utilisateur a été débloqué');
+                        } catch (error) {
+                            console.error("Erreur lors du déblocage :", error);
+                            toast.error('Erreur lors du déblocage de l\'utilisateur');
+                        }
                     }
                 },
                 {
@@ -297,22 +312,15 @@ const DataUsers = () => {
             // Recharger les données après la mise à jour
             const users = await getAllUsers();
             if (users?.elements && Array.isArray(users.elements)) {
-                setData(users.elements);
+                const filteredUsers = users.elements.filter(user => user._id !== currentUserId);
+                setData(filteredUsers);
             }
 
             setModalOpen(false);
-            confirmAlert({
-                title: 'Succès',
-                message: 'L\'utilisateur a été mis à jour.',
-                buttons: [{ label: 'OK' }]
-            });
+            toast.success('L\'utilisateur a été mis à jour');
         } catch (error) {
             console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
-            confirmAlert({
-                title: 'Erreur',
-                message: 'Un problème est survenu lors de la mise à jour.',
-                buttons: [{ label: 'OK' }]
-            });
+            toast.error('Un problème est survenu lors de la mise à jour');
         }
     };
 
@@ -347,9 +355,23 @@ const DataUsers = () => {
     const filteredData = useMemo(() => {
         return data.filter(row =>
             [row.nom, row.prenom, row.adresse, row.telephone, row.email]
-                .some(field => field.toLowerCase().includes(debouncedFilterText.toLowerCase()))
+                .some(field => field?.toLowerCase().includes(debouncedFilterText.toLowerCase()))
         );
     }, [data, debouncedFilterText]);
+
+    if (loading) {
+        return (
+            <Fragment>
+                <Breadcrumbs mainTitle="Utilisateurs" parent="Administrateur" title="Utilisateurs" />
+                <div className="text-center p-5">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="sr-only">Chargement...</span>
+                    </div>
+                    <p className="mt-2">Chargement des utilisateurs...</p>
+                </div>
+            </Fragment>
+        );
+    }
 
     return (
         <Fragment>

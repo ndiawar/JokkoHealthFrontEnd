@@ -1,0 +1,99 @@
+.chats-container {
+  display: flex;
+  height: 100vh;
+}
+
+.user-list {
+  width: 250px;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+  overflow-y: auto; /* Ajoute un scroll si le contenu dépasse */
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer; /* Ajoute un curseur de main pour indiquer que c'est cliquable */
+}
+
+.user-item:hover {
+  background-color: #f0f0f0; /* Change la couleur de fond au survol */
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  align-items: center; /* Aligne verticalement les éléments */
+}
+
+.messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 10px;
+  align-items: flex-start; /* Aligne les messages au début */
+}
+
+.message-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.message-content {
+  background: #f1f1f1;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 70%; /* Limite la largeur des bulles de message */
+}
+
+.message-time {
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 5px; /* Ajoute un espacement pour le temps */
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.chat-input button {
+  margin-left: 10px;
+  padding: 10px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}

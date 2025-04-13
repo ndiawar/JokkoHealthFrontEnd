@@ -166,7 +166,7 @@ import DataUsers from "../Pages/Admin/Utilisateurs/DataUsers";
 
 import Historique from "../Pages/Admin/Historique";
 import Inscrire from "../Pages/Admin/Inscription";
-
+import Chats from "../Pages/Chats";
 export const routes = [
 
   // Mes routes composantes JokkoHealth
@@ -176,7 +176,7 @@ export const routes = [
   { path: `${process.env.PUBLIC_URL}/pages/admin/dashboard/:layout`, Component: <DashboardAdmin /> },
   { path: `${process.env.PUBLIC_URL}/pages/admin/utilisateurs/datausers/:layout`, Component: <DataUsers /> },
   { path: `${process.env.PUBLIC_URL}/dashboard/default/:layout`, Component: <Default /> },
-
+  { path: `${process.env.PUBLIC_URL}/pages/chats/:layout`, Component: <Chats /> },
 
   // Mes routes composantes JokkoHealth
   { path: `${process.env.PUBLIC_URL}/pages/schedulemedcin/schedule/:layout`, Component: <Schedule /> },

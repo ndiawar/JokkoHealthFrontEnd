@@ -1,8 +1,8 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import DataTable from 'react-data-table-component';
-import Cookies from 'js-cookie'; // Import de js-cookie
-import { jwtDecode } from 'jwt-decode'; // Import de jwt-decode
-import { FaRegFrown } from 'react-icons/fa'; // Icône pour le tableau vide
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { FaRegFrown } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
@@ -31,7 +31,11 @@ const tableColumns = [
     {
         name: 'Demande',
         cell: row => (
-            <span className={`badge ${row.demande === 'Acceptée' ? 'bg-success' : 'bg-warning'}`}>
+            <span className={`badge ${
+                row.demande === 'Validé' ? 'bg-success' :
+                row.demande === 'En attente' ? 'bg-warning' :
+                'bg-danger'
+            }`}>
                 {row.demande}
             </span>
         ),
@@ -40,20 +44,19 @@ const tableColumns = [
 ];
 
 const TableRV = () => {
-    const [data, setData] = useState([]); // Les données des rendez-vous
-    const [loading, setLoading] = useState(true); // État de chargement
-    const [error, setError] = useState(null); // État d'erreur
-    const [patientId, setPatientId] = useState(null); // ID du patient
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [patientId, setPatientId] = useState(null);
 
-    // Récupérer l'ID de l'utilisateur connecté à partir des cookies
     useEffect(() => {
         const fetchUserDataFromCookie = () => {
-            const token = Cookies.get('jwt'); // Récupérer le token JWT des cookies
+            const token = Cookies.get('jwt');
 
             if (token) {
                 try {
-                    const decodedToken = jwtDecode(token); // Décoder le token pour récupérer l'ID
-                    setPatientId(decodedToken.id); // Assurez-vous que l'ID se trouve dans la charge utile du token
+                    const decodedToken = jwtDecode(token);
+                    setPatientId(decodedToken.id);
                 } catch (error) {
                     console.error('Erreur lors du décodage du token:', error);
                     setError('Erreur lors de la récupération des informations utilisateur.');
@@ -63,23 +66,18 @@ const TableRV = () => {
             }
         };
 
-        fetchUserDataFromCookie(); // Appeler la fonction pour récupérer les données
+        fetchUserDataFromCookie();
     }, []);
 
-    // Récupérer les rendez-vous acceptés du patient
     useEffect(() => {
         const fetchAppointments = async () => {
-            if (!patientId) return; // Ne pas faire la requête si l'ID du patient n'est pas encore récupéré
-        
+            if (!patientId) return;
+
             try {
-                console.log("Envoi de la requête avec le token dans le cookie");
-        
                 const response = await axios.get('/rendezvous/accepted-for-patient', {
-                    withCredentials: true,  // Permet d'envoyer les cookies avec la requête
+                    withCredentials: true,
                 });
-        
-                console.log('Réponse API:', response.data);
-        
+
                 if (response.status === 200) {
                     const appointments = response.data;
                     const formattedData = appointments.map(appointment => ({
@@ -88,7 +86,9 @@ const TableRV = () => {
                         telephone: appointment.doctorId ? appointment.doctorId.telephone : 'Non disponible',
                         date: new Date(appointment.date).toLocaleDateString(),
                         heure: `${appointment.heure_debut} - ${appointment.heure_fin}`,
-                        demande: appointment.statutDemande === 'accepté' && appointment.demandeParticipe ? 'Acceptée' : 'Non acceptée',
+                        demande: appointment.statutDemande === 'accepté' ? 'Validé' :
+                                 appointment.statutDemande === 'en attente' ? 'En attente' :
+                                 'Rejeté',
                     }));
                     setData(formattedData);
                 }
@@ -99,12 +99,10 @@ const TableRV = () => {
                 setLoading(false);
             }
         };
-        
-    
+
         fetchAppointments();
-    }, [patientId]); // Appel lorsque l'ID du patient est disponible
-    
-    // Affichage du chargement, de l'erreur ou de l'absence de patientId
+    }, [patientId]);
+
     if (loading) return <p>Chargement des rendez-vous...</p>;
     if (error) return <p>{error}</p>;
     if (!patientId) return <p>Veuillez vous connecter pour voir vos rendez-vous.</p>;
