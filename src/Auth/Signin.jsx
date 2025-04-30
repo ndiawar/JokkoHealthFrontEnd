@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import imagePath from '../../src/assets/images/other-images/Administration_9.png';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import logo from '../../src/assets/images/other-images/Links.png';
@@ -11,7 +11,7 @@ import CustomizerContext from "../_helper/Customizer";
 import Cookies from 'js-cookie';
 
 const Signin = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { layoutURL } = useContext(CustomizerContext);
 
   const [email, setEmail] = useState("");
@@ -56,29 +56,44 @@ const Signin = () => {
     setIsLoading(true);
     try {
       const response = await loginUser({ email, motDePasse: password });
+      console.log('Réponse de connexion:', response);
       const { user, token } = response;
+      console.log('Rôle de l\'utilisateur:', user.role);
 
-      // Stocker le token dans les cookies
+      // Stocker le token et le rôle dans les cookies
       Cookies.set('jwt', token, { expires: 1 });
+      Cookies.set('userRole', user.role, { expires: 1 });
+      
+      // Mettre à jour l'état d'authentification dans le localStorage
+      localStorage.setItem('authenticated', 'true');
+      localStorage.setItem('login', 'true');
+      localStorage.setItem('user', JSON.stringify(user));
 
-      // Redirection en fonction du rôle de l'utilisateur
+      // Définir le chemin de redirection en fonction du rôle
+      let redirectPath;
       switch (user.role) {
         case 'SuperAdmin':
-          navigate(`${process.env.PUBLIC_URL}/pages/admin/dashboard/${layoutURL}`);
+          redirectPath = `${process.env.PUBLIC_URL}/pages/admin/dashboard/${layoutURL}`;
           break;
         case 'Medecin':
-          navigate(`${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`);
+          redirectPath = `${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`;
           break;
         case 'Patient':
-          navigate(`${process.env.PUBLIC_URL}/dashboard/patient/${layoutURL}`);
+          redirectPath = `${process.env.PUBLIC_URL}/dashboard/patient/${layoutURL}`;
           break;
         default:
           toast.error("Rôle utilisateur non reconnu !");
-          break;
+          return;
       }
 
+      console.log('Tentative de redirection vers:', redirectPath);
+      
+      // Forcer la navigation avec window.location
+      window.location.href = redirectPath;
+      
       toast.success("Connexion réussie !");
     } catch (error) {
+      console.error('Erreur lors de la connexion:', error);
       setLoginError(error.response?.data?.message || "Erreur lors de la connexion");
       toast.error("Vous avez entré un mauvais mot de passe ou un nom d'utilisateur !");
     } finally {
