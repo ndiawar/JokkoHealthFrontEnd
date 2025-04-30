@@ -12,9 +12,11 @@ const CustomizerProvider = (props) => {
   const [mixLayout, setMixLayout] = useState(false);
   const [sidebarResponsive, setSidebarResponsive] = useState(false);
   const [IsOpen, setIsClose] = useState(false);
-  const defaultLayoutObj = classes.find((item) => Object.values(item).pop(1) === 'compact-wrapper');
-  const layoutURL = localStorage.getItem('layout') || Object.keys(defaultLayoutObj).pop();
-  const layoutValue = Object.values(defaultLayoutObj).pop();
+  
+  // Vérification sécurisée de defaultLayoutObj avec Singapore comme valeur par défaut
+  const defaultLayoutObj = classes.find((item) => Object.keys(item).pop() === 'Singapore') || {};
+  const layoutURL = localStorage.getItem('layout') || (defaultLayoutObj ? Object.keys(defaultLayoutObj).pop() : 'Singapore');
+  const layoutValue = defaultLayoutObj ? Object.values(defaultLayoutObj).pop() : 'horizontal-wrapper enterprice-type';
   const location = window.location.pathname.split('/').pop();
 
   useEffect(() => {

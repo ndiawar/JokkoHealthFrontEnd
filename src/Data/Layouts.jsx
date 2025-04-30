@@ -12,3 +12,5 @@ export const classes = [
   { Rome: 'compact-sidebar compact-small material-icon' },
   { Barcelona: 'horizontal-wrapper enterprice-type advance-layout' }
 ];
+
+localStorage.setItem('layout', 'Singapore');
