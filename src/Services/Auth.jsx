@@ -1,6 +1,16 @@
 export function authHeader() {
-    // Les cookies seront envoyés automatiquement avec les requêtes si 'withCredentials' est activé
-    return {};  // Pas besoin d'ajouter le token ici, car les cookies sont envoyés automatiquement
+    // Récupérer le token depuis les cookies
+    const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('jwt='))
+        ?.split('=')[1];
+
+    if (token) {
+        return {
+            'Authorization': `Bearer ${token}`
+        };
+    }
+    return {};
 }
 
 export function getCurrentUser() {

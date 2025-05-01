@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 // import { useNavigate } from "react-router-dom";
 import imagePath from '../../src/assets/images/other-images/Administration_9.png';
-import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import logo from '../../src/assets/images/other-images/Links.png';
 import { loginUser } from "../api/users";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,6 +20,7 @@ const Signin = () => {
   const [passwordError, setPasswordError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Fonction pour valider l'email
   const validateEmail = (value) => {
@@ -134,7 +135,7 @@ const Signin = () => {
               <div className="input-wrapper">
                 <FaLock className="input-icon" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   placeholder="Mot de passe"
@@ -142,6 +143,13 @@ const Signin = () => {
                   onChange={handleInputChange}
                   className={`input-field ${passwordError ? "input-error" : ""}`}
                 />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
               {passwordError && <span className="error-message">{passwordError}</span>}
             </div>
