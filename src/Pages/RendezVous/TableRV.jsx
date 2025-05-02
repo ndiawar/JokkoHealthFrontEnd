@@ -1,47 +1,10 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import DataTable from 'react-data-table-component';
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
 import { FaRegFrown } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
-
-// Colonnes pour le tableau
-const tableColumns = [
-    {
-        name: 'Spécialité',
-        selector: row => row.specialite,
-        sortable: true,
-    },
-    {
-        name: 'Téléphone',
-        selector: row => row.telephone,
-        sortable: true,
-    },
-    {
-        name: 'Date de disponibilité',
-        selector: row => row.date,
-        sortable: true,
-    },
-    {
-        name: 'Heure',
-        selector: row => row.heure,
-        sortable: true,
-    },
-    {
-        name: 'Demande',
-        cell: row => (
-            <span className={`badge ${
-                row.demande === 'Validé' ? 'bg-success' :
-                row.demande === 'En attente' ? 'bg-warning' :
-                'bg-danger'
-            }`}>
-                {row.demande}
-            </span>
-        ),
-        sortable: true,
-    },
-];
+import { getAppointments } from '../../api/ApiRendezVous';
+import { Badge } from 'reactstrap';
 
 const TableRV = () => {
     const [data, setData] = useState([]);
@@ -50,78 +13,153 @@ const TableRV = () => {
     const [patientId, setPatientId] = useState(null);
 
     useEffect(() => {
-        const fetchUserDataFromCookie = () => {
-            const token = Cookies.get('jwt');
-
-            if (token) {
-                try {
-                    const decodedToken = jwtDecode(token);
-                    setPatientId(decodedToken.id);
-                } catch (error) {
-                    console.error('Erreur lors du décodage du token:', error);
-                    setError('Erreur lors de la récupération des informations utilisateur.');
-                }
-            } else {
-                setError('Token non trouvé dans les cookies.');
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get("/users/me", {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                console.log('Données utilisateur reçues:', response.data);
+                setPatientId(response.data._id);
+            } catch (err) {
+                console.error("Erreur lors de la récupération des informations utilisateur:", err);
+                setError("Erreur lors de la récupération des informations utilisateur.");
             }
         };
 
-        fetchUserDataFromCookie();
+        fetchUserData();
     }, []);
 
     useEffect(() => {
         const fetchAppointments = async () => {
-            if (!patientId) return;
+            if (!patientId) {
+                console.log('PatientId non disponible');
+                return;
+            }
 
+            console.log('Récupération des rendez-vous pour le patient:', patientId);
             try {
-                const response = await axios.get('/rendezvous/accepted-for-patient', {
-                    withCredentials: true,
-                });
-
-                if (response.status === 200) {
-                    const appointments = response.data;
-                    const formattedData = appointments.map(appointment => ({
-                        id: appointment._id,
-                        specialite: appointment.specialiste,
-                        telephone: appointment.doctorId ? appointment.doctorId.telephone : 'Non disponible',
-                        date: new Date(appointment.date).toLocaleDateString(),
-                        heure: `${appointment.heure_debut} - ${appointment.heure_fin}`,
-                        demande: appointment.statutDemande === 'accepté' ? 'Validé' :
-                                 appointment.statutDemande === 'en attente' ? 'En attente' :
-                                 'Rejeté',
+                const appointments = await getAppointments();
+                console.log('Rendez-vous reçus:', appointments);
+                
+                const filteredAppointments = appointments
+                    .filter(appointment => 
+                        (appointment.demandeParticipe === true) || 
+                        (appointment.statutDemande === 'refusé' && appointment.patientId === patientId)
+                    )
+                    .map(appointment => ({
+                        ...appointment,
+                        statutLabel: getStatutLabel(appointment.statutDemande)
                     }));
-                    setData(formattedData);
-                }
+                console.log('Rendez-vous filtrés:', filteredAppointments);
+                
+                setData(filteredAppointments);
             } catch (err) {
-                console.error("Erreur lors de la récupération des rendez-vous :", err);
-                setError("Impossible de récupérer les rendez-vous acceptés.");
+                console.error("Erreur détaillée lors de la récupération des rendez-vous :", err);
+                setError("Impossible de récupérer les rendez-vous.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchAppointments();
+        if (patientId) {
+            fetchAppointments();
+            const interval = setInterval(fetchAppointments, 30000);
+            return () => clearInterval(interval);
+        }
     }, [patientId]);
 
-    if (loading) return <p>Chargement des rendez-vous...</p>;
-    if (error) return <p>{error}</p>;
-    if (!patientId) return <p>Veuillez vous connecter pour voir vos rendez-vous.</p>;
+    const getStatutLabel = (statut) => {
+        switch (statut) {
+            case 'accepté':
+                return { text: 'Accepté', color: 'success' };
+            case 'refusé':
+                return { text: 'Refusé', color: 'danger' };
+            case 'en attente':
+                return { text: 'En attente', color: 'warning' };
+            default:
+                return { text: statut, color: 'secondary' };
+        }
+    };
+
+    const tableColumns = [
+        {
+            name: 'Date',
+            selector: row => new Date(row.date).toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }),
+            sortable: true,
+        },
+        {
+            name: 'Heure',
+            selector: row => `${row.heure_debut} - ${row.heure_fin}`,
+            sortable: true,
+        },
+        {
+            name: 'Spécialiste',
+            selector: row => row.specialiste || 'Non spécifié',
+            sortable: true,
+        },
+        {
+            name: 'Médecin',
+            selector: row => row.doctorId ? `Dr. ${row.doctorId.nom} ${row.doctorId.prenom}` : 'Non assigné',
+            sortable: true,
+        },
+        {
+            name: 'Statut',
+            cell: row => (
+                <Badge color={row.statutLabel.color} className="px-3 py-2">
+                    {row.statutLabel.text}
+                </Badge>
+            ),
+            sortable: true,
+            selector: row => row.statutDemande,
+        }
+    ];
+
+    if (loading) return (
+        <div className="text-center my-5">
+            <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+    );
+
+    if (error) return (
+        <div className="alert alert-danger" role="alert">
+            {error}
+        </div>
+    );
+
+    if (!patientId) return (
+        <div className="alert alert-warning" role="alert">
+            Veuillez vous connecter pour voir vos rendez-vous.
+        </div>
+    );
 
     return (
         <Fragment>
-            <h2 style={{ textAlign: 'left', marginTop: '20px', paddingLeft: '10px' }}>Mes Rendez-vous</h2>
+            <h2 className="mb-4">Mes Rendez-vous</h2>
             <div className="table-responsive">
                 {data.length === 0 ? (
-                    <div className="text-center">
-                        <FaRegFrown size={50} color="#f8d7da" />
-                        <p style={{ color: '#f8d7da' }}>Aucun rendez-vous accepté trouvé pour ce patient.</p>
+                    <div className="text-center py-5">
+                        <FaRegFrown size={50} className="text-muted mb-3" />
+                        <p className="text-muted">Aucun rendez-vous trouvé.</p>
                     </div>
                 ) : (
                     <DataTable
-                        data={data}
                         columns={tableColumns}
-                        striped={true}
+                        data={data}
                         pagination
+                        paginationPerPage={5}
+                        paginationRowsPerPageOptions={[5, 10, 15]}
+                        striped
+                        highlightOnHover
+                        responsive
                     />
                 )}
             </div>

@@ -14,18 +14,18 @@ const SampleNextArrow = ({ onClick }) => (
     style={{
       position: "absolute",
       top: "50%",
-      right: "-50px",
+      right: "-30px",
       transform: "translateY(-50%)",
       cursor: "pointer",
       backgroundColor: "#3e7e8c",
       color: "#FFFFFF",
       borderRadius: "50%",
-      width: "40px",
-      height: "40px",
+      width: "30px",
+      height: "30px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      zIndex: 10,
+      zIndex: 1,
     }}
     onClick={onClick}
   >
@@ -38,18 +38,18 @@ const SamplePrevArrow = ({ onClick }) => (
     style={{
       position: "absolute",
       top: "50%",
-      left: "-50px",
+      left: "-30px",
       transform: "translateY(-50%)",
       cursor: "pointer",
       backgroundColor: "#3e7e8c",
       color: "#FFFFFF",
       borderRadius: "50%",
-      width: "40px",
-      height: "40px",
+      width: "30px",
+      height: "30px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      zIndex: 10,
+      zIndex: 1,
     }}
     onClick={onClick}
   >
@@ -61,6 +61,7 @@ const CarteRv = ({ onAppointmentAdded }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [patientId, setPatientId] = useState(null);
+  const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -79,7 +80,10 @@ const CarteRv = ({ onAppointmentAdded }) => {
     const fetchAppointments = async () => {
       try {
         const data = await getAvailableAppointments();
-        setAppointments(data);
+        // Filtrer les rendez-vous pour éviter les doublons
+        const uniqueAppointments = Array.from(new Set(data.map(a => a._id)))
+          .map(id => data.find(a => a._id === id));
+        setAppointments(uniqueAppointments);
       } catch (err) {
         console.error("Impossible de récupérer les rendez-vous.");
       } finally {
@@ -89,46 +93,59 @@ const CarteRv = ({ onAppointmentAdded }) => {
 
     fetchUserData();
     fetchAppointments();
-  }, [patientId]);
+  }, []);
 
   const handleDemanderParticipation = async (appointmentId) => {
+    if (isRequesting) return;
+    
     if (!patientId) {
-      toast.error("Veuillez vous connecter pour demander un rendez-vous.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Veuillez vous connecter pour demander un rendez-vous.");
       return;
     }
 
+    setIsRequesting(true);
     try {
-      const response = await requestAppointment(appointmentId);
-      toast.success(response.message, {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      onAppointmentAdded(appointmentId);
+      const response = await requestAppointment(appointmentId, patientId);
+      toast.success(response.message);
+      if (onAppointmentAdded) {
+        onAppointmentAdded(appointmentId);
+      }
+      // Mettre à jour la liste des rendez-vous après une demande réussie
+      setAppointments(prev => prev.filter(app => app._id !== appointmentId));
     } catch (error) {
-      toast.error("Erreur lors de la demande de participation.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Erreur lors de la demande de participation.");
+    } finally {
+      setIsRequesting(false);
     }
   };
 
-  if (loading) return <p>Chargement des rendez-vous...</p>;
+  if (loading) {
+    return (
+      <div className="text-center my-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+    );
+  }
 
   const settings = {
-    dots: true,
-    infinite: true,
+    dots: false,
+    infinite: false,
     speed: 500,
-    slidesToShow: 2,
+    slidesToShow: 1,
     slidesToScroll: 1,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
-      { breakpoint: 768, settings: { slidesToShow: 1, slidesToScroll: 1 } },
-    ],
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        }
+      }
+    ]
   };
 
   return (
@@ -136,19 +153,23 @@ const CarteRv = ({ onAppointmentAdded }) => {
       <style>
         {`
           .card-container {
-            margin: 0 10px; /* Ajout d’un espace entre les cartes */
+            padding: 10px;
           }
 
           .card {
             background-color: white;
             color: black;
             border-radius: 15px;
-            padding: 15px;
+            padding: 20px;
             text-align: center;
-            height: 250px;
+            height: auto;
+            min-height: 250px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            max-width: 400px;
           }
 
           .profile-image {
@@ -164,24 +185,25 @@ const CarteRv = ({ onAppointmentAdded }) => {
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
           }
 
           .card-title {
             margin: 0;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: bold;
           }
 
           .text-muted {
-            font-size: 0.85rem;
-            color: gray;
+            font-size: 0.9rem;
+            color: #666;
             margin: 0;
           }
 
           .card-text {
-            font-size: 0.9rem;
-            margin-bottom: 12px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
           }
 
           .btn-with-icon {
@@ -189,34 +211,51 @@ const CarteRv = ({ onAppointmentAdded }) => {
             align-items: center;
             justify-content: center;
             gap: 8px;
-            font-size: 0.9rem;
-            padding: 8px 12px;
+            font-size: 1rem;
+            padding: 10px 20px;
+            background-color: #3e7e8c;
+            border: none;
+            transition: all 0.3s ease;
+          }
+
+          .btn-with-icon:hover:not(:disabled) {
+            background-color: #2c5d6f;
+            transform: translateY(-2px);
+          }
+
+          .btn-with-icon:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
           }
 
           .empty-message {
             text-align: center;
             margin-top: 50px;
-            font-size: 1.5rem;
-            color: gray;
+            padding: 20px;
           }
 
           .empty-message .icon {
-            font-size: 5rem;
+            font-size: 3rem;
             color: #3e7e8c;
+            margin-bottom: 15px;
           }
 
-          .slick-prev, .slick-next {
-            z-index: 10;
-            width: 40px;
-            height: 40px;
+          .slick-slider {
+            margin: 0 40px;
           }
 
-          .slick-prev {
-            left: -50px; /* Espace entre bouton et cartes */
+          .slick-track {
+            display: flex;
+            align-items: center;
           }
 
-          .slick-next {
-            right: -50px; /* Espace entre bouton et cartes */
+          .slick-slide {
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+          }
+
+          .slick-slide.slick-active {
+            opacity: 1;
           }
         `}
       </style>
@@ -230,32 +269,41 @@ const CarteRv = ({ onAppointmentAdded }) => {
         <Slider {...settings}>
           {appointments.map((appointment) => (
             <div key={appointment._id} className="card-container">
-              <div className="card shadow">
+              <div className="card">
                 <div className="card-header">
                   <img src="https://via.placeholder.com/50" alt="Médecin" className="profile-image" />
                   <div>
                     <h5 className="card-title">
-                      {appointment.doctorId.nom} {appointment.doctorId.prenom}
+                      {appointment.doctorId?.nom || 'Médecin'} {appointment.doctorId?.prenom || ''}
                     </h5>
-                    <p className="text-muted">{appointment.specialiste}</p>
+                    <p className="text-muted">{appointment.specialiste || 'Spécialiste'}</p>
                   </div>
                 </div>
 
                 <p className="card-text">
                   Cher(e) patient(e),<br />
-                  Le Dr {appointment.doctorId.nom} est disponible le{" "}
-                  <strong>{new Date(appointment.date).toLocaleDateString()}</strong> de{" "}
+                  Le Dr {appointment.doctorId?.nom || 'Médecin'} est disponible le{" "}
+                  <strong>
+                    {new Date(appointment.date).toLocaleDateString('fr-FR', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </strong>
+                  <br />de{" "}
                   <strong>
                     {appointment.heure_debut} à {appointment.heure_fin}
-                  </strong>.
+                  </strong>
                 </p>
 
                 <button
                   className="btn btn-primary btn-with-icon"
                   onClick={() => handleDemanderParticipation(appointment._id)}
+                  disabled={isRequesting}
                 >
                   <FontAwesomeIcon icon={faBell} style={{ color: "yellow" }} />
-                  Prenez rendez-vous maintenant
+                  {isRequesting ? 'En cours...' : 'Prenez rendez-vous maintenant'}
                 </button>
               </div>
             </div>

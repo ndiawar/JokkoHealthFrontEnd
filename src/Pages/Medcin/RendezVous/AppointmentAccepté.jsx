@@ -1,104 +1,156 @@
 import React, { useState, useEffect } from 'react';
-import { getAcceptedAppointmentsWithParticipation } from '../../../api/ApiRendezVous'; // Import de la fonction pour récupérer les rendez-vous
+import { getAcceptedAppointmentRequests } from '../../../api/ApiRendezVous';
+import { Spinner } from 'reactstrap';
+import { FaCalendarCheck, FaClock, FaUser, FaPhone, FaEnvelope } from 'react-icons/fa';
 
-const AcceptedAppointmentsToday = ({ currentPageToday, setCurrentPageToday, appointmentsPerPage }) => {
+const AcceptedAppointmentsToday = ({ currentPageToday, setCurrentPageToday }) => {
   const [acceptedAppointments, setAcceptedAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Récupérer les rendez-vous acceptés
-  useEffect(() => {
-    const fetchAcceptedAppointments = async () => {
-      try {
-        const response = await getAcceptedAppointmentsWithParticipation();
-        setAcceptedAppointments(response); // Mettre à jour l'état avec les rendez-vous récupérés
-      } catch (error) {
-        console.error('Erreur lors de la récupération des rendez-vous acceptés:', error);
-      }
-    };
+  // Fonction pour récupérer les rendez-vous acceptés
+  const fetchAcceptedAppointments = async () => {
+    try {
+      setLoading(true);
+      const response = await getAcceptedAppointmentRequests();
+      
+      // Filtrer les rendez-vous pour aujourd'hui
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
 
-    fetchAcceptedAppointments();
-  }, []); // Le tableau vide [] signifie que cette fonction sera appelée au montage du composant (une seule fois).
+      const todayAppointments = response.filter(appointment => {
+        const appointmentDate = new Date(appointment.date);
+        appointmentDate.setHours(0, 0, 0, 0);
+        return appointmentDate.getTime() === today.getTime() && 
+               appointment.statutDemande === 'accepté' &&
+               appointment.demandeParticipe === true;
+      });
 
-  // Filtrer les rendez-vous acceptés pour aujourd'hui
-  const today = new Date().toISOString().split('T')[0]; // Récupère la date du jour au format 'YYYY-MM-DD'
-  
-  const todayAppointments = acceptedAppointments.filter(appointment => {
-    // Comparer la date du rendez-vous avec la date d'aujourd'hui
-    const appointmentDate = new Date(appointment.date).toISOString().split('T')[0];
-    return appointmentDate === today;
-  });
+      // Trier les rendez-vous par heure
+      const sortedAppointments = todayAppointments.sort((a, b) => {
+        const timeA = a.heure_debut.split(':').map(Number);
+        const timeB = b.heure_debut.split(':').map(Number);
+        return (timeA[0] * 60 + timeA[1]) - (timeB[0] * 60 + timeB[1]);
+      });
 
-  // Fonction de pagination : découpe les rendez-vous en fonction de la page actuelle
-  const paginate = (items, currentPageToday) => {
-    const startIndex = currentPageToday * appointmentsPerPage;
-    return items.slice(startIndex, startIndex + appointmentsPerPage);
+      setAcceptedAppointments(sortedAppointments);
+      setError(null);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des rendez-vous acceptés:', error);
+      setError('Impossible de charger les rendez-vous');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const paginatedTodayAppointments = paginate(todayAppointments, currentPageToday); // Applique la pagination sur les rendez-vous d'aujourd'hui
+  // Effet pour charger les rendez-vous et les actualiser
+  useEffect(() => {
+    fetchAcceptedAppointments();
+    // Actualiser toutes les 30 secondes
+    const interval = setInterval(fetchAcceptedAppointments, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fonction pour obtenir le rendez-vous actuel
+  const currentAppointment = acceptedAppointments[currentPageToday] || null;
+
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="card-body text-center">
+          <Spinner color="primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="">
-      <div className="card">
-        <div className="card-header">
-          <h5>Rendez-vous acceptés du jour ({todayAppointments.length})</h5>
-        </div>
-        <div className="card-body">
-          {paginatedTodayAppointments.length > 0 ? (
-            // Si des rendez-vous sont trouvés, les afficher
-            paginatedTodayAppointments.map((appointment) => (
-              <div key={appointment._id} className="d-flex align-items-center mb-2 p-2 border rounded">
-                <div className="flex-grow-1">
-                  <h6 className="mb-1">
-                    {appointment.patientId?.nom} {appointment.patientId?.prenom}
-                  </h6>
-                  <small className="text-muted d-block">
-                    {new Date(appointment.date).toLocaleDateString()} 
-                    {` à ${new Date(appointment.heure_debut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                  </small>
-                  <small className="text-muted d-block">
-                    {appointment.specialiste}
-                  </small>
-                  <small className="text-muted d-block">
-                    Téléphone: {appointment.patientId?.telephone}
-                  </small>
-                  <small className="text-muted d-block">
-                    Email: {appointment.patientId?.email}
-                  </small>
+    <div className="card shadow-sm">
+      <div className="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 className="mb-0">
+          <FaCalendarCheck className="me-2" />
+          Rendez-vous acceptés du jour
+          <span className="badge bg-primary ms-2">{acceptedAppointments.length}</span>
+        </h5>
+      </div>
+      <div className="card-body">
+        {currentAppointment ? (
+          <div className="appointment-card mb-3 p-3 border rounded bg-light">
+            <div className="d-flex justify-content-between align-items-start mb-2">
+              <div className="patient-info">
+                <h6 className="mb-1">
+                  <FaUser className="me-2" />
+                  {currentAppointment.patientId?.nom} {currentAppointment.patientId?.prenom}
+                </h6>
+                <div className="text-muted small">
+                  <p className="mb-1">
+                    <FaClock className="me-2" />
+                    {currentAppointment.heure_debut} - {currentAppointment.heure_fin}
+                  </p>
+                  <p className="mb-1">
+                    <FaPhone className="me-2" />
+                    {currentAppointment.patientId?.telephone}
+                  </p>
+                  <p className="mb-1">
+                    <FaEnvelope className="me-2" />
+                    {currentAppointment.patientId?.email}
+                  </p>
                 </div>
-                <span className="badge bg-success">Confirmé</span>
               </div>
-            ))
-          ) : (
-            // Si aucun rendez-vous n'est trouvé pour aujourd'hui
-            <div className="text-center text-muted">
-              Aucun rendez-vous pour aujourd'hui
+              <span className="badge bg-success">Confirmé</span>
             </div>
-          )}
-        </div>
-
-        {todayAppointments.length > 0 && (
-          <div className="card-footer d-flex justify-content-between align-items-center">
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => setCurrentPageToday(prev => Math.max(prev - 1, 0))}
-              disabled={currentPageToday === 0}
-            >
-              Précédent
-            </button>
-            <span>
-              Page {currentPageToday + 1} sur {Math.ceil(todayAppointments.length / appointmentsPerPage)}
-            </span>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => setCurrentPageToday(prev => 
-                Math.min(prev + 1, Math.ceil(todayAppointments.length / appointmentsPerPage) - 1)
-              )}
-              disabled={currentPageToday >= Math.ceil(todayAppointments.length / appointmentsPerPage) - 1}
-            >
-              Suivant
-            </button>
+            {currentAppointment.specialiste && (
+              <div className="speciality mt-2">
+                <span className="badge bg-info">{currentAppointment.specialiste}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-4">
+            <FaCalendarCheck size={40} className="text-muted mb-3" />
+            <p className="text-muted">Aucun rendez-vous pour aujourd'hui</p>
           </div>
         )}
       </div>
+
+      {acceptedAppointments.length > 0 && (
+        <div className="card-footer bg-white d-flex justify-content-between align-items-center">
+          <button
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => setCurrentPageToday(prev => Math.max(prev - 1, 0))}
+            disabled={currentPageToday === 0}
+          >
+            Précédent
+          </button>
+          <span className="text-muted">
+            Rendez-vous {currentPageToday + 1} sur {acceptedAppointments.length}
+          </span>
+          <button
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => setCurrentPageToday(prev => 
+              Math.min(prev + 1, acceptedAppointments.length - 1)
+            )}
+            disabled={currentPageToday >= acceptedAppointments.length - 1}
+          >
+            Suivant
+          </button>
+        </div>
+      )}
     </div>
   );
 };

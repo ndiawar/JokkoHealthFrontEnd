@@ -1,23 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Spinner } from 'react-bootstrap';
 import { Line, Doughnut } from 'react-chartjs-2';
-import { 
-  useFetchAppointments,
-  useFetchAcceptedAppointments,
-  useFetchRejectedAppointments
-} from '../../../Hooks/JokkoHealth/useRendezVous';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { getAllAppointments, getAcceptedAppointmentRequests, getAppointmentsStatsByMonthForMedecin } from '../../../api/ApiRendezVous';
 import './RendezVous.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
 const ResumeRendezVous = () => {
-  // Récupération des données via les hooks spécifiés
-  const { data: allAppointments, isLoading: loadingAll } = useFetchAppointments();
-  const { data: acceptedAppointments, isLoading: loadingAccepted } = useFetchAcceptedAppointments();
-  const { data: rejectedAppointments, isLoading: loadingRejected } = useFetchRejectedAppointments();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalAppointments: 0,
+    acceptedAppointments: 0,
+    monthlyStats: []
+  });
 
-  // Configuration commune des graphiques
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [allAppointments, acceptedAppointments, monthlyStats] = await Promise.all([
+        getAllAppointments(),
+        getAcceptedAppointmentRequests(),
+        getAppointmentsStatsByMonthForMedecin()
+      ]);
+
+      setStats({
+        totalAppointments: allAppointments.length,
+        acceptedAppointments: acceptedAppointments.length,
+        monthlyStats: monthlyStats.stats || []
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des statistiques:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    // Actualisation toutes les 30 secondes
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -25,12 +50,7 @@ const ResumeRendezVous = () => {
     scales: { x: { display: false }, y: { display: false } }
   };
 
-  // Calcul des métriques principales
-  const totalAppointments = allAppointments?.length || 0;
-  const acceptedCount = acceptedAppointments?.length || 0;
-  const rejectedCount = rejectedAppointments?.length || 0;
-
-  if (loadingAll || loadingAccepted || loadingRejected) {
+  if (loading) {
     return (
       <div className="text-center my-5">
         <Spinner animation="border" variant="primary" />
@@ -46,13 +66,13 @@ const ResumeRendezVous = () => {
           <Card.Body>
             <Card.Title className="d-flex flex-column align-items-start">
               <span>Tous les rendez-vous</span>
-              <h2>{totalAppointments}</h2>
+              <h2>{stats.totalAppointments}</h2>
             </Card.Title>
             <Line 
               data={{
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                labels: stats.monthlyStats.map(stat => `${stat.month}/${stat.year}`),
                 datasets: [{
-                  data: [totalAppointments, 0, 0, 0, 0], // À adapter avec des données temporelles réelles
+                  data: stats.monthlyStats.map(stat => stat.count),
                   borderColor: 'rgba(54, 162, 235, 1)',
                   backgroundColor: 'rgba(54, 162, 235, 0.2)',
                   fill: false,
@@ -71,13 +91,13 @@ const ResumeRendezVous = () => {
           <Card.Body>
             <Card.Title className="d-flex flex-column align-items-start">
               <span>Rendez-vous acceptés</span>
-              <h2>{acceptedCount}</h2>
+              <h2>{stats.acceptedAppointments}</h2>
             </Card.Title>
             <Line 
               data={{
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                labels: stats.monthlyStats.map(stat => `${stat.month}/${stat.year}`),
                 datasets: [{
-                  data: [acceptedCount, 0, 0, 0, 0], // À adapter avec des données temporelles réelles
+                  data: stats.monthlyStats.map(stat => stat.acceptedCount || 0),
                   borderColor: 'rgba(75, 192, 192, 1)',
                   backgroundColor: 'rgba(75, 192, 192, 0.2)',
                   fill: false,
@@ -95,14 +115,17 @@ const ResumeRendezVous = () => {
         <Card className="compact-card">
           <Card.Body>
             <Card.Title className="d-flex flex-column align-items-start">
-              <span>Nombre de demandes</span>
-              <h2>{acceptedCount + rejectedCount}</h2>
+              <span>Statistiques mensuelles</span>
+              <h2>{stats.monthlyStats[stats.monthlyStats.length - 1]?.count || 0}</h2>
             </Card.Title>
             <Doughnut 
               data={{
-                labels: ['Acceptés', 'Rejetés'],
+                labels: ['Acceptés', 'En attente'],
                 datasets: [{
-                  data: [acceptedCount, rejectedCount],
+                  data: [
+                    stats.acceptedAppointments,
+                    stats.totalAppointments - stats.acceptedAppointments
+                  ],
                   backgroundColor: [
                     'rgba(75, 192, 192, 0.2)',
                     'rgba(255, 99, 132, 0.2)'
