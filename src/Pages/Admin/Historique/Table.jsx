@@ -42,7 +42,7 @@ const Table = () => {
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/logs');
+                const response = await fetch('logs');
                 const result = await response.json();
                 if (result.logs) {
                     const formattedLogs = result.logs.map(log => ({

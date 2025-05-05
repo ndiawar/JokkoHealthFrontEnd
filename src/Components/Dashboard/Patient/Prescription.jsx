@@ -1,40 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import UserContext from '../../../_helper/UserContext'; // Import du contexte utilisateur
+import UserContext from '../../../_helper/UserContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaHeartbeat, FaLungs, FaRegLightbulb, FaRegClock } from 'react-icons/fa';
+import { MdCheckCircle } from 'react-icons/md';
 
-// Détection des anomalies pour la fréquence cardiaque et la saturation en oxygène
-const detectHeartRateAnomalies = (heartRate) => {
-  let anomalies = [];
-  if (heartRate < 40) {
-    anomalies.push("Bradycardie extrême détectée! Fréquence cardiaque trop basse.");
-  } else if (heartRate < 50) {
-    anomalies.push("Bradycardie détectée! Fréquence cardiaque trop basse.");
-  } else if (heartRate > 100) {
-    anomalies.push("Tachycardie détectée! Fréquence cardiaque trop élevée.");
-  }
-  return anomalies;
-};
-
-const detectOxygenAnomalies = (oxygenLevel) => {
-  let anomalies = [];
-  if (oxygenLevel < 90) {
-    anomalies.push("Hypoxémie détectée! SpO2 trop bas.");
-  }
-  if (oxygenLevel < 85) {
-    anomalies.push("Danger critique! SpO2 trop bas.");
-  }
-  return anomalies;
-};
-
-// Le composant Prescription qui affiche les anomalies et les prescriptions
 const Prescription = () => {
-  const { user } = useContext(UserContext); // Utilisation du contexte utilisateur
+  const { user } = useContext(UserContext);
   const [heartRate, setHeartRate] = useState(null);
   const [oxygenLevel, setOxygenLevel] = useState(null);
-  const [heartRateAnomalies, setHeartRateAnomalies] = useState([]);
-  const [oxygenAnomalies, setOxygenAnomalies] = useState([]);
-  const [heartRatePrescriptions, setHeartRatePrescriptions] = useState([]);
-  const [oxygenPrescriptions, setOxygenPrescriptions] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -47,66 +22,135 @@ const Prescription = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:3001/api/sensorPatient/sensorPoul/currentPatientSensorData', {
-        withCredentials: true, // Assurez-vous d'envoyer les cookies pour l'authentification
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
+      const response = await axios.get('sensorPatient/sensorPoul/currentPatientSensorData', {
+        withCredentials: true,
+        headers: { 'Cache-Control': 'no-cache' }
       });
 
       if (response.data && response.data.sensorData) {
         const data = response.data.sensorData;
         setHeartRate(data.heartRate);
         setOxygenLevel(data.spo2);
-
-        setError(null); // Réinitialiser l'erreur
+        setError(null);
       } else {
         setError("Aucune donnée disponible");
       }
     } catch (err) {
       console.error("Erreur API:", err);
-      const errorMessage = err.response?.data?.message || "Erreur lors de la récupération des données";
-      setError(errorMessage);
+      setError(err.response?.data?.message || "Erreur lors de la récupération des données");
     } finally {
-      setLoading(false); // Mettre à jour l'état de chargement
+      setLoading(false);
     }
   };
 
-  // Détection et mise à jour des anomalies et prescriptions pour la fréquence cardiaque et SpO2
+  // Génération des recommandations basées sur les données
   useEffect(() => {
+    const newRecommendations = [];
+
+    // Recommandations pour la fréquence cardiaque
     if (heartRate !== null) {
-      const detectedHeartRateAnomalies = detectHeartRateAnomalies(heartRate);
-      const heartRateMedicalPrescriptions = detectedHeartRateAnomalies.map((anomaly) => {
-        if (anomaly.includes("Bradycardie") || anomaly.includes("Tachycardie")) {
-          return "Consultez un médecin pour un suivi cardiaque et ajustez votre activité physique.";
-        }
-        return null;
-      }).filter(Boolean);
-
-      setHeartRateAnomalies(detectedHeartRateAnomalies);
-      setHeartRatePrescriptions(heartRateMedicalPrescriptions);
+      if (heartRate < 40) {
+        newRecommendations.push({
+          type: "urgence",
+          title: "Bradycardie Extrême",
+          description: "Votre fréquence cardiaque est très basse",
+          advice: [
+            "Consultez immédiatement un médecin",
+            "Évitez toute activité physique",
+            "Restez assis ou allongé",
+            "Respirez profondément et calmement"
+          ],
+          icon: <FaHeartbeat />,
+          color: "#dc3545"
+        });
+      } else if (heartRate < 50) {
+        newRecommendations.push({
+          type: "attention",
+          title: "Bradycardie",
+          description: "Votre fréquence cardiaque est basse",
+          advice: [
+            "Reposez-vous et évitez les efforts",
+            "Surveillez votre rythme cardiaque",
+            "Consultez un médecin si cela persiste",
+            "Évitez les boissons stimulantes"
+          ],
+          icon: <FaHeartbeat />,
+          color: "#ffc107"
+        });
+      } else if (heartRate > 100) {
+        newRecommendations.push({
+          type: "attention",
+          title: "Tachycardie",
+          description: "Votre fréquence cardiaque est élevée",
+          advice: [
+            "Reposez-vous et respirez profondément",
+            "Évitez le stress et l'anxiété",
+            "Hydratez-vous régulièrement",
+            "Consultez un médecin si cela persiste"
+          ],
+          icon: <FaHeartbeat />,
+          color: "#ffc107"
+        });
+      }
     }
 
+    // Recommandations pour la saturation en oxygène
     if (oxygenLevel !== null) {
-      const detectedOxygenAnomalies = detectOxygenAnomalies(oxygenLevel);
-      const oxygenMedicalPrescriptions = detectedOxygenAnomalies.map((anomaly) => {
-        if (anomaly.includes("Hypoxémie") || anomaly.includes("Danger critique")) {
-          return "Consultez immédiatement un professionnel de santé. Utilisation d'un concentrateur d'oxygène recommandé.";
-        }
-        return null;
-      }).filter(Boolean);
-
-      setOxygenAnomalies(detectedOxygenAnomalies);
-      setOxygenPrescriptions(oxygenMedicalPrescriptions);
+      if (oxygenLevel < 85) {
+        newRecommendations.push({
+          type: "urgence",
+          title: "Danger Critique",
+          description: "Votre saturation en oxygène est très basse",
+          advice: [
+            "Consultez immédiatement un médecin",
+            "Utilisez un concentrateur d'oxygène si disponible",
+            "Restez assis ou allongé",
+            "Respirez profondément et calmement"
+          ],
+          icon: <FaLungs />,
+          color: "#dc3545"
+        });
+      } else if (oxygenLevel < 90) {
+        newRecommendations.push({
+          type: "attention",
+          title: "Hypoxémie",
+          description: "Votre saturation en oxygène est basse",
+          advice: [
+            "Reposez-vous et respirez profondément",
+            "Évitez les efforts physiques",
+            "Consultez un médecin si cela persiste",
+            "Maintenez une bonne posture pour faciliter la respiration"
+          ],
+          icon: <FaLungs />,
+          color: "#ffc107"
+        });
+      }
     }
+
+    // Recommandations générales si tout est normal
+    if (newRecommendations.length === 0 && heartRate !== null && oxygenLevel !== null) {
+      newRecommendations.push({
+        type: "normal",
+        title: "État Normal",
+        description: "Vos paramètres vitaux sont dans les normes",
+        advice: [
+          "Continuez à maintenir une bonne hygiène de vie",
+          "Pratiquez une activité physique régulière",
+          "Maintenez une alimentation équilibrée",
+          "Dormez suffisamment"
+        ],
+        icon: <MdCheckCircle />,
+        color: "#198754"
+      });
+    }
+
+    setRecommendations(newRecommendations);
   }, [heartRate, oxygenLevel]);
 
-  // Utilisation de useEffect pour charger les données du capteur au premier rendu
   useEffect(() => {
-    fetchSensorData(); // Charger les données une fois au montage
-  }, [user]); // Exécuter lorsque le user est défini ou modifié
+    fetchSensorData();
+  }, [user]);
 
-  // Affichage pendant le chargement
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
@@ -117,7 +161,6 @@ const Prescription = () => {
     );
   }
 
-  // Affichage des erreurs
   if (error) {
     return (
       <div className="alert alert-danger text-center" style={{ maxWidth: '500px', margin: '0 auto' }}>
@@ -126,75 +169,129 @@ const Prescription = () => {
     );
   }
 
-  return (
-    <div style={{ maxWidth: '950px', margin: '20px auto', padding: '20px' }}>
-      {/* Accordéon pour la fréquence cardiaque */}
-      <div className="accordion" id="heartRateAccordion">
-        <h4>Fréquence Cardiaque</h4>
-        {heartRateAnomalies.length > 0 ? (
-          heartRateAnomalies.map((anomaly, index) => (
-            <div className="accordion-item" key={index}>
-              <h2 className="accordion-header" id={`headingHeartRate${index}`}>
-                <button
-                  className="accordion-button"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#collapseHeartRate${index}`}
-                  aria-expanded="false"
-                  aria-controls={`collapseHeartRate${index}`}>
-                  {anomaly}
-                </button>
-              </h2>
-              <div
-                id={`collapseHeartRate${index}`}
-                className="accordion-collapse collapse"
-                aria-labelledby={`headingHeartRate${index}`}>
-                <div className="accordion-body">
-                  {heartRatePrescriptions[index] || "Recommandations générales : consultez un professionnel de santé."}
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="alert alert-success text-center">
-            Aucune anomalie détectée pour la fréquence cardiaque.
+  const RecommendationCard = ({ recommendation }) => (
+    <motion.div
+      className="card mb-4 recommendation-card"
+      style={{
+        borderLeft: `4px solid ${recommendation.color}`,
+        borderRadius: '15px',
+        boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
+        background: `linear-gradient(135deg, ${recommendation.color}10 0%, ${recommendation.color}05 100%)`,
+        transition: 'all 0.3s ease',
+        overflow: 'hidden'
+      }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: '0 12px 20px rgba(0,0,0,0.15)'
+      }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="card-body p-4">
+        <div className="d-flex align-items-center mb-3">
+          <motion.div 
+            style={{ 
+              color: recommendation.color, 
+              fontSize: '2rem', 
+              marginRight: '15px',
+              background: `linear-gradient(135deg, ${recommendation.color}20 0%, ${recommendation.color}10 100%)`,
+              padding: '10px',
+              borderRadius: '12px'
+            }}
+            animate={{ 
+              scale: [1, 1.1, 1],
+              transition: { duration: 2, repeat: Infinity }
+            }}
+          >
+            {recommendation.icon}
+          </motion.div>
+          <div>
+            <h5 className="card-title mb-1" style={{ 
+              color: recommendation.color,
+              fontWeight: '600',
+              fontSize: '1.2rem'
+            }}>
+              {recommendation.title}
+            </h5>
+            <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+              {recommendation.description}
+            </p>
           </div>
-        )}
+        </div>
+        <motion.div 
+          className="mt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h6 className="mb-3 d-flex align-items-center" style={{ 
+            color: recommendation.color,
+            fontWeight: '600'
+          }}>
+            <FaRegLightbulb className="me-2" />
+            Recommandations
+          </h6>
+          <ul className="list-unstyled">
+            <AnimatePresence>
+              {recommendation.advice.map((advice, index) => (
+                <motion.li
+                  key={index}
+                  className="mb-3 d-flex align-items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ delay: index * 0.1 }}
+                  style={{
+                    background: `linear-gradient(135deg, ${recommendation.color}10 0%, ${recommendation.color}05 100%)`,
+                    padding: '10px 15px',
+                    borderRadius: '8px',
+                    border: `1px solid ${recommendation.color}20`
+                  }}
+                >
+                  <FaRegClock className="me-3" style={{ 
+                    color: recommendation.color,
+                    fontSize: '1.2rem'
+                  }} />
+                  <span style={{ fontSize: '0.95rem' }}>{advice}</span>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
+        </motion.div>
       </div>
+    </motion.div>
+  );
 
-      {/* Accordéon pour la saturation en oxygène */}
-      <div className="accordion" id="oxygenAccordion">
-        <h4>Saturation en Oxygène (SpO2)</h4>
-        {oxygenAnomalies.length > 0 ? (
-          oxygenAnomalies.map((anomaly, index) => (
-            <div className="accordion-item" key={index}>
-              <h2 className="accordion-header" id={`headingOxygen${index}`}>
-                <button
-                  className="accordion-button"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#collapseOxygen${index}`}
-                  aria-expanded="false"
-                  aria-controls={`collapseOxygen${index}`}>
-                  {anomaly}
-                </button>
-              </h2>
-              <div
-                id={`collapseOxygen${index}`}
-                className="accordion-collapse collapse"
-                aria-labelledby={`headingOxygen${index}`}>
-                <div className="accordion-body">
-                  {oxygenPrescriptions[index] || "Recommandations générales : consultez un professionnel de santé."}
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="alert alert-success text-center">
-            Aucune anomalie détectée pour la saturation en oxygène.
-          </div>
-        )}
-      </div>
+  return (
+    <div className="container py-4">
+      <motion.div 
+        className="row"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="col-12">
+          <motion.h4 
+            className="mb-4 d-flex align-items-center"
+            style={{ 
+              fontWeight: '600',
+              color: '#2c3e50'
+            }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <FaRegLightbulb className="me-2" style={{ color: '#f39c12' }} />
+            Recommandations de Santé
+          </motion.h4>
+          <AnimatePresence>
+            {recommendations.map((recommendation, index) => (
+              <RecommendationCard key={index} recommendation={recommendation} />
+            ))}
+          </AnimatePresence>
+        </div>
+      </motion.div>
     </div>
   );
 };

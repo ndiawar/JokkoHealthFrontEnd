@@ -3,10 +3,15 @@ import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import UserContext from '../../../_helper/UserContext'; // Import du contexte utilisateur
+import { FaHeartbeat, FaLungs } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
-// Couleurs mises à jour
-const heartRateColor = '#007BFF'; // Bleu pour la fréquence cardiaque
-const oxygenSaturationColor = '#28A745'; // Vert pour la saturation en oxygène
+// Couleurs mises à jour avec des tons plus doux et des dégradés
+const heartRateColor = 'rgba(220, 53, 69, 0.8)';
+const heartRateGradient = 'rgba(220, 53, 69, 0.1)';
+const oxygenSaturationColor = 'rgba(13, 110, 253, 0.8)';
+const oxygenSaturationGradient = 'rgba(13, 110, 253, 0.1)';
+const gridColor = 'rgba(0, 0, 0, 0.05)';
 
 // Composant pour afficher les graphiques des capteurs
 const ChartDashboard = () => {
@@ -31,7 +36,7 @@ const ChartDashboard = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:3001/api/sensorPatient/sensorPoul/currentPatientSensorData', {
+      const response = await axios.get('sensorPatient/sensorPoul/currentPatientSensorData', {
         withCredentials: true, // Assurez-vous d'envoyer les cookies pour l'authentification
         headers: {
           'Cache-Control': 'no-cache'
@@ -119,94 +124,277 @@ const ChartDashboard = () => {
     return <div>Aucune donnée du capteur disponible.</div>;
   }
 
-  // Transformer les données du capteur pour les graphiques
-  const heartRateData = {
-    labels: historicalData.timestamps, // Horaires des lectures
-    datasets: [
-      {
-        label: 'Fréquence Cardiaque',
-        data: historicalData.heartRate, // Utilisation des données historiques de fréquence cardiaque
-        borderColor: heartRateColor,
-        backgroundColor: 'rgba(0, 123, 255, 0.4)', // Couleur bleue avec transparence
-        borderWidth: 2,
-      },
-    ],
-  };
-
-  const oxygenSaturationData = {
-    labels: historicalData.timestamps, // Horaires des lectures
-    datasets: [
-      {
-        label: 'Saturation en Oxygène',
-        data: historicalData.oxygenSaturation, // Utilisation des données historiques de saturation en oxygène
-        borderColor: oxygenSaturationColor,
-        backgroundColor: 'rgba(40, 167, 69, 0.4)', // Couleur verte avec transparence
-        borderWidth: 2,
-      },
-    ],
-  };
-
   // Options pour le graphique de fréquence cardiaque
   const heartRateOptions = {
     maintainAspectRatio: false,
     responsive: true,
-    legend: {
-      display: false, // Masquer la légende
+    animation: {
+      duration: 2000,
+      easing: 'easeInOutQuart'
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#2c3e50',
+        bodyColor: '#2c3e50',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.parsed.y} BPM`;
+          }
+        }
+      }
     },
     scales: {
       y: {
         beginAtZero: false,
         ticks: {
-          stepSize: 20, // Intervalles de 20
-          min: 0, // Valeur minimale
-          max: 100, // Valeur maximale
+          stepSize: 20,
+          min: 0,
+          max: 100,
+          color: '#6c757d',
+          font: {
+            size: 12,
+            weight: '500'
+          }
         },
         grid: {
-          display: true,
-          color: '#e0e0e0', // Couleur de la grille
-        },
+          color: gridColor,
+          drawBorder: false
+        }
       },
       x: {
         grid: {
-          display: false,
+          display: false
         },
-      },
+        ticks: {
+          color: '#6c757d',
+          font: {
+            size: 12,
+            weight: '500'
+          }
+        }
+      }
     },
+    elements: {
+      line: {
+        tension: 0.4,
+        borderWidth: 3
+      },
+      point: {
+        radius: 5,
+        hoverRadius: 8,
+        backgroundColor: heartRateColor,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }
+    }
   };
 
   // Options pour le graphique de saturation en oxygène
   const oxygenSaturationOptions = {
     maintainAspectRatio: false,
     responsive: true,
-    legend: {
-      display: false, // Masquer la légende
+    animation: {
+      duration: 2000,
+      easing: 'easeInOutQuart'
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#2c3e50',
+        bodyColor: '#2c3e50',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${context.parsed.y}%`;
+          }
+        }
+      }
     },
     scales: {
       y: {
         beginAtZero: false,
-        grid: {
-          display: true,
-          color: '#e0e0e0', // Couleur de la grille
+        ticks: {
+          stepSize: 10,
+          min: 0,
+          max: 100,
+          color: '#6c757d',
+          font: {
+            size: 12,
+            weight: '500'
+          }
         },
+        grid: {
+          color: gridColor,
+          drawBorder: false
+        }
       },
       x: {
         grid: {
-          display: false,
+          display: false
         },
-      },
+        ticks: {
+          color: '#6c757d',
+          font: {
+            size: 12,
+            weight: '500'
+          }
+        }
+      }
     },
+    elements: {
+      line: {
+        tension: 0.4,
+        borderWidth: 3
+      },
+      point: {
+        radius: 5,
+        hoverRadius: 8,
+        backgroundColor: oxygenSaturationColor,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }
+    }
+  };
+
+  // Transformer les données du capteur pour les graphiques
+  const heartRateData = {
+    labels: historicalData.timestamps,
+    datasets: [
+      {
+        label: 'Fréquence Cardiaque',
+        data: historicalData.heartRate,
+        borderColor: heartRateColor,
+        backgroundColor: heartRateGradient,
+        borderWidth: 2,
+        fill: true
+      }
+    ]
+  };
+
+  const oxygenSaturationData = {
+    labels: historicalData.timestamps,
+    datasets: [
+      {
+        label: 'Saturation en Oxygène',
+        data: historicalData.oxygenSaturation,
+        borderColor: oxygenSaturationColor,
+        backgroundColor: oxygenSaturationGradient,
+        borderWidth: 2,
+        fill: true
+      }
+    ]
   };
 
   return (
     <div style={{ width: '100%', maxWidth: '900px', margin: 'auto', marginLeft: '20px' }}>
-      <h4 style={{ textAlign: 'left' }}>Fréquence Cardiaque</h4>
-      <div style={{ height: '200px' }}>
-        <Line data={heartRateData} options={heartRateOptions} />
-      </div>
-      <h4 style={{ textAlign: 'left' }}>Saturation en Oxygène (SpO2)</h4>
-      <div style={{ height: '200px' }}>
-        <Line data={oxygenSaturationData} options={oxygenSaturationOptions} />
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="d-flex align-items-center mb-3">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.1, 1],
+              transition: { duration: 2, repeat: Infinity }
+            }}
+          >
+            <FaHeartbeat style={{ 
+              color: heartRateColor, 
+              fontSize: '2.9rem',
+              background: heartRateGradient,
+              padding: '8px',
+              borderRadius: '50%',
+              boxShadow: '0 2px 6px rgba(220, 53, 69, 0.2)'
+            }} />
+          </motion.div>
+          <h4 style={{ 
+            textAlign: 'left', 
+            color: heartRateColor, 
+            margin: '0 0 0 15px',
+            fontWeight: '600',
+            fontSize: '1.4rem'
+          }}>
+            Fréquence Cardiaque
+          </h4>
+        </div>
+        <div style={{ 
+          height: '200px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '15px',
+          padding: '20px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          border: `1px solid ${heartRateGradient}`
+        }}>
+          <Line data={heartRateData} options={heartRateOptions} />
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="mt-4"
+      >
+        <div className="d-flex align-items-center mb-3">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.1, 1],
+              transition: { duration: 2, repeat: Infinity }
+            }}
+          >
+            <FaLungs style={{ 
+              color: oxygenSaturationColor, 
+              fontSize: '2.9rem',
+              background: oxygenSaturationGradient,
+              padding: '8px',
+              borderRadius: '50%',
+              boxShadow: '0 2px 6px rgba(13, 110, 253, 0.2)'
+            }} />
+          </motion.div>
+          <h4 style={{ 
+            textAlign: 'left', 
+            color: oxygenSaturationColor, 
+            margin: '0 0 0 15px',
+            fontWeight: '600',
+            fontSize: '1.4rem'
+          }}>
+            Saturation en Oxygène (SpO2)
+          </h4>
+        </div>
+        <div style={{ 
+          height: '200px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '15px',
+          padding: '20px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          border: `1px solid ${oxygenSaturationGradient}`
+        }}>
+          <Line data={oxygenSaturationData} options={oxygenSaturationOptions} />
+        </div>
+      </motion.div>
     </div>
   );
 };

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import { FaHeartbeat, FaWind, FaThermometerHalf } from "react-icons/fa";
+// import { FaHeartbeat, FaWind, FaThermometerHalf } from "react-icons/fa";
+import { GiHeartBeats, GiLungs, GiClockwork } from "react-icons/gi";
+import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
 import UserContext from "../../../_helper/UserContext"; // Importez le contexte utilisateur
@@ -9,40 +11,58 @@ function Card({ icon, title, value, unit, status, color }) {
   const darkerColor = shadeColor(color, -20);
 
   return (
-    <div
+    <motion.div
       className="card shadow-sm bg-white rounded"
       style={{
-        width: "14rem",
-        height: "12rem",
+        width: "16rem",
+        height: "14rem",
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "center",
-        padding: "1rem",
+        padding: "1.5rem",
         borderLeft: `5px solid ${color}`,
-        textAlign: "left",
-        backgroundColor: darkerColor
+        textAlign: "center",
+        backgroundColor: darkerColor,
+        transition: "all 0.3s ease",
+        cursor: "pointer",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          boxShadow: "0 10px 20px rgba(0,0,0,0.1)"
+        }
       }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
-      <div style={{ fontSize: "2rem", color: color }}>{icon}</div>
-      <h6 className="card-title text-muted" style={{ margin: "0.5rem 0", fontSize: "0.9rem" }}>
-        {title}
-      </h6>
-      <h4 className="card-text" style={{ margin: "0", fontSize: "1.2rem" }}>
-        {value} <span style={{ fontSize: "0.8rem" }}>{unit}</span>
-      </h4>
-      <span
-        className="badge"
-        style={{
-          backgroundColor: color,
-          marginTop: "0.5rem",
-          fontSize: "0.8rem",
-          padding: "0.25rem 0.5rem",
+      <motion.div 
+        style={{ fontSize: "3rem", color: color }}
+        animate={{ 
+          scale: [1, 1.1, 1],
+          transition: { duration: 2, repeat: Infinity }
         }}
       >
+        {icon}
+      </motion.div>
+      <h6 className="card-title text-muted mt-3" style={{ fontSize: "1rem", fontWeight: "600" }}>
+        {title}
+      </h6>
+      <h4 className="card-text mt-2" style={{ fontSize: "1.8rem", fontWeight: "700" }}>
+        {value} <span style={{ fontSize: "1rem", fontWeight: "500" }}>{unit}</span>
+      </h4>
+      <motion.span
+        className="badge mt-3"
+        style={{
+          backgroundColor: color,
+          fontSize: "0.9rem",
+          padding: "0.5rem 1rem",
+          borderRadius: "20px",
+          fontWeight: "600"
+        }}
+        whileHover={{ scale: 1.05 }}
+      >
         {status}
-      </span>
-    </div>
+      </motion.span>
+    </motion.div>
   );
 }
 
@@ -71,7 +91,7 @@ function CardDashboard() {
         return;
       }
 
-      const response = await axios.get('http://localhost:3001/api/sensorPatient/sensorPoul/currentPatientSensorData', {
+      const response = await axios.get('sensorPatient/sensorPoul/currentPatientSensorData', {
         withCredentials: true, // Assurez-vous d'envoyer les cookies pour l'authentification
         headers: {
           'Cache-Control': 'no-cache'
@@ -172,30 +192,45 @@ function CardDashboard() {
   }
 
   return (
-    <div className="d-flex flex-wrap justify-content-center gap-3 p-3">
-      <div className="col-6 col-md-4 col-lg-3">
+    <div className="d-flex flex-wrap justify-content-center gap-4 p-4">
+      <motion.div 
+        className="col-6 col-md-4 col-lg-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <Card
-          icon={<FaHeartbeat size={50} />}
+          icon={<GiHeartBeats size={60} />}
           title="Fréquence cardiaque"
           value={sensorData?.heartRate ?? "--"}
           unit="BPM"
           status={getStatus(sensorData?.heartRate, "heartRate")}
           color={getStatusColor(getStatus(sensorData?.heartRate, "heartRate"))}
         />
-      </div>
-      <div className="col-6 col-md-4 col-lg-3">
+      </motion.div>
+      <motion.div 
+        className="col-6 col-md-4 col-lg-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <Card
-          icon={<FaWind size={50} />}
+          icon={<GiLungs size={60} />}
           title="Saturation O₂"
           value={sensorData?.spo2 ?? "--"}
           unit="%"
           status={getStatus(sensorData?.spo2, "oxygenLevel")}
           color={getStatusColor(getStatus(sensorData?.spo2, "oxygenLevel"))}
         />
-      </div>
-      <div className="col-6 col-md-4 col-lg-3">
+      </motion.div>
+      <motion.div 
+        className="col-6 col-md-4 col-lg-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
         <Card
-          icon={<FaThermometerHalf size={50} />}
+          icon={<GiClockwork size={60} />}
           title="Dernière lecture"
           value={sensorData?.timestamp
             ? new Date(sensorData.timestamp).toLocaleTimeString('fr-FR')
@@ -204,7 +239,7 @@ function CardDashboard() {
           status={sensorData?.timestamp ? "Actif" : "Inactif"}
           color={sensorData?.timestamp ? "#0D6EFD" : "#6C757D"}
         />
-      </div>
+      </motion.div>
     </div>
   );
 }

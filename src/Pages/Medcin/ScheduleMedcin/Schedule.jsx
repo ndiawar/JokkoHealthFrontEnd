@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { startOfWeek, addDays, format } from "date-fns";
+import { fr } from 'date-fns/locale';
 import { Row, Col, Button } from "reactstrap";
 import axios from "axios";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";  // Import des icônes de pagination
@@ -9,8 +10,8 @@ import "./Schedule.css";
 const Schedule = () => {
   const today = new Date();
   const startDate = startOfWeek(today, { weekStartsOn: 1 });
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const [selectedDay, setSelectedDay] = useState(format(today, "EEE"));
+  const days = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+  const [selectedDay, setSelectedDay] = useState(format(today, "EEE", { locale: fr }));
   const [events, setEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(1); // Afficher 1 événement par page (peut être ajusté)
@@ -29,12 +30,12 @@ const Schedule = () => {
           endDate.setHours(parseInt(endHour, 10), parseInt(endMinute, 10)); // Fix end date hour
 
           return {
-            day: format(startDate, "EEE"),
+            day: format(startDate, "EEE", { locale: fr }),
             time: `${appointment.heure_debut} - ${appointment.heure_fin}`,
-            event: `Rendez-vous avec ${appointment.doctorId.nom} ${appointment.doctorId.prenom}`,
+            event: `Rendez-vous avec Dr. ${appointment.doctorId.nom} ${appointment.doctorId.prenom}`,
             type: "consultation", // Vous pouvez adapter ce type en fonction de vos besoins
             specialiste: appointment.specialiste,
-            doctor: `${appointment.doctorId.nom} ${appointment.doctorId.prenom}`,
+            doctor: `Dr. ${appointment.doctorId.nom} ${appointment.doctorId.prenom}`,
           };
         });
 
@@ -66,7 +67,7 @@ const Schedule = () => {
         {/* Header */}
         <Row className="schedule-header mb-3">
           <Col xs={6} className="text-start">
-            <p className="fs-5 mb-0">{format(today, "MMMM, yyyy")}</p>
+            <p className="fs-5 mb-0">{format(today, "MMMM yyyy", { locale: fr })}</p>
           </Col>
           <Col xs={6} className="text-end">
             <p className="mb-0">Programme hebdomadaire</p>
@@ -82,9 +83,9 @@ const Schedule = () => {
                 key={index}
                 xs={1}
                 className={`schedule-day text-center p-2 ${
-                  selectedDay === format(date, "EEE") ? "active" : ""
+                  selectedDay === format(date, "EEE", { locale: fr }) ? "active" : ""
                 }`}
-                onClick={() => setSelectedDay(format(date, "EEE"))}
+                onClick={() => setSelectedDay(format(date, "EEE", { locale: fr }))}
               >
                 <div className="day-abbr">{day}</div>
                 <div className="day-number fw-medium">
@@ -106,8 +107,8 @@ const Schedule = () => {
                   </Col>
                   <Col xs={9}>
                     <p className="mb-0">{event.event}</p>
-                    <p className="mb-0">Spécialiste: {event.specialiste}</p>
-                    <p className="mb-0">Docteur: {event.doctor}</p>
+                    <p className="mb-0">Spécialité: {event.specialiste}</p>
+                    <p className="mb-0">Médecin: {event.doctor}</p>
                   </Col>
                 </Row>
               </div>
