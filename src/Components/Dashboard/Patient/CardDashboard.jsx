@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
 import UserContext from "../../../_helper/UserContext"; // Importez le contexte utilisateur
+import NoSensorFound from "./NoSensorFound";
 
 // Composant Card pour afficher les données
 function Card({ icon, title, value, unit, status, color }) {
@@ -184,11 +185,7 @@ function CardDashboard() {
 
   // Affichage des erreurs
   if (error) {
-    return (
-      <div className="alert alert-danger text-center" style={{ maxWidth: '500px', margin: '0 auto' }}>
-        {error}
-      </div>
-    );
+    return <NoSensorFound message="Aucun capteur détecté pour ce dossier médical. Connectez un appareil pour suivre vos constantes." />;
   }
 
   return (

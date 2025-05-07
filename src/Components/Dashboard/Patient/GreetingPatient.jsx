@@ -19,26 +19,6 @@ const GreetingPatient = () => {
               <div className='text-white greeting-user'>
                 <H4 attrH4={{ className: 'f-w-600' }}>Bienvenue sur Jokko Health ! 💙</H4>
                 <H4>Suivez votre santé en temps réel et restez en contact avec votre médecin.</H4>
-                <div className="mt-3 user-info">
-                  <p className="mb-1">
-                    <span className="fw-bold">Nom de famille:</span> {user?.nom || 'Non défini'}
-                  </p>
-                  <p className="mb-1">
-                    <span className="fw-bold">Prénom:</span> {user?.prenom || 'Non défini'}
-                  </p>
-                  <p className="mb-1">
-                    <span className="fw-bold">Adresse email:</span> {user?.email || 'Non défini'}
-                  </p>
-                  <p className="mb-1">
-                    <span className="fw-bold">Numéro de téléphone:</span> {user?.telephone || 'Non défini'}
-                  </p>
-                  <p className="mb-1">
-                    <span className="fw-bold">Genre:</span> {user?.sexe || 'Non défini'}
-                  </p>
-                  <p className="mb-1">
-                    <span className="fw-bold">Dossier médical:</span> {user?.medicalRecord ? 'Disponible' : 'Non disponible'}
-                  </p>
-                </div>
               </div>
             </Col>
             <Col xs="4" className='d-flex justify-content-end align-items-end' style={{ position: 'relative' }}>

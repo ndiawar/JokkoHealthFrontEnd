@@ -4,6 +4,7 @@ import UserContext from '../../../_helper/UserContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaHeartbeat, FaLungs, FaRegLightbulb, FaRegClock } from 'react-icons/fa';
 import { MdCheckCircle } from 'react-icons/md';
+import NoSensorFound from "./NoSensorFound";
 
 const Prescription = () => {
   const { user } = useContext(UserContext);
@@ -162,11 +163,7 @@ const Prescription = () => {
   }
 
   if (error) {
-    return (
-      <div className="alert alert-danger text-center" style={{ maxWidth: '500px', margin: '0 auto' }}>
-        {error}
-      </div>
-    );
+    return <NoSensorFound message="Aucune donnée de capteur trouvée. Connectez un appareil pour recevoir des recommandations personnalisées." />;
   }
 
   const RecommendationCard = ({ recommendation }) => (

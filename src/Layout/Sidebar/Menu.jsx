@@ -133,6 +133,20 @@ export const MENUITEMS = [
       },
     ],
   },
+  {
+    menutitle: "Notifications",
+    menucontent: "Toutes vos notifications",
+    Items: [
+      {
+        title: "Notifications",
+        icon: "bell",
+        type: "link",
+        path: `${process.env.PUBLIC_URL}/notifications`,
+        protected: true,
+        roles: ['SuperAdmin', 'Medecin', 'Patient']
+      }
+    ]
+  },
 ];
 
 const Menu = () => {

@@ -167,6 +167,8 @@ import DataUsers from "../Pages/Admin/Utilisateurs/DataUsers";
 import Historique from "../Pages/Admin/Historique";
 import Inscrire from "../Pages/Admin/Inscription";
 import Chats from "../Pages/Chats";
+import NotificationList from "../Components/Notification/NotificationList";
+
 export const routes = [
 
   // Mes routes composantes JokkoHealth
@@ -322,5 +324,8 @@ export const routes = [
 
   // //page
   { path: `${process.env.PUBLIC_URL}/pages/sample-page/:layout`, Component: <SamplePage /> },
+
+  // Route pour la liste des notifications
+  { path: `${process.env.PUBLIC_URL}/notifications/:layout`, Component: <NotificationList /> },
 
 ];

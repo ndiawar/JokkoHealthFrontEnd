@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import UserContext from '../../../_helper/UserContext'; // Import du contexte utilisateur
 import { FaHeartbeat, FaLungs } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import NoSensorFound from "./NoSensorFound";
 
 // Couleurs mises à jour avec des tons plus doux et des dégradés
 const heartRateColor = 'rgba(220, 53, 69, 0.8)';
@@ -112,11 +113,7 @@ const ChartDashboard = () => {
 
   // Affichage des erreurs
   if (error) {
-    return (
-      <div className="alert alert-danger text-center" style={{ maxWidth: '500px', margin: '0 auto' }}>
-        {error}
-      </div>
-    );
+    return <NoSensorFound message="Aucune donnée de capteur disponible. Veuillez connecter un appareil pour visualiser vos graphiques de santé." />;
   }
 
   // Vérifier que les données existent avant de continuer
