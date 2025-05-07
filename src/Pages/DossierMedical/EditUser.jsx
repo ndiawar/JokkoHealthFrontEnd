@@ -225,17 +225,6 @@ const EditMyProfile = () => {
                                     disabled={!isEditing}
                                 />
                             </FormGroup>
-
-                            <FormGroup>
-                                <Label>Statut :</Label>
-                                <Input
-                                    type="text"
-                                    name="status"
-                                    value={record.status}
-                                    onChange={handleChange}
-                                    disabled={!isEditing}
-                                />
-                            </FormGroup>
                         </Col>
                     </Row>
                 </CardBody>

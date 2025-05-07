@@ -204,15 +204,7 @@ const UserDetail4 = () => {
                                 />
                             </FormGroup>
 
-                            <FormGroup>
-                            <Label>Nom d&apos;utilisateur :</Label>
-                                <Input
-                                    type="text"
-                                    name="username"
-                                    value={record.username}
-                                    disabled
-                                />
-                            </FormGroup>
+                        
                         </Col>
                     </Row>
                 </CardBody>
