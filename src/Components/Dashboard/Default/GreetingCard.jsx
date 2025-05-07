@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 import { P, H5, H6 } from '../../../AbstractElements';
-import ProfilImage from '../../../assets/images/jokko/medecin.svg';
+import ProfilImage from '../../../assets/images/Jokko/medecin.svg';
 
 const GreetingCard = () => {
   const [newPatientsCount, setNewPatientsCount] = useState(0);

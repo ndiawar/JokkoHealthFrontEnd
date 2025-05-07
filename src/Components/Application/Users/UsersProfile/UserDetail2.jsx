@@ -1,10 +1,10 @@
+/*global require */
 import React, { Fragment } from 'react';
 import { Col, Card, Row } from 'reactstrap';
 import { Image, P } from '../../../../AbstractElements';
 import { UserProfileDesc1 } from '../../../../Constant';
 import UserFooter from './Common/UserFooter';
 import UserTitle from './Common/UserTitle';
-
 const UserDetails2 = () => {
     return (
         <Fragment>

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaSave } from 'react-icons/fa';
 import { Btn, H4 } from "../../AbstractElements";
 import { Row, Col, CardHeader, CardBody, Form, FormGroup, Label, Input } from 'reactstrap';
 import axios from 'axios';
@@ -17,8 +17,44 @@ const EditMyProfile = () => {
         antecedentsFamiliaux: '',
         status: '',
     });
-    
-    const [initialRecord, setInitialRecord] = useState({}); // Stocke les valeurs initiales
+
+    const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+
+    // Liste des groupes sanguins possibles
+    const bloodGroups = [
+        'A+', 'A-',
+        'B+', 'B-',
+        'AB+', 'AB-',
+        'O+', 'O-',
+        'Inconnu'
+    ];
+
+    const validate = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'age':
+                if (value && (value < 0 || value > 120)) {
+                    error = 'Âge invalide (0-120)';
+                }
+                break;
+            case 'poids':
+                if (value && (value < 0 || value > 300)) {
+                    error = 'Poids invalide (0-300 kg)';
+                }
+                break;
+            case 'groupeSanguin':
+                if (value && !bloodGroups.includes(value)) {
+                    error = 'Veuillez sélectionner un groupe valide';
+                }
+                break;
+            default:
+                break;
+        }
+        setErrors(prev => ({ ...prev, [name]: error }));
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,143 +62,179 @@ const EditMyProfile = () => {
                 const response = await axios.get('/medical/me');
                 if (response.data.success) {
                     const medicalData = response.data.record;
-                    const initialData = {
+                    setRecord({
                         _id: medicalData._id,
-                        age: medicalData.age,
-                        poids: medicalData.poids,
-                        groupeSanguin: medicalData.groupeSanguin,
-                        chirurgie: medicalData.chirurgie,
-                        hospitalisation: medicalData.hospitalisation,
-                        antecedentsFamiliaux: medicalData.antecedentsFamiliaux,
-                        status: medicalData.status,
-                    };
-                    setRecord(initialData);
-                    setInitialRecord(initialData); // Sauvegarde les valeurs initiales
+                        age: medicalData.age || '',
+                        poids: medicalData.poids || '',
+                        groupeSanguin: medicalData.groupeSanguin || '',
+                        chirurgie: medicalData.chirurgie || '',
+                        hospitalisation: medicalData.hospitalisation || '',
+                        antecedentsFamiliaux: medicalData.antecedentsFamiliaux || '',
+                        status: medicalData.status || '',
+                    });
                 }
             } catch (error) {
-                console.error('Erreur lors de la récupération des données :', error);
-                showAlert('Erreur', 'Erreur lors de la récupération des données médicales', 'error');
+                setError("Erreur lors de la récupération des données.");
+                confirmAlert({
+                    title: "Erreur",
+                    message: "Erreur lors de la récupération des données médicales.",
+                    buttons: [{ label: 'OK', className: 'btn btn-danger' }]
+                });
+            } finally {
+                setLoading(false);
             }
         };
-
         fetchData();
     }, []);
 
+    const toggleEdit = () => setIsEditing(prev => !prev);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setRecord((prevRecord) => ({
-            ...prevRecord,
-            [name]: value,
-        }));
-    };
-
-    const showAlert = (title, message, type = 'success') => {
-        confirmAlert({
-            title: title,
-            message: message,
-            buttons: [
-                {
-                    label: 'OK',
-                    className: type === 'error' ? 'btn btn-danger' : 'btn btn-primary'
-                }
-            ]
-        });
-    };
-
-    // Fonction pour vérifier si des champs ont été modifiés
-    const hasChanges = () => {
-        return Object.keys(record).some(
-            key => record[key] !== initialRecord[key]
-        );
+        setRecord({ ...record, [name]: value });
+        validate(name, value);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Vérifier s'il y a des modifications
-        if (!hasChanges()) {
-            showAlert('Information', 'Aucun champ modifié', 'info');
-            return;
+        try {
+            const response = await axios.put(`/medical/${record._id}`, record);
+            if (response.data.success) {
+                setIsEditing(false);
+                confirmAlert({
+                    title: "Succès",
+                    message: "Votre dossier médical a été mis à jour avec succès.",
+                    buttons: [{ label: 'OK', className: 'btn btn-primary' }]
+                });
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || "Erreur inconnue";
+            confirmAlert({
+                title: "Erreur",
+                message: message,
+                buttons: [{ label: 'OK', className: 'btn btn-danger' }]
+            });
         }
-        
-        confirmAlert({
-            title: 'Confirmation',
-            message: 'Êtes-vous sûr de vouloir modifier votre dossier médical ?',
-            buttons: [
-                {
-                    label: 'Oui',
-                    onClick: async () => {
-                        try {
-                            const response = await axios.put(`/medical/${record._id}`, {
-                                age: record.age,
-                                poids: record.poids,
-                                groupeSanguin: record.groupeSanguin,
-                                chirurgie: record.chirurgie,
-                                hospitalisation: record.hospitalisation,
-                                antecedentsFamiliaux: record.antecedentsFamiliaux,
-                                status: record.status,
-                            });
-
-                            if (response.data.success) {
-                                showAlert('Succès', 'Profil mis à jour avec succès !');
-                                // Mettre à jour les valeurs initiales après une modification réussie
-                                setInitialRecord({...record});
-                            }
-                        } catch (error) {
-                            console.error('Erreur lors de la mise à jour du profil :', error.response ? error.response.data : error.message);
-                            showAlert('Erreur', "Erreur lors de la mise à jour du profil.", 'error');
-                        }
-                    }
-                },
-                {
-                    label: 'Non',
-                    onClick: () => {}
-                }
-            ]
-        });
     };
+
+    const isFormValid = () => {
+        return Object.values(errors).every(err => !err) &&
+            (!record.age || (record.age >= 0 && record.age <= 120)) &&
+            (!record.poids || (record.poids >= 0 && record.poids <= 300)) &&
+            (!record.groupeSanguin || bloodGroups.includes(record.groupeSanguin));
+    };
+
+    if (loading) return <div>Chargement...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
         <Fragment>
+            <CardHeader className="d-flex justify-content-between align-items-center">
+                <H4 attrH4={{ className: "card-title mb-0" }}>Dossier Médical</H4>
+                {!isEditing && (
+                    <Btn attrBtn={{ color: 'secondary', onClick: toggleEdit }}>
+                        <FaPen /> Modifier son dossier médical
+                    </Btn>
+                )}
+            </CardHeader>
+
             <Form onSubmit={handleSubmit}>
-                <CardHeader className="d-flex justify-content-between align-items-center">
-                    <H4 attrH4={{ className: "card-title mb-0" }}>Dossier Médical</H4>
-                    <div className="text-end mb-3">
-                        <Btn type="submit">
-                            <FaPen /> Modifier son dossier médical
+                {isEditing && (
+                    <div className="text-end p-3">
+                        <Btn attrBtn={{ color: 'primary', type: 'submit', disabled: !isFormValid() }}>
+                            <FaSave /> Enregistrer les modifications
                         </Btn>
                     </div>
-                </CardHeader>
+                )}
                 <CardBody>
                     <Row>
                         <Col xs="12">
                             <FormGroup>
                                 <Label>Âge :</Label>
-                                <Input type="number" name="age" value={record.age} onChange={handleChange} />
+                                <Input
+                                    type="number"
+                                    name="age"
+                                    value={record.age}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                    className={errors.age ? "is-invalid" : ""}
+                                />
+                                {errors.age && <div className="invalid-feedback">{errors.age}</div>}
                             </FormGroup>
+
                             <FormGroup>
-                                <Label>Poids :</Label>
-                                <Input type="number" name="poids" value={record.poids} onChange={handleChange} />
+                                <Label>Poids (kg) :</Label>
+                                <Input
+                                    type="number"
+                                    name="poids"
+                                    value={record.poids}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                    className={errors.poids ? "is-invalid" : ""}
+                                />
+                                {errors.poids && <div className="invalid-feedback">{errors.poids}</div>}
                             </FormGroup>
+
                             <FormGroup>
                                 <Label>Groupe Sanguin :</Label>
-                                <Input type="text" name="groupeSanguin" value={record.groupeSanguin} onChange={handleChange} />
+                                <Input
+                                    type="select"
+                                    name="groupeSanguin"
+                                    value={record.groupeSanguin}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                    className={errors.groupeSanguin ? "is-invalid" : ""}
+                                >
+                                    <option value="">Sélectionnez un groupe sanguin</option>
+                                    {bloodGroups.map(group => (
+                                        <option key={group} value={group}>{group}</option>
+                                    ))}
+                                </Input>
+                                {errors.groupeSanguin && <div className="invalid-feedback">{errors.groupeSanguin}</div>}
                             </FormGroup>
+
                             <FormGroup>
                                 <Label>Chirurgie :</Label>
-                                <Input type="text" name="chirurgie" value={record.chirurgie} onChange={handleChange} />
+                                <Input
+                                    type="text"
+                                    name="chirurgie"
+                                    value={record.chirurgie}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                />
                             </FormGroup>
+
                             <FormGroup>
                                 <Label>Hospitalisation :</Label>
-                                <Input type="text" name="hospitalisation" value={record.hospitalisation} onChange={handleChange} />
+                                <Input
+                                    type="text"
+                                    name="hospitalisation"
+                                    value={record.hospitalisation}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                />
                             </FormGroup>
+
                             <FormGroup>
                                 <Label>Antécédents Familiaux :</Label>
-                                <Input type="text" name="antecedentsFamiliaux" value={record.antecedentsFamiliaux} onChange={handleChange} />
+                                <Input
+                                    type="text"
+                                    name="antecedentsFamiliaux"
+                                    value={record.antecedentsFamiliaux}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                />
                             </FormGroup>
+
                             <FormGroup>
                                 <Label>Statut :</Label>
-                                <Input type="text" name="status" value={record.status} onChange={handleChange} />
+                                <Input
+                                    type="text"
+                                    name="status"
+                                    value={record.status}
+                                    onChange={handleChange}
+                                    disabled={!isEditing}
+                                />
                             </FormGroup>
                         </Col>
                     </Row>
