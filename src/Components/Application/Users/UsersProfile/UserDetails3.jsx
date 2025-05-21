@@ -1,3 +1,4 @@
+/*global require*/ 
 import React, { Fragment, useState, useEffect } from 'react';
 import { Card, Row, Col, Form, FormGroup, Label, Input, Button } from 'reactstrap';
 import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
