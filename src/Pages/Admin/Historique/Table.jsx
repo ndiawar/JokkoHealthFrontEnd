@@ -2,6 +2,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
 import { H4 } from '../../../AbstractElements';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
 const tableColumns = [
     { name: 'Utilisateur', selector: row => row.utilisateur, sortable: true },
@@ -36,16 +37,15 @@ const getActionMessage = (action) => {
 const Table = () => {
     const [data, setData] = useState([]); // Mettre à jour avec les logs
     const [filteredData, setFilteredData] = useState([]);
-    const [rowsPerPage] = useState(5);
+    const [rowsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState(''); // Champ de recherche
 
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const response = await fetch('http://localhost:3001/api/logs');
-                const result = await response.json();
-                if (result.logs) {
-                    const formattedLogs = result.logs.map(log => ({
+                const response = await axios.get('/logs');
+                if (response.data.logs) {
+                    const formattedLogs = response.data.logs.map(log => ({
                         id: log._id,
                         utilisateur: `${log.userId.prenom} ${log.userId.nom}`,  // Nom complet
                         email: log.userId.email,              // Email de l'utilisateur

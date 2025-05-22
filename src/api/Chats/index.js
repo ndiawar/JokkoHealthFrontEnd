@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3001/api/chats";
+const API_URL = "chats";
 
 export const getChats = async (userId) => {
   return axios.get(`${API_URL}/user/${userId}`);
