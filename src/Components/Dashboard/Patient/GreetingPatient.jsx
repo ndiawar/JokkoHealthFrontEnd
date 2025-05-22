@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { H4 } from '../../../AbstractElements';
-import CarToon from '../../../assets/images/Jokko/medecin.svg';
+import CarToon from '../../../assets/images/jokko/medecin.svg';
 import { Card, CardBody, Col, Row } from 'reactstrap';
 import UserContext from '../../../_helper/UserContext';
 

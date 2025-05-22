@@ -51,9 +51,10 @@ export const fetchPatients = async () => {
     }
 };
 
+
 /**
  * 🚀 Récupérer les données mensuelles des patients et médecins
- * @returns {Promise<{patients: number, medecins: number}>}
+ * @returns {Promise<Array<{year: number, month: number, patients: number, medecins: number}>>}
  */
 export const fetchMonthlyPatientsAndMedecins = async () => {
     try {
@@ -63,10 +64,10 @@ export const fetchMonthlyPatientsAndMedecins = async () => {
 
         // Vérification de la réponse de l'API
         if (data.success) {
-            return data.data; // Retourne les données mensuelles
+            return data.data; // Retourne le tableau des statistiques mensuelles
         } else {
             console.error("Erreur lors de la récupération des données mensuelles.");
-            return { patients: 0, medecins: 0 };
+            return [];
         }
     } catch (error) {
         // Log détaillé pour débogage

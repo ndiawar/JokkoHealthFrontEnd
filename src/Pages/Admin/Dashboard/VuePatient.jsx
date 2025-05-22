@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from 'react-bootstrap'; // Importation du composant Card
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { fetchMonthlyPatientsAndMedecins } from '../../../api/filteruser'; // Importez la méthode
+
 
 const PatientOverview = () => {
     const [timeRange, setTimeRange] = useState('month');
@@ -12,13 +13,15 @@ const PatientOverview = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const monthlyData = await fetchMonthlyPatientsAndMedecins(); // Appel de la méthode
-                if (monthlyData) {
-                    // Transformer les données pour les adapter au graphique20
-                    const transformedData = [
-                        { period: 'Mois en cours', Medecin: monthlyData.medecins, Patient: monthlyData.patients }
-                    ];
-                    setData(transformedData); // Mettre à jour l'état avec les données transformées
+                const monthlyData = await fetchMonthlyPatientsAndMedecins();
+                if (monthlyData && monthlyData.length > 0) {
+                    // Transformer les données pour le graphique
+                    const transformedData = monthlyData.map(item => ({
+                        name: `${item.month}/${item.year}`,
+                        Medecin: item.medecins,
+                        Patient: item.patients
+                    }));
+                    setData(transformedData);
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération des données mensuelles:", error);
@@ -73,37 +76,37 @@ const PatientOverview = () => {
                 </Card.Header>
                 <Card.Body>
                     {/* Graphique */}
-                    <ResponsiveContainer width="100%" height={400}>
-                        <LineChart
-                            data={data}
-                            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                        >
-                            <XAxis 
-                                dataKey="period" 
-                                tick={{ fill: '#12687B' }}
-                                axisLine={{ stroke: '#1593AF' }}
-                            />
-                            <YAxis 
-                                tick={{ fill: '#12687B' }}
-                                axisLine={{ stroke: '#1593AF' }}
-                            />
-                            <Tooltip />
-                            <Line
-                                type="monotone"
-                                dataKey="Medecin"
-                                stroke={colors.Medecin}
-                                strokeWidth={2}
-                                dot={{ fill: colors.Medecin }}
-                            />
-                            <Line
-                                type="monotone"
-                                dataKey="Patient"
-                                stroke={colors.Patient}
-                                strokeWidth={2}
-                                dot={{ fill: colors.Patient }}
-                            />
-                        </LineChart>
-                    </ResponsiveContainer>
+                    <div style={{ width: '100%', height: 400 }}>
+                        <ResponsiveContainer>
+                            <LineChart data={data}>
+                                <XAxis 
+                                    dataKey="name" 
+                                    stroke="#666"
+                                    tick={{ fill: '#666' }}
+                                />
+                                <YAxis 
+                                    stroke="#666"
+                                    tick={{ fill: '#666' }}
+                                />
+                                <Tooltip />
+                                <Legend />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="Patient" 
+                                    stroke={colors.Patient} 
+                                    strokeWidth={2}
+                                    dot={{ fill: colors.Patient }}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="Medecin" 
+                                    stroke={colors.Medecin} 
+                                    strokeWidth={2}
+                                    dot={{ fill: colors.Medecin }}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
                 </Card.Body>
             </Card>
         </div>
