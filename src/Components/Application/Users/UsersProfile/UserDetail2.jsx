@@ -1,4 +1,3 @@
-/*global require */
 import React, { Fragment } from 'react';
 import { Col, Card, Row } from 'reactstrap';
 import { Image, P } from '../../../../AbstractElements';

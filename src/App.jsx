@@ -23,10 +23,34 @@ const queryClient = new QueryClient({
 });
 
 // Configuration d'axios
-axios.defaults.baseURL = "http://localhost:3001/api/";
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || "https://jokkohealthback.onrender.com/api/";
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.defaults.headers.post['Accept'] = 'application/json';
 axios.defaults.withCredentials = true;
+
+// Ajout du token d'authentification à chaque requête
+axios.interceptors.request.use(
+  (config) => {
+    // Ne pas ajouter le token pour la route de connexion
+    if (!config.url.includes('login')) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    // Log pour le débogage
+    console.log('Requête axios:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data
+    });
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Intercepteur global pour gérer les erreurs
 axios.interceptors.response.use(
