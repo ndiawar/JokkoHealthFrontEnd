@@ -19,6 +19,10 @@ yarn.lock
 /build/
 /dist/
 
+Dockerfile
+.dockerignore
+nginx.conf
+
 # System files
 .DS_Store
 Thumbs.db
