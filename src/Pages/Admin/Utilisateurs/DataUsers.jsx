@@ -343,18 +343,17 @@ const DataUsers = () => {
 
     // Colonnes du tableau
     const customColumns = [
-        { name: 'Nom', selector: row => row.nom, sortable: true },
-        { name: 'Prénom', selector: row => row.prenom, sortable: true },
-        { name: 'Adresse', selector: row => row.adresse, sortable: true },
-        { name: 'Téléphone', selector: row => row.telephone, sortable: true },
-        { name: 'Email', selector: row => row.email, sortable: true },
-        { name: 'Actions', cell: row => actionButtons(row), ignoreRowClick: true, allowOverflow: true, button: true },
+        { name: 'Nom', selector: row => row.nom, sortable: true, width: '20%' },
+        { name: 'Prénom', selector: row => row.prenom, sortable: true, width: '20%' },
+        { name: 'Téléphone', selector: row => row.telephone, sortable: true, width: '20%' },
+        { name: 'Email', selector: row => row.email, sortable: true, width: '20%' },
+        { name: 'Actions', cell: row => actionButtons(row), ignoreRowClick: true, allowOverflow: true, button: true, width: '20%' },
     ];
 
     // Filtrage des données
     const filteredData = useMemo(() => {
         return data.filter(row =>
-            [row.nom, row.prenom, row.adresse, row.telephone, row.email]
+            [row.nom, row.prenom, row.telephone, row.email]
                 .some(field => field?.toLowerCase().includes(debouncedFilterText.toLowerCase()))
         );
     }, [data, debouncedFilterText]);
@@ -396,15 +395,39 @@ const DataUsers = () => {
                 </div>
             )}
 
-            <DataTable
-                data={filteredData}
-                columns={customColumns}
-                striped={true}
-                center={true}
-                pagination
-                selectableRows
-                onSelectedRowsChange={handleRowSelected}
-            />
+            <div style={{ width: '100%', overflowX: 'hidden' }}>
+                <DataTable
+                    data={filteredData}
+                    columns={customColumns}
+                    striped={true}
+                    center={true}
+                    pagination
+                    paginationPerPage={9}
+                    selectableRows
+                    onSelectedRowsChange={handleRowSelected}
+                    customStyles={{
+                        table: {
+                            style: {
+                                width: '100%',
+                                tableLayout: 'fixed'
+                            }
+                        },
+                        cells: {
+                            style: {
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                padding: '8px'
+                            }
+                        },
+                        header: {
+                            style: {
+                                padding: '8px'
+                            }
+                        }
+                    }}
+                />
+            </div>
 
             <UserModal
                 isOpen={modalOpen}

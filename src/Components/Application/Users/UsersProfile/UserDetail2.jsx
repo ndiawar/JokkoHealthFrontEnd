@@ -4,7 +4,6 @@ import { Image, P } from '../../../../AbstractElements';
 import { UserProfileDesc1 } from '../../../../Constant';
 import UserFooter from './Common/UserFooter';
 import UserTitle from './Common/UserTitle';
-
 const UserDetails2 = () => {
     return (
         <Fragment>

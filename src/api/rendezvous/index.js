@@ -21,7 +21,7 @@ export const createAppointment = async ({ date, heure_debut, heure_fin, speciali
 // 🚀 Récupérer tous les rendez-vous
 export const fetchAppointments = async () => {
   try {
-    const { data } = await axios.get("appointments", {
+    const { data } = await axios.get("rendezvous", {
       headers: authHeader() // Ajout de l'authHeader ici si besoin
     });
     return data;
@@ -35,7 +35,7 @@ export const fetchAppointments = async () => {
 export const fetchAppointmentsForCalendar = async (startDate, endDate) => {
   try {
     // Assurez-vous de passer les paramètres startDate et endDate dans la query string
-    const { data } = await axios.get("appointments/calendar", {
+    const { data } = await axios.get("rendezvous/calendar", {
       params: {
         startDate: startDate,
         endDate: endDate
@@ -84,7 +84,7 @@ export const manageRequest = async (id, { statutDemande }) => {
 // 🚀 Afficher l'historique des rendez-vous d'un patient
 export const fetchPatientHistory = async () => {
   try {
-    const { data } = await axios.get("appointments/historique-patient", {
+    const { data } = await axios.get("rendezvous/historique-patient", {
       headers: authHeader() // Ajout de l'authHeader ici si besoin
     });
     return data;
@@ -97,7 +97,7 @@ export const fetchPatientHistory = async () => {
 // 🚀 Afficher l'historique des rendez-vous d'un médecin
 export const fetchDoctorHistory = async () => {
   try {
-    const { data } = await axios.get("appointments/historique-medecin", {
+    const { data } = await axios.get("rendezvous/historique-medecin", {
       headers: authHeader() // Ajout de l'authHeader ici si besoin
     });
     return data;
@@ -110,7 +110,7 @@ export const fetchDoctorHistory = async () => {
 // 🚀 Afficher les rendez-vous créés par le médecin d'un patient
 export const fetchAppointmentsByDoctor = async () => {
   try {
-    const { data } = await axios.get("appointments/by-doctor", {
+    const { data } = await axios.get("rendezvous/by-doctor", {
       headers: authHeader() // Ajout de l'authHeader ici si besoin
     });
     return data;
@@ -123,7 +123,7 @@ export const fetchAppointmentsByDoctor = async () => {
 // 🚀 Afficher la liste des rendez-vous acceptés
 export const fetchAcceptedAppointments = async () => {
   try {
-    const { data } = await axios.get("appointments/accepted", {
+    const { data } = await axios.get("rendezvous/accepted", {
       headers: authHeader()
     });
     return data.data; // Extraction du tableau de données
@@ -137,7 +137,7 @@ export const fetchAcceptedAppointments = async () => {
 // 🚀 Afficher la liste des rendez-vous refusés
 export const fetchRejectedAppointments = async () => {
   try {
-    const { data } = await axios.get("appointments/rejected", {
+    const { data } = await axios.get("rendezvous/rejected", {
       headers: authHeader()
     });
     return data.data; // Extraction du tableau de données

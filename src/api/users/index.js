@@ -128,7 +128,7 @@ export const deleteUser = async (id) => {
   }
 };
 
-// �� Réinitialiser le mot de passe d'un utilisateur
+// 🚀 Réinitialiser le mot de passe d'un utilisateur
 export const sendPasswordResetEmail = async (email) => {
   try {
     const { data } = await axios.post("users/reset-password", {
@@ -156,10 +156,29 @@ export const createNewPassword = async (token, password) => {
 };
 
 // 🚀 Connexion d'un utilisateur (Login)
-export const loginUser = async ({ email, motDePasse }) => {
-  const { data } = await axios.post("users/login", {
-    email,
-    motDePasse
-  });
-  return data;
+export const loginUser = async ({ email, password }) => {
+  try {
+    console.log('Tentative de connexion avec:', { email, motDePasse: password });
+    
+    const { data } = await axios.post("users/login", {
+      email,
+      motDePasse: password
+    });
+    
+    console.log('Réponse du serveur:', data);
+    
+    if (!data.token) {
+      throw new Error("Token non reçu du serveur");
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Erreur détaillée lors de la connexion:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      request: error.config
+    });
+    throw error;
+  }
 };

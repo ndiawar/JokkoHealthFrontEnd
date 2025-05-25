@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api/appointments'; // Mets l'URL de ton backend
+const API_URL = 'rendezvous'; // Mise à jour du chemin pour correspondre au backend
 
 export const getAppointments = async () => {
     try {
@@ -15,7 +15,7 @@ export const getAppointments = async () => {
 // Exemple de fonction API pour envoyer la demande
 export const demanderParticipation = async (appointmentId, patientId) => {
     try {
-        const response = await axios.post(`http://localhost:3001/api/appointments/${appointmentId}/demander-participation`, {
+        const response = await axios.post(`/rendezvous/${appointmentId}/demander-participation`, {
             patientId: patientId
         });
         return response.data;  // Retourne les données de la réponse

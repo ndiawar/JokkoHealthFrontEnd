@@ -8,7 +8,6 @@ import { loginUser } from "../api/users";
 import "react-toastify/dist/ReactToastify.css";
 import "./Signin.css";
 import CustomizerContext from "../_helper/Customizer";
-import Cookies from 'js-cookie';
 
 const Signin = () => {
   // const navigate = useNavigate();
@@ -56,47 +55,46 @@ const Signin = () => {
 
     setIsLoading(true);
     try {
-      const response = await loginUser({ email, motDePasse: password });
+      const response = await loginUser({ email, password });
       console.log('Réponse de connexion:', response);
-      const { user, token } = response;
-      console.log('Rôle de l\'utilisateur:', user.role);
-
-      // Stocker le token et le rôle dans les cookies
-      Cookies.set('jwt', token, { expires: 1 });
-      Cookies.set('userRole', user.role, { expires: 1 });
       
-      // Mettre à jour l'état d'authentification dans le localStorage
-      localStorage.setItem('authenticated', 'true');
-      localStorage.setItem('login', 'true');
-      localStorage.setItem('user', JSON.stringify(user));
+      if (response.token) {
+        // Stocker le token dans le localStorage
+        localStorage.setItem('auth_token', response.token);
+        
+        // Stocker les informations utilisateur
+        if (response.user) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+          localStorage.setItem('authenticated', 'true');
+          localStorage.setItem('login', 'true');
+          
+          // Définir le chemin de redirection en fonction du rôle
+          let redirectPath;
+          switch (response.user.role) {
+            case 'SuperAdmin':
+              redirectPath = `${process.env.PUBLIC_URL}/pages/admin/dashboard/${layoutURL}`;
+              break;
+            case 'Medecin':
+              redirectPath = `${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`;
+              break;
+            case 'Patient':
+              redirectPath = `${process.env.PUBLIC_URL}/dashboard/patient/${layoutURL}`;
+              break;
+            default:
+              toast.error("Rôle utilisateur non reconnu !");
+              return;
+          }
 
-      // Définir le chemin de redirection en fonction du rôle
-      let redirectPath;
-      switch (user.role) {
-        case 'SuperAdmin':
-          redirectPath = `${process.env.PUBLIC_URL}/pages/admin/dashboard/${layoutURL}`;
-          break;
-        case 'Medecin':
-          redirectPath = `${process.env.PUBLIC_URL}/dashboard/default/${layoutURL}`;
-          break;
-        case 'Patient':
-          redirectPath = `${process.env.PUBLIC_URL}/dashboard/patient/${layoutURL}`;
-          break;
-        default:
-          toast.error("Rôle utilisateur non reconnu !");
-          return;
+          toast.success("Connexion réussie !");
+          window.location.href = redirectPath;
+        }
+      } else {
+        throw new Error("Token non reçu du serveur");
       }
-
-      console.log('Tentative de redirection vers:', redirectPath);
-      
-      // Forcer la navigation avec window.location
-      window.location.href = redirectPath;
-      
-      toast.success("Connexion réussie !");
     } catch (error) {
       console.error('Erreur lors de la connexion:', error);
       setLoginError(error.response?.data?.message || "Erreur lors de la connexion");
-      toast.error("Vous avez entré un mauvais mot de passe ou un nom d'utilisateur !");
+      toast.error(error.response?.data?.message || "Vous avez entré un mauvais mot de passe ou un nom d'utilisateur !");
     } finally {
       setIsLoading(false);
     }
