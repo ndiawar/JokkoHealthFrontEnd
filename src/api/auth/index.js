@@ -1,6 +1,9 @@
 import axios from "axios";
 import { authHeader } from "../../Services/Auth";
 
+// Configuration de l'URL de base pour axios
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 // Classe d'erreur personnalisée pour les erreurs d'API
 class ApiError extends Error {
   constructor(message, data = null) {
@@ -19,6 +22,9 @@ export const forgotPassword = async (email) => {
       throw new ApiError("Veuillez fournir une adresse email valide");
     }
 
+    console.log("URL de base:", axios.defaults.baseURL);
+    console.log("Envoi de la requête vers:", `${axios.defaults.baseURL}/auth/forgot-password`);
+    
     const { data } = await axios.post("auth/forgot-password", { email });
     return {
       success: true,
@@ -27,6 +33,16 @@ export const forgotPassword = async (email) => {
     };
   } catch (error) {
     console.error("Erreur lors de la demande de réinitialisation de mot de passe:", error);
+    console.error("Détails de l'erreur:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method
+      }
+    });
     throw new ApiError(
       error.response?.data?.message || "Une erreur est survenue lors de la demande de réinitialisation",
       error.response?.data || error
