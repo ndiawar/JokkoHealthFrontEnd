@@ -24,22 +24,32 @@ const AjoutRendezVous = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      // Validation des heures
+      // Validation de la date et de l'heure
+      const selectedDate = new Date(data.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Si la date est aujourd'hui, vérifier que l'heure n'est pas passée
+      if (selectedDate.getTime() === today.getTime()) {
+        const currentHour = new Date().getHours();
+        const currentMinutes = new Date().getMinutes();
+        const [debutHeures, debutMinutes] = data.heure_debut.split(':').map(Number);
+
+        if (debutHeures < currentHour || (debutHeures === currentHour && debutMinutes <= currentMinutes)) {
+          toast.error('L\'heure de début doit être dans le futur');
+          return;
+        }
+      } else if (selectedDate < today) {
+        toast.error('La date doit être dans le futur');
+        return;
+      }
+
+      // Validation des heures de début et de fin
       const [debutHeures, debutMinutes] = data.heure_debut.split(':').map(Number);
       const [finHeures, finMinutes] = data.heure_fin.split(':').map(Number);
       
       if (finHeures < debutHeures || (finHeures === debutHeures && finMinutes <= debutMinutes)) {
         toast.error('L\'heure de fin doit être après l\'heure de début');
-        return;
-      }
-
-      // Validation de la date
-      const selectedDate = new Date(data.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (selectedDate < today) {
-        toast.error('La date doit être dans le futur');
         return;
       }
 
